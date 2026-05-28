@@ -1745,7 +1745,7 @@ section#more {
     width: 90%;
     margin-left: 5%;
     border-radius: 15px;
-    padding:none;
+    padding: none;
     background: rgb(32, 32, 32);
 }
 
@@ -2012,6 +2012,7 @@ section#more {
         transform: translateX(400px);
         opacity: 0;
     }
+
     to {
         transform: translateX(0);
         opacity: 1;
@@ -3287,7 +3288,7 @@ section#create {
     background: var(--menu-bg);
     border-radius: 20px;
     padding: 32px;
-    margin-top:-100px;
+    margin-top: -100px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, .08);
 }
 

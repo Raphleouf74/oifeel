@@ -1,41 +1,16 @@
-
 // ======================
 // CONSTANTS
 // ======================
 const API = "https://moodshare-7dd7.onrender.com/api";
-const ADMIN_SECRET = "080310";
+
+// Token admin JWT stocké en mémoire (jamais dans localStorage)
+let adminToken = null;
 
 function adminHeaders() {
-    const headers = {
+    return {
         "Content-Type": "application/json",
-        "X-Admin-Secret": ADMIN_SECRET,
+        ...(adminToken ? { "Authorization": `Bearer ${adminToken}` } : {}),
     };
-    return headers;
-}
-async function loadAdminPassword() {
-    try {
-        const res = await fetch(`${API}/admin/password`, { headers: adminHeaders() });
-        if (res.ok) {
-            const data = await res.json();
-            admin_pwd = data.password;
-        }
-    } catch (e) {
-        console.log('Erreur réseau lors de la récupération du mot de passe.' + e.message);
-    }
-}
-
-// Charger le mot de passe au démarrage
-loadAdminPassword();
-
-const urlParams = new URLSearchParams(window.location.search);
-const envAdminPwd = urlParams.get('admin_pwd');
-if (envAdminPwd) {
-    admin_pwd = envAdminPwd;
-    console.log('[ADMIN] ADMIN_PASSWORD récupéré depuis URL param (override)');
-}
-
-function getAdminCreds() {
-    return [{ id: "rmladmin", password: admin_pwd }];
 }
 
 
@@ -50,22 +25,34 @@ let allUsers = [];
 // LOGIN
 // ======================
 document.getElementById("attemptlogin").addEventListener(("click"), () => attemptLogin());
-function attemptLogin() {
+async function attemptLogin() {
     const id = document.getElementById("login-id").value.trim();
     const pw = document.getElementById("login-password").value;
     const err = document.getElementById("login-error");
 
     err.classList.remove("show");
 
-    // Vérifier si les credentials correspondent à au moins un admin dans le tableau
-    const isValidAdmin = getAdminCreds().some(admin => admin.id === id && admin.password === pw);
+    // Le mot de passe n'est JAMAIS comparé côté client.
+    // On envoie les credentials au backend qui valide et renvoie un token JWT.
+    try {
+        const res = await fetch(`${API}/admin/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, password: pw }),
+        });
 
-    if (isValidAdmin) {
-        sessionStorage.setItem("ms_admin", "1");
-        document.getElementById("login-screen").style.display = "none";
-        document.getElementById("admin-screen").classList.add("show");
-        loadAll();
-    } else {
+        if (res.ok) {
+            const data = await res.json();
+            adminToken = data.token; // stocker le token en mémoire (pas localStorage)
+            sessionStorage.setItem("ms_admin", "1");
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("admin-screen").classList.add("show");
+            loadAll();
+        } else {
+            err.classList.add("show");
+        }
+    } catch (e) {
+        console.error('[ADMIN] Erreur de connexion:', e.message);
         err.classList.add("show");
     }
 }
@@ -81,6 +68,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 function doLogout() {
+    adminToken = null; // effacer le token JWT de la mémoire
     sessionStorage.removeItem("ms_admin");
     document.getElementById("admin-screen").classList.remove("show");
     document.getElementById("login-screen").style.display = "";
@@ -575,7 +563,6 @@ async function setMaintenance(enabled) {
 // EMERGENCY RESTART
 // ======================
 function openEmergencyRestart() {
-    document.getElementById("emergency-password").value = "";
     document.getElementById("emergency-command").value = "";
     document.getElementById("emergency-error").style.display = "none";
     openModal("emergency-modal");
@@ -585,14 +572,6 @@ async function confirmEmergencyRestart() {
     const password = document.getElementById("emergency-password").value;
     const command = document.getElementById("emergency-command").value.trim();
     const errorEl = document.getElementById("emergency-error");
-
-    // Vérifier les credentials
-    const isValidAdmin = getAdminCreds().some(admin => admin.password === password);
-    if (!isValidAdmin) {
-        errorEl.textContent = "❌ Mot de passe incorrect";
-        errorEl.style.display = "block";
-        return;
-    }
 
     // La commande doit être "RESTART_NOW" pour l'autoriser
     if (command !== "RESTART_NOW") {
@@ -910,11 +889,10 @@ es.addEventListener("report", (e) => {
 // ======================
 // SESSION RESTORE
 // ======================
-if (sessionStorage.getItem("ms_admin") === "1") {
-    document.getElementById("login-screen").style.display = "none";
-    document.getElementById("admin-screen").classList.add("show");
-    loadAll();
-}
+// Note: adminToken est en mémoire (perdu au rechargement de page).
+// Si la page est rechargée, l'admin doit se reconnecter — c'est voulu pour la sécurité.
+// On efface donc le flag sessionStorage pour forcer le re-login.
+sessionStorage.removeItem("ms_admin");
 
 // ======================
 // PINNED POSTS (ANNONCES)

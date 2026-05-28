@@ -289,8 +289,8 @@ app.use((req, res, next) => {
 const { MongoStore } = require('connect-mongo');
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'moodshare-secret-change-me-in-production',
-  admin_pwd: process.env.ADMIN_PASSWORD || 'admin123',
+  secret: process.env.SESSION_SECRET,
+  admin_pwd: process.env.ADMIN_PASSWORD,
   resave: false,
   saveUninitialized: true,
   store: MongoStore.create({
@@ -1090,17 +1090,31 @@ app.get('/api/social/feed', requireAuth, async (req, res) => {
 // ============================================================
 
 function requireAdmin(req, res, next) {
+  // Méthode 1 : token JWT admin (nouvelle méthode sécurisée)
+  const authHeader = req.headers['authorization'];
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.substring(7);
+    try {
+      const decoded = jwtService.verify(token);
+      if (decoded.role === 'admin') {
+        return next();
+      }
+    } catch (err) {
+      // token invalide ou expiré
+    }
+  }
+
+  // Méthode 2 : X-Admin-Secret (rétrocompatibilité)
   const secret = process.env.ADMIN_SECRET;
-  if (!secret) {
-    console.warn('⚠️  ADMIN_SECRET non défini — routes admin désactivées');
-    return res.status(503).json({ error: 'Admin non configuré côté serveur' });
+  if (secret) {
+    const provided = req.headers['x-admin-secret'];
+    if (provided && provided === secret) {
+      return next();
+    }
   }
-  const provided = req.headers['x-admin-secret'];
-  if (!provided || provided !== secret) {
-    console.warn('🚫 Tentative d\'accès admin refusée — mauvais secret');
-    return res.status(403).json({ error: 'Accès refusé' });
-  }
-  next();
+
+  console.warn('🚫 Tentative d\'accès admin refusée');
+  return res.status(403).json({ error: 'Accès refusé' });
 }
 
 app.post('/api/admin/posts/pinned', requireAdmin, async (req, res) => {
@@ -1230,15 +1244,41 @@ app.get('/api/admin/users', requireAdmin, async (req, res) => {
   }
 });
 
-app.get('/api/admin/password', requireAdmin, (req, res) => {
-  res.json({ password: process.env.ADMIN_PASSWORD });
-  console.log('🔐 [ADMIN] Vérification de la configuration du mot de passe admin');
-  if (!process.env.ADMIN_PASSWORD) {
-    console.warn('⚠️  ADMIN_PASSWORD non défini — pensez à le configurer pour sécuriser l\'accès admin');
+// POST /api/admin/login — Authentification admin sécurisée
+// Le mot de passe n'est JAMAIS renvoyé au frontend.
+// On compare avec ADMIN_PASSWORD_HASH (sha256 du mot de passe) stocké dans les env vars Render.
+// Pour générer le hash : node -e "const c=require('crypto');console.log(c.createHash('sha256').update('VOTRE_MDP').digest('hex'))"
+app.post('/api/admin/login', (req, res) => {
+  const { id, password } = req.body;
+
+  if (!id || !password) {
+    return res.status(400).json({ error: 'Identifiants manquants' });
   }
-  else {
-    console.log('✅ ADMIN_PASSWORD est configuré');
+
+  // Accepte uniquement l'id "rmladmin"
+  if (id !== 'rmladmin') {
+    console.warn('🚫 [ADMIN LOGIN] Mauvais identifiant:', id);
+    return res.status(403).json({ error: 'Identifiants incorrects' });
   }
+
+  const expectedHash = process.env.ADMIN_PASSWORD_HASH;
+  if (!expectedHash) {
+    console.error('❌ [ADMIN LOGIN] ADMIN_PASSWORD_HASH non défini dans les variables d\'environnement');
+    return res.status(503).json({ error: 'Admin non configuré' });
+  }
+
+  const providedHash = crypto.createHash('sha256').update(password).digest('hex');
+
+  if (providedHash !== expectedHash) {
+    console.warn('🚫 [ADMIN LOGIN] Mauvais mot de passe pour:', id);
+    return res.status(403).json({ error: 'Identifiants incorrects' });
+  }
+
+  // Générer un token admin JWT valable 8 heures
+  const adminToken = jwtService.sign({ adminId: id, role: 'admin' }, '8h');
+
+  console.log('✅ [ADMIN LOGIN] Connexion admin réussie pour:', id);
+  res.json({ token: adminToken });
 });
 
 app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
@@ -1864,7 +1904,7 @@ app.post('/api/users/public-key', async (req, res) => {
     console.log(`🔑 Clé E2E enregistrée pour user ${userId}`);
     res.json({ ok: true, registered: true });
   } catch (err) {
-    console.error('❌ Save public key error:', err);
+    console.error('❌ Erreur lors de l\'enregistrement de la clé publique:', err);
     res.status(500).json({ error: 'Erreur serveur' });
   }
 });
@@ -1958,7 +1998,7 @@ app.post('/api/posts/:id/view', async (req, res) => {
 
     res.json({ views: post.views });
   } catch (err) {
-    console.error('❌ view error:', err);
+    console.error('❌ Erreur lors de l\'incrémentation des vues:', err);
     res.status(500).json({ error: 'Erreur serveur' });
   }
 });
@@ -2004,7 +2044,7 @@ app.post('/api/posts/:id/react', requireAuth, async (req, res) => {
 
     res.json({ reactions: post.reactions });
   } catch (err) {
-    console.error('❌ react error:', err);
+    console.error('❌ Erreur réaction de post:', err);
     res.status(500).json({ error: 'Erreur serveur' });
   }
 });
@@ -2054,7 +2094,7 @@ app.get('/api/posts/:id/comments', async (req, res) => {
 
     res.json({ comments: comments.map(c => ({ ...c, _id: c._id })) });
   } catch (err) {
-    console.error('❌ get comments error:', err);
+    console.error('❌ Erreur lors de la récupération des commentaires:', err);
     res.status(500).json({ error: 'Erreur serveur' });
   }
 });
@@ -2113,7 +2153,7 @@ app.post('/api/posts/:id/comments', async (req, res) => {
 
     res.status(201).json({ comment });
   } catch (err) {
-    console.error('❌ post comment error:', err);
+    console.error('❌ Erreur commentaire de post:', err);
     res.status(500).json({ error: 'Erreur serveur' });
   }
 });
@@ -2145,7 +2185,7 @@ app.get("/api/health", (req, res) => {
   res.json({ ok: true });
 });
 
-console.log('✅ Routes sociales chargées avec MongoDB');
+console.log('Routes sociales MongoDB - OK');
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Le serveur tourne sur le port ${PORT}`));
