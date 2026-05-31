@@ -1,5 +1,0 @@
-﻿ Release v2.4.0
-Date: 2026-05-01 15:20
-Build: 2.4.0
- Changelog:
-
