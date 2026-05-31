@@ -1,5 +1,5 @@
 {
   "scripts": {
-    "build": "expo export -p web"
+    "build": "echo 'Static site — no build step required'"
   }
 }
