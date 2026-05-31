@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "build": "expo export -p web"
+  }
+}
