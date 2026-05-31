@@ -1,0 +1,14 @@
+[
+  {
+    "id": "1",
+    "username": "O I FEELOfficiel",
+    "verified": true,
+    "passwordHash": null,
+    "avatar": "/assets/logo/logo_dark.jpg",
+    "bio": "Compte officiel O I FEEL",
+    "recommendedScore": 200,
+    "isGuest": false,
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "settings": {}
+  }
+]

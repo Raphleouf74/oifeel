@@ -1,0 +1,6 @@
+{
+  "appId": "com.moodshare.app",
+  "appName": "MoodShare",
+  "webDir": ".", 
+  "bundledWebRuntime": false
+}

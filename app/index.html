@@ -1,0 +1,1238 @@
+<!doctype html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>O I FEEL</title>
+        <link rel="icon" href="/app/assets/logo/app_icon_minimal_dark.png">
+        <link rel="stylesheet" href="/app/styles/main.css">
+        <link rel="stylesheet" href="/app/styles/create-section.css">
+        <link rel="stylesheet" href="/app/styles/mobile.css" media="screen and (max-width: 769px)">
+        <link rel="stylesheet" href="/app/styles/main.css" media="screen and (min-width: 769px)">
+        <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
+    </head>
+    <body>
+        <!-- Overlay de flou pour les options avancées -->
+        <div id="blurOverlay"></div>
+        <!-- Nouveau loader minimaliste -->
+        <div id="loader" class="loader-active">
+            <div class="loader-gradient"></div>
+            <div class="loader-content">
+                <div class="loader-logo">
+                    <img src="/app/assets/logo/app_icon_dark.png" alt="O I FEEL Logo">
+                    <!-- <span class="loader-logo-text"
+            >O I<span class="loader-accent">FEEL</span></span
+          > -->
+                </div>
+                <div class="loader-bar">
+                    <div class="loader-bar-fill"></div>
+                </div>
+            </div>
+        </div>
+        <div id="maintenance-overlay" class="maintenance-overlay hidden">
+            <div class="maintenance-panel">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="75"
+                    height="75"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-construction-icon lucide-construction"
+                >
+                    <rect
+                        x="2"
+                        y="6"
+                        width="20"
+                        height="8"
+                        rx="1"
+                    />
+                    <path d="M17 14v7"/>
+                    <path d="M7 14v7"/>
+                    <path d="M17 3v3"/>
+                    <path d="M7 3v3"/>
+                    <path d="M10 14 2.3 6.3"/>
+                    <path d="m14 6 7.7 7.7"/>
+                    <path d="m8 6 8 8"/>
+                </svg>
+                <h1>maintenance en cours...</h1>
+                <p>
+                    le site est temporairement indisponible pour maintenance. Reviens dans quelques instants.
+                </p>
+                <button onclick="location.reload()">recharger la page</button>
+            </div>
+        </div>
+        <div id="ban-overlay" class="maintenance-overlay hidden">
+            <div class="maintenance-panel">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="75"
+                    height="75"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-ban"
+                >
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="m4.9 4.9 14.2 14.2"/>
+                </svg>
+                <h1>compte banni</h1>
+                <p id="ban-reason">
+                    ton compte a été banni pour violation des règles.
+                </p>
+                <p id="ban-until"></p>
+                <button onclick="logout()">se déconnecter</button>
+            </div>
+        </div>
+        <header>
+            <img src="/app/assets/logo/app_icon_dark.png" alt="O I FEEL Logo">
+        </header>
+        <div id="accountheader">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-circle-user-round-icon lucide-circle-user-round"
+            >
+                <path d="M18 20a6 6 0 0 0-12 0"/>
+                <circle cx="12" cy="10" r="4"/>
+                <circle cx="12" cy="12" r="10"/>
+            </svg>
+            <div id="profilemenu">
+                <span id="userName">UserName</span>
+                <button onclick="document.getElementById('authModal').style.display = 'block'">
+                    inscription / connexion
+                </button>
+                <button disabled style="color: red" onclick="logout()">
+                    déconnexion
+                </button>
+                <!-- <button><i>[Option 3 (Paramètres)]</i></button>
+        <button><i>[Option 4 (Support)]</i></button> -->
+                <a href="/app/admin/admin.html">
+                    <button>portail admin</button>
+                </a>
+                <p>
+                    v
+                    <span id="SiteVersion">...</span>
+                    |
+                    <span id="BuildVersion">...</span>
+                </p>
+            </div>
+        </div>
+        <div id="authModal">
+            <div id="authActions" class="auth-actions">
+                <!-- Fond décoratif -->
+                <div class="auth-bg-orb auth-bg-orb--1"></div>
+                <div class="auth-bg-orb auth-bg-orb--2"></div>
+                <div class="auth-bg-grid"></div>
+                <!-- Bouton fermer -->
+                <button class="auth-close-btn" onclick="document.getElementById('authModal').style.display = 'none'" aria-label="Fermer">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <line
+                            x1="18"
+                            y1="6"
+                            x2="6"
+                            y2="18"
+                        />
+                        <line
+                            x1="6"
+                            y1="6"
+                            x2="18"
+                            y2="18"
+                        />
+                    </svg>
+                </button>
+                <div class="auth-inner">
+                    <!-- Colonne gauche — branding -->
+                    <div class="auth-brand">
+                        <div class="auth-logo-wrap">
+                            <img
+                                src="/app/assets/logo/app_icon_dark.png"
+                                alt="O I FEEL Logo"
+                                class="auth-logo"
+                                height="100"
+                                width="100"
+                            >
+                        </div>
+                        <h2 class="auth-brand-name">
+                            O I
+                            <span>FEEL</span>
+                        </h2>
+                        <p class="auth-brand-tagline" data-i18n="login-message">
+                            partage ton humeur avec le monde entier.
+                        </p>
+                    </div>
+                    <!-- Colonne droite — actions -->
+                    <div class="auth-actions-col">
+                        <p class="auth-actions-label">choisis une option</p>
+                        <button id="openLogin" class="auth-action-btn auth-action-btn--primary">
+                            <span class="auth-action-icon">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                                    <polyline points="10 17 15 12 10 7"/>
+                                    <line
+                                        x1="15"
+                                        y1="12"
+                                        x2="3"
+                                        y2="12"
+                                    />
+                                </svg>
+                            </span>
+                            <span class="auth-action-text">
+                                <strong data-i18n="login_btn">connecte-toi</strong>
+                                <small data-i18n="login_btn_sub">accéde à ton compte</small>
+                            </span>
+                            <svg
+                                class="auth-action-arrow"
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </button>
+                        <button id="openRegister" class="auth-action-btn auth-action-btn--secondary">
+                            <span class="auth-action-icon">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="9" cy="7" r="4"/>
+                                    <line
+                                        x1="19"
+                                        y1="8"
+                                        x2="19"
+                                        y2="14"
+                                    />
+                                    <line
+                                        x1="22"
+                                        y1="11"
+                                        x2="16"
+                                        y2="11"
+                                    />
+                                </svg>
+                            </span>
+                            <span class="auth-action-text">
+                                <strong data-i18n="register_btn">inscrit-toi</strong>
+                                <small data-i18n="register_btn_sub">crée ton compte gratuitement</small>
+                            </span>
+                            <svg
+                                class="auth-action-arrow"
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </button>
+                        <button
+                            id="logoutBtn"
+                            class="auth-action-btn auth-action-btn--danger"
+                            data-i18n="logout_btn"
+                            style="display: none"
+                        >
+                            <span class="auth-action-icon">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                    <polyline points="16 17 21 12 16 7"/>
+                                    <line
+                                        x1="21"
+                                        y1="12"
+                                        x2="9"
+                                        y2="12"
+                                    />
+                                </svg>
+                            </span>
+                            <span class="auth-action-text">
+                                <strong data-i18n="logout_btn">se déconnecter</strong>
+                                <small data-i18n="logout_btn_sub">quitte ta session</small>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="authModalForm" class="modal hidden">
+            <div class="auth-form-backdrop" id="authFormBackdrop"></div>
+            <form id="authForm" novalidate>
+                <!-- Décor -->
+                <div class="auth-form-orb auth-form-orb--1"></div>
+                <div class="auth-form-orb auth-form-orb--2"></div>
+                <!-- Header -->
+                <div class="auth-form-header">
+                    <div class="auth-form-logo">
+                        <img src="/app/assets/logo/app_icon_dark.png" alt="O I FEEL Logo" class="auth-logo">
+                    </div>
+                    <div>
+                        <h3 id="authFormTitle" class="auth-form-title">connexion</h3>
+                        <p class="auth-form-subtitle">bienvenue sur O I FEEL</p>
+                    </div>
+                </div>
+                <!-- Champs -->
+                <div class="auth-field" id="authUsernameField">
+                    <label class="auth-field-label" for="authUsername">entre ton pseudo</label>
+                    <div class="auth-field-wrap">
+                        <svg
+                            class="auth-field-icon"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <circle cx="12" cy="8" r="5"/>
+                            <path d="M20 21a8 8 0 0 0-16 0"/>
+                        </svg>
+                        <input
+                            id="authUsername"
+                            class="auth-input"
+                            type="text"
+                            placeholder="Ton pseudo…"
+                            autocomplete="username"
+                            maxlength="13"
+                            required
+                        >
+                    </div>
+                </div>
+                <div class="auth-field">
+                    <label class="auth-field-label" for="authPassword">entre ton mot de passe</label>
+                    <div class="auth-field-wrap">
+                        <svg
+                            class="auth-field-icon"
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <rect
+                                width="18"
+                                height="11"
+                                x="3"
+                                y="11"
+                                rx="2"
+                                ry="2"
+                            />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                        <input
+                            id="authPassword"
+                            class="auth-input"
+                            type="password"
+                            placeholder="••••••••"
+                            autocomplete="current-password"
+                            required
+                        >
+                        <button
+                            type="button"
+                            class="auth-pwd-toggle"
+                            onclick="
+                this.previousElementSibling.type =
+                  this.previousElementSibling.type === 'password'
+                    ? 'text'
+                    : 'password';
+                this.classList.toggle('shown');
+              "
+                            tabindex="-1"
+                            aria-label="Voir le mot de passe"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <!-- Erreur -->
+                <div class="auth-form-error" id="authFormError" style="display: none"></div>
+                <!-- Boutons -->
+                <div class="auth-form-btns">
+                    <button id="authSubmit" type="submit" class="auth-submit-btn">
+                        valider
+                    </button>
+                    <button id="authCancel" type="button" class="auth-cancel-btn">
+                        annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+        <nav id="nav" class="menu" role="navigation">
+            <a class="hoverable link active" id="home">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="40"
+                    height="40"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.25"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="link-icon"
+                >
+                    <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/>
+                    <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                </svg>
+                <p class="link-title" data-i18n="nav_home">accueil</p>
+            </a>
+            <a class="hoverable link" id="messages">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="36"
+                    height="36"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.25"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="link-icon"
+                >
+                    <path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/>
+                </svg>
+                <p class="link-title" data-i18n="nav_messages">messages</p>
+            </a>
+            <a class="hoverable link" id="create">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="36"
+                    height="36"
+                    viewBox="0 0 24 24"
+                    fill="#150668"
+                    stroke="white"
+                    stroke-width="2.25"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="link-icon"
+                >
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M8 12h8"/>
+                    <path d="M12 8v8"/>
+                </svg>
+                <p class="link-title" data-i18n="nav_create">créer</p>
+            </a>
+            <a class="hoverable link" id="inbox">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="36"
+                    height="36"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.25"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="link-icon"
+                >
+                    <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+                    <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+                </svg>
+                <p class="link-title" data-i18n="nav_inbox">notifications</p>
+            </a>
+            <a class="hoverable link" id="more">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="link-icon"
+                >
+                    <path d="M5 12h14"/>
+                    <path d="M12 5v14"/>
+                </svg>
+                <p class="link-title" data-i18n="nav_profile">plus</p>
+            </a>
+        </nav>
+        <section id="home" class="tab active">
+            <!-- Barre de sélection Posts / Stories -->
+            <div id="feed-selector" class="sort-bar">
+                <button class="sort-btn sort-btn--active" data-feed="posts">posts</button>
+                <button class="sort-btn" data-feed="stories">stories</button>
+            </div>
+            <!-- Container Stories -->
+            <div id="stories-container" class="feed-container hidden">
+                <div class="stories">
+                    <h2 data-i18n="home_stories">stories</h2>
+                    <div class="stories-list">
+                        <div class="story add-story" id="addStoryBtn" title="Ajouter une story">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="22"
+                                height="22"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path d="M5 12h14"/>
+                                <path d="M12 5v14"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Container Posts -->
+            <div id="posts-container" class="feed-container">
+                <div class="posts-section">
+                    <h2 data-i18n="home_recent_posts">posts récents</h2>
+                    <div id="sort-bar" class="sort-bar">
+                        <button class="sort-btn sort-btn--active" data-sort="recent">récents</button>
+                        <button class="sort-btn" data-sort="popular">populaires</button>
+                        <button class="sort-btn" data-sort="trending">tendances</button>
+                    </div>
+                    <div id="moodWall"></div>
+                </div>
+            </div>
+        </section>
+        <section id="create" class="tab hidden">
+            <div class="create-container">
+                <!-- Titre -->
+                <div class="create-header">
+                    <h1 data-i18n="create_title">créer</h1>
+                </div>
+                <!-- Zone de saisie -->
+                <div class="create-input-group">
+                    <textarea
+                        id="moodInput"
+                        class="create-textarea"
+                        maxlength="200"
+                        resize="none"
+                        rows="4"
+                    ></textarea>
+                    <div class="create-char-count">
+                        <span id="charCount">0</span>
+                        <span>/200</span>
+                    </div>
+                </div>
+                <!-- Barre d'outils -->
+                <div class="create-toolbar">
+                    <!-- Emoji picker button -->
+                    <input
+                        type="text"
+                        class="moodEmoji"
+                        id="chosenEmojiPreview"
+                        readonly
+                    >
+                    <button
+                        type="button"
+                        class="create-tool-btn"
+                        id="emojiToolBtn"
+                        title="Ajouter un emoji"
+                    >
+                        <span>
+                            <span id="emojiState">ajoute un</span> emoji</span>
+                        <div id="deleteCurrentEmoji" class="emoji-preview">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="lucide lucide-trash-icon lucide-trash"
+                            >
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                                <path d="M3 6h18"/>
+                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                        </div>
+                    </button>
+                    <!-- Sticker picker button -->
+                    <button
+                        type="button"
+                        class="create-tool-btn"
+                        id="stickerToolBtn"
+                        title="ajoute un sticker GIF"
+                    >
+                        <svg
+                            width="20"
+                            height="20"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                        >
+                            <rect
+                                x="3"
+                                y="3"
+                                width="18"
+                                height="18"
+                                rx="2"
+                            />
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                        <span>sticker</span>
+                    </button>
+                    <!-- Color presets -->
+                    <div class="create-color-group">
+                        <div id="moodColorDiv">
+                            <input
+                                type="color"
+                                id="textColor"
+                                value="#000000"
+                                readonly
+                            >
+                            <p>
+                                #
+                                <span id="chosenColorValue">ffffff</span>
+                            </p>
+                        </div>
+                        <div id="MoodTextColor">
+                            <div id="chosenColor"></div>
+                            <p>
+                                #
+                                <span id="chosenColorValue">ffffff</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div id="pickColorModal" hidden>
+                    <div id="pickColorModalContent">
+                        <h3>couleur personnalisée</h3>
+                        <input
+                            type="color"
+                            id="moodColor"
+                            value="#ffffff"
+                            class="create-color-custom"
+                            title="Couleur personnalisée"
+                        >
+                        <h3>couleurs prédéfinies</h3>
+                        <div id="create-color-preset"></div>
+                    </div>
+                </div>
+                <!-- Emoji picker overlay (hidden by default) -->
+                <div id="emojiPickerOverlay" class="create-picker-overlay" style="display: none !important">
+                    <div class="create-picker-panel">
+                        <div class="create-picker-header">
+                            <span>choisis un emoji</span>
+                            <button type="button" class="create-picker-close-emoji" aria-label="Fermer">
+                                ×
+                            </button>
+                        </div>
+                        <emoji-picker id="emojiPicker"></emoji-picker>
+                    </div>
+                </div>
+                <!-- Sticker picker overlay (hidden by default) -->
+                <div id="stickerPickerOverlay" class="create-picker-overlay" style="display: none !important">
+                    <div class="create-picker-panel">
+                        <div class="create-picker-header">
+                            <span>recherche un sticker</span>
+                            <button type="button" class="create-picker-close" aria-label="Fermer">
+                                ×
+                            </button>
+                        </div>
+                        <div class="sticker-search">
+                            <input type="text" id="stickerSearchInput" placeholder="Rechercher sur Tenor...">
+                            <button type="button" id="stickerSearchBtn">
+                                <svg
+                                    width="18"
+                                    height="18"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2.5"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="m21 21-4.35-4.35"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="stickerResults" class="sticker-results"></div>
+                    </div>
+                </div>
+                <!-- Preview live -->
+                <div class="create-preview">
+                    <div class="create-preview-label" data-i18n="create_preview">
+                        aperçu
+                    </div>
+                    <div id="previewMood" class="create-preview-card">
+                        <div class="create-preview-emoji" id="previewEmoji">👋</div>
+                        <div class="create-preview-text" id="previewText">
+                            ton message apparaîtra ici...
+                        </div>
+                        <div id="previewSticker" class="create-preview-sticker" style="display: none"></div>
+                    </div>
+                </div>
+                <div id="moreOptionsBtn">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="lucide lucide-plus-icon lucide-plus"
+                    >
+                        <path d="M5 12h14"/>
+                        <path d="M12 5v14"/>
+                    </svg>
+                    <p>options supplémentaires</p>
+                </div>
+                <div id="advancedOptions" hidden>
+                    <!-- Options avancées -->
+                    <div class="create-advanced">
+                        <!-- Story toggle -->
+                        <label class="create-toggle">
+                            <input type="checkbox" id="storyModeToggle">
+                            <span class="create-toggle-slider"></span>
+                            <span class="create-toggle-label">
+                                <svg
+                                    width="16"
+                                    height="16"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                                <span data-i18n="create_story">story 24h</span>
+                            </span>
+                        </label>
+                        <!-- Ephemeral toggle -->
+                        <label class="create-toggle">
+                            <input type="checkbox" id="ephemeralToggle">
+                            <span class="create-toggle-slider"></span>
+                            <span class="create-toggle-label">
+                                <svg
+                                    width="16"
+                                    height="16"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <polyline points="1 4 1 10 7 10"/>
+                                    <polyline points="23 20 23 14 17 14"/>
+                                    <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+                                </svg>
+                                <span data-i18n="create_ephemeral">message éphémère</span>
+                            </span>
+                        </label>
+                    </div>
+                    <!-- Duration picker (shown when ephemeral is on) -->
+                    <div id="durationPicker" class="create-duration" style="display: none">
+                        <div class="create-duration-inputs">
+                            <div class="create-duration-field">
+                                <input
+                                    type="number"
+                                    id="durationDays"
+                                    min="0"
+                                    max="30"
+                                    placeholder="0"
+                                >
+                                <label data-i18n="days">jours</label>
+                            </div>
+                            <div class="create-duration-field">
+                                <input
+                                    type="number"
+                                    id="durationHours"
+                                    min="0"
+                                    max="23"
+                                    placeholder="0"
+                                >
+                                <label data-i18n="hours">heures</label>
+                            </div>
+                            <div class="create-duration-field">
+                                <input
+                                    type="number"
+                                    id="durationMinutes"
+                                    min="0"
+                                    max="59"
+                                    placeholder="0"
+                                >
+                                <label data-i18n="minutes">minutes</label>
+                            </div>
+                        </div>
+                        <div class="create-duration-preview">
+                            <span data-i18n="create_expire_at">expire le :</span>
+                            <strong id="msgdeletetime">—</strong>
+                        </div>
+                    </div>
+                </div>
+                <div id="publishOptions">
+                    <!-- Submit button -->
+                    <button type="button" class="create-submit-btn" id="submitMood">
+                        <svg
+                            width="20"
+                            height="20"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            viewBox="0 0 24 24"
+                        >
+                            <path d="m22 2-7 20-4-9-9-4Z"/>
+                            <path d="M22 2 11 13"/>
+                        </svg>
+                        <span data-i18n="create_share">partager</span>
+                    </button>
+                    <button type="button" id="publish-tools">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="lucide lucide-ellipsis-vertical-icon lucide-ellipsis-vertical"
+                        >
+                            <circle cx="12" cy="12" r="1"/>
+                            <circle cx="12" cy="5" r="1"/>
+                            <circle cx="12" cy="19" r="1"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div id="publishOptionsDiv">
+                <label class="anon-label">
+                    <input type="checkbox" id="anon-toggle" class="anon-input">
+                    <span class="anon-track"></span>
+                    <span class="anon-text">publier anonymement</span>
+                </label>
+                <button id="deleteAll" data-i18n="delete_all">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="lucide lucide-trash-icon lucide-trash"
+                    >
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                        <path d="M3 6h18"/>
+                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                    tout supprimer
+                </button>
+            </div>
+        </section>
+        <section id="inbox" class="tab hidden">
+            <h1 data-i18n="inbox_title">boîte de récéption</h1>
+            <div id="inboxdiv">
+                <i data-i18n="inbox_empty">tes notifications apparaîtront ici.</i>
+            </div>
+        </section>
+        <section id="messages" class="tab hidden">
+            <div id="messagesdiv">
+                <div id="messages-section" class="messages-container">
+                    <div class="messages-sidebar">
+                        <div class="messages-sidebar-header">
+                            <h2>messages</h2>
+                            <button id="new-conversation-btn" class="btn-icon" title="nouvelle conversation">
+                                +
+                            </button>
+                        </div>
+                        <div id="conversations-list"></div>
+                    </div>
+                    <div class="messages-main">
+                        <div id="messages-empty">
+                            <p>sélectionne une conversation</p>
+                        </div>
+                        <div id="messages-thread" style="display: none">
+                            <div class="messages-header">
+                                <button id="back-to-list">←</button>
+                                <h3 id="current-chat-name"></h3>
+                            </div>
+                            <div id="messages-body"></div>
+                            <p data-i18n="message_warning" class="message-warning">
+                                seuls les 50 derniers messages sont sauvegardés.
+                            </p>
+                            <div class="messages-input-wrap">
+                                <input type="text" id="message-input" placeholder="Écris un message...">
+                                <button id="send-message-btn">envoyer</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="more" class="tab hidden">
+            <div id="accountinfo">
+                <span id="userNameProfile">username</span>
+                <p>
+                    identifiant utilisateur:
+                    <span id="userId">connecte-toi</span>
+                </p>
+            </div>
+            <!-- 🧠 Section des posts du profil -->
+            <div id="MoreAccSettings">
+                <a
+                    href="https://ko-fi.com/moodshare"
+                    target="_blank"
+                    class="donate-btn"
+                    rel="noopener"
+                >
+                    <div id="image">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="white"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="lucide lucide-hand-coins-icon lucide-hand-coins"
+                        >
+                            <path d="M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17"/>
+                            <path d="m7 21 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/>
+                            <path d="m2 16 6 6"/>
+                            <circle cx="16" cy="9" r="2.9"/>
+                            <circle cx="6" cy="5" r="3"/>
+                        </svg>
+                    </div>
+                    <button class="hoverable" data-i18n="donate">fais un don</button>
+                </a>
+                <a href="Legal/TERMS_OF_SERVICE.html">
+                    <div id="image">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="white"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="lucide lucide-receipt-text-icon lucide-receipt-text"
+                        >
+                            <path d="M13 16H8"/>
+                            <path d="M14 8H8"/>
+                            <path d="M16 12H8"/>
+                            <path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/>
+                        </svg>
+                    </div>
+                    <button class="hoverable">
+                        <p data-i18n="CGU_title">conditions générales du service</p>
+                    </button>
+                </a>
+                <a href="Legal/PRIVACY_POLICY.html">
+                    <div id="image">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="white"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="lucide lucide-handshake-icon lucide-handshake"
+                        >
+                            <path d="m11 17 2 2a1 1 0 1 0 3-3"/>
+                            <path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/>
+                            <path d="m21 3 1 11h-2"/>
+                            <path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/>
+                            <path d="M3 4h8"/>
+                        </svg>
+                    </div>
+                    <button class="hoverable">
+                        <p data-i18n="Policy_title">politique de confidentialité</p>
+                    </button>
+                </a>
+                <!-- <a
+                    href="moodshare.apk"
+                    class="download-apk-btn"
+                    hidden
+                    disabled
+                >
+                    <div id="image">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="white"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="lucide lucide-download-icon lucide-download"
+                        >
+                            <path d="M12 15V3"/>
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <path d="m7 10 5 5 5-5"/>
+                        </svg>
+                    </div>
+                    <button disabled class="hoverable">installe l'app ! (.apk) (obsolète)</button>
+                </a> -->
+            </div>
+            <div class="language-picker">
+                <p data-i18n="settings_language" class="lp-title">langue</p>
+                <div class="lp-control">
+                    <button
+                        class="lp-button"
+                        id="lpOpenBtn"
+                        aria-haspopup="dialog"
+                        aria-expanded="false"
+                    >
+                        <span id="lpCurrentFlag" class="lp-flag">🌐</span>
+                        <span id="lpCurrentLabel">français</span>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="36"
+                            height="36"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.25"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="lucide lucide-arrow-down-icon lucide-arrow-down"
+                        >
+                            <path d="M12 5v14"/>
+                            <path d="m19 12-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div
+                        id="lpPopup"
+                        class="lp-popup"
+                        role="dialog"
+                        aria-label="Language selector"
+                    >
+                        <p style="color: red" data-i18n="lp-warn"></p>
+                        <div id="lpGrid" class="lp-grid" tabindex="0"></div>
+                    </div>
+                </div>
+            </div>
+            <h3>rejoins le serveur discord de O I FEEL !</h3>
+            <a id="discordbtn" href="https://discord.gg/xvVnNAGNtP">
+                <div id="discordlogo">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                        <path d="M524.5 133.8C524.3 133.5 524.1 133.2 523.7 133.1C485.6 115.6 445.3 103.1 404 96C403.6 95.9 403.2 96 402.9 96.1C402.6 96.2 402.3 96.5 402.1 96.9C396.6 106.8 391.6 117.1 387.2 127.5C342.6 120.7 297.3 120.7 252.8 127.5C248.3 117 243.3 106.8 237.7 96.9C237.5 96.6 237.2 96.3 236.9 96.1C236.6 95.9 236.2 95.9 235.8 95.9C194.5 103 154.2 115.5 116.1 133C115.8 133.1 115.5 133.4 115.3 133.7C39.1 247.5 18.2 358.6 28.4 468.2C28.4 468.5 28.5 468.7 28.6 469C28.7 469.3 28.9 469.4 29.1 469.6C73.5 502.5 123.1 527.6 175.9 543.8C176.3 543.9 176.7 543.9 177 543.8C177.3 543.7 177.7 543.4 177.9 543.1C189.2 527.7 199.3 511.3 207.9 494.3C208 494.1 208.1 493.8 208.1 493.5C208.1 493.2 208.1 493 208 492.7C207.9 492.4 207.8 492.2 207.6 492.1C207.4 492 207.2 491.8 206.9 491.7C191.1 485.6 175.7 478.3 161 469.8C160.7 469.6 160.5 469.4 160.3 469.2C160.1 469 160 468.6 160 468.3C160 468 160 467.7 160.2 467.4C160.4 467.1 160.5 466.9 160.8 466.7C163.9 464.4 167 462 169.9 459.6C170.2 459.4 170.5 459.2 170.8 459.2C171.1 459.2 171.5 459.2 171.8 459.3C268 503.2 372.2 503.2 467.3 459.3C467.6 459.2 468 459.1 468.3 459.1C468.6 459.1 469 459.3 469.2 459.5C472.1 461.9 475.2 464.4 478.3 466.7C478.5 466.9 478.7 467.1 478.9 467.4C479.1 467.7 479.1 468 479.1 468.3C479.1 468.6 479 468.9 478.8 469.2C478.6 469.5 478.4 469.7 478.2 469.8C463.5 478.4 448.2 485.7 432.3 491.6C432.1 491.7 431.8 491.8 431.6 492C431.4 492.2 431.3 492.4 431.2 492.7C431.1 493 431.1 493.2 431.1 493.5C431.1 493.8 431.2 494 431.3 494.3C440.1 511.3 450.1 527.6 461.3 543.1C461.5 543.4 461.9 543.7 462.2 543.8C462.5 543.9 463 543.9 463.3 543.8C516.2 527.6 565.9 502.5 610.4 469.6C610.6 469.4 610.8 469.2 610.9 469C611 468.8 611.1 468.5 611.1 468.2C623.4 341.4 590.6 231.3 524.2 133.7zM222.5 401.5C193.5 401.5 169.7 374.9 169.7 342.3C169.7 309.7 193.1 283.1 222.5 283.1C252.2 283.1 275.8 309.9 275.3 342.3C275.3 375 251.9 401.5 222.5 401.5zM417.9 401.5C388.9 401.5 365.1 374.9 365.1 342.3C365.1 309.7 388.5 283.1 417.9 283.1C447.6 283.1 471.2 309.9 470.7 342.3C470.7 375 447.5 401.5 417.9 401.5z"></path>
+                    </svg>
+                </div>
+                <h4>rejoins notre serveur discord !</h4>
+            </a>
+            <footer>
+                <p data-i18n="copyright">
+                    <b>O I FEEL &copy; 2025-2026.</b>
+                    toute reproduction partielle ou totale est strictement interdite.
+                </p>
+            </footer>
+        </section>
+        <!-- ===== REPORT MODAL ===== -->
+        <div id="reportModalOverlay" class="report-modal-overlay hidden" onclick="if (event.target === this) window.closeReportModal();">
+            <div class="report-modal-panel">
+                <div class="report-modal-header">
+                    <div class="report-modal-title">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+                            <line
+                                x1="4"
+                                y1="22"
+                                x2="4"
+                                y2="15"
+                            />
+                        </svg>
+                        signaler ce post
+                    </div>
+                    <button class="report-modal-close" onclick="window.closeReportModal()" aria-label="Fermer">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <line
+                                x1="18"
+                                y1="6"
+                                x2="6"
+                                y2="18"
+                            />
+                            <line
+                                x1="6"
+                                y1="6"
+                                x2="18"
+                                y2="18"
+                            />
+                        </svg>
+                    </button>
+                </div>
+                <div class="report-modal-body">
+                    <div class="report-field">
+                        <label class="report-label" for="reportCategory">catégorie du signalement</label>
+                        <div class="report-select-wrap">
+                            <select id="reportCategory" class="report-select">
+                                <option value="" disabled selected>
+                                    choisis une catégorie…
+                                </option>
+                                <option value="Contenu haineux">
+                                    🚫 contenu haineux ou discriminatoire
+                                </option>
+                                <option value="Harcèlement">
+                                    😠 harcèlement ou intimidation
+                                </option>
+                                <option value="Spam">📢 spam ou contenu répétitif</option>
+                                <option value="Contenu inapproprié">
+                                    🔞 contenu inapproprié ou choquant
+                                </option>
+                                <option value="Désinformation">
+                                    ❌ fausse information / désinformation
+                                </option>
+                                <option value="Atteinte à la vie privée">
+                                    🔒 atteinte à la vie privée
+                                </option>
+                                <option value="Autre">💬 autre</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="report-field">
+                        <label class="report-label" for="reportDetail">
+                            décris le problème
+                            <span id="reportCharCount" class="report-charcount">0 / 500</span>
+                        </label>
+                        <textarea
+                            id="reportDetail"
+                            class="report-textarea"
+                            placeholder="Explique pourquoi ce post pose problème…"
+                            maxlength="500"
+                            oninput="
+                document.getElementById('reportCharCount').textContent =
+                  this.value.length + ' / 500'
+              "
+                        ></textarea>
+                    </div>
+                    <div id="reportError" class="report-msg report-msg--error" style="display: none"></div>
+                    <div id="reportSuccess" class="report-msg report-msg--success" style="display: none">
+                        ✅ ton signalement a bien été envoyé. merci !
+                    </div>
+                    <div class="report-footer">
+                        <button class="report-cancel-btn" onclick="window.closeReportModal()">
+                            annuler
+                        </button>
+                        <button id="reportSubmitBtn" class="report-submit-btn" onclick="window.submitReport()">
+                            envoyer le signalement
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script type="module" src="/app/scripts/messages.js"></script>
+        <script type="module" src="/app/scripts/social.js"></script>
+    </body>
+    <script type="module" src="/app/scripts/app.js"></script>
+    <script type="module" src="/app/scripts/auth.js"></script>
+    <script type="module" src="/app/scripts/profile.js"></script>
+    <script type="module" src="/app/scripts/lang-picker.js"></script>
+</html>

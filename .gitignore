@@ -1,6 +1,3 @@
 .netlify
 **/node_modules
 push.ps1
-**/moodshare-android
-capacitor.config.json
-/Logos

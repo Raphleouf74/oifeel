@@ -1,0 +1,497 @@
+/* ═══════════════════════════════════════════════════════════════
+   O I FEEL — Article Post  ·  Dark editorial theme
+   Matches the main landing page aesthetic
+   ═══════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+
+@font-face {
+    font-family: "DM Sans";
+    src: url("/app/fonts/DMSans-VariableFont_opsz,wght.ttf") format("truetype");
+    font-weight: 100 900;
+    font-style: normal;
+}
+
+:root {
+    --bg: #0d0d0d;
+    --bg-2: #161616;
+    --bg-3: #1f1f1f;
+    --accent: #FF3366;
+    --accent-dim: rgba(255, 51, 102, 0.12);
+    --accent-glow: rgba(255, 51, 102, 0.3);
+    --fg: #ffffff;
+    --fg-2: #aaaaaa;
+    --fg-3: #555555;
+    --border: rgba(255, 255, 255, 0.08);
+    --radius: 12px;
+    --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --font-display: 'Syne', 'DM Sans', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+}
+
+/* ─── RESET ──────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+    line-height: 1.7;
+    overflow-x: hidden;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* ─── SCROLL PROGRESS ────────────────────────────────────────── */
+#scroll-progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.05);
+    z-index: 9999;
+}
+
+#scroll-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.08s linear;
+    box-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* ─── HEADER ─────────────────────────────────────────────────── */
+#article-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    padding: 0 2.5rem;
+    background: rgba(13, 13, 13, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    z-index: 998;
+    transition: background 0.3s var(--ease), border-color 0.3s ease;
+}
+
+.nav-inner {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.nav-logo {
+    color: var(--fg-2);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.88rem;
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.2s ease;
+}
+
+.nav-logo:hover {
+    color: var(--fg);
+}
+
+/* ─── MAIN ───────────────────────────────────────────────────── */
+main {
+    width: 100%;
+    min-height: 100vh;
+    padding-top: 68px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ─── HERO ───────────────────────────────────────────────────── */
+.hero {
+    width: 90%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 5rem 2rem 4rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.hero-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    animation: slideInLeft 0.75s var(--ease) both;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-28px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.article-date {
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+}
+
+.article-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    color: var(--fg);
+}
+
+.article-title .highlight {
+    color: var(--accent);
+    /* override the gradient from old CSS */
+    background: none;
+    -webkit-text-fill-color: var(--accent);
+    background-clip: unset;
+}
+
+.article-subtitle {
+    font-size: 1.1rem;
+    color: var(--fg-2);
+    line-height: 1.75;
+    max-width: 480px;
+}
+
+.hero-image {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    animation: slideInRight 0.75s var(--ease) 0.15s both;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(28px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ─── ARTICLE BODY ───────────────────────────────────────────── */
+.article-body {
+    width: 90%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1rem 2rem 6rem;
+}
+
+.content-section {
+    margin-bottom: 3.5rem;
+    opacity: 0;
+    animation: fadeUp 0.6s var(--ease) both;
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.content-section:nth-child(1) {
+    animation-delay: 0.10s;
+}
+
+.content-section:nth-child(2) {
+    animation-delay: 0.18s;
+}
+
+.content-section:nth-child(3) {
+    animation-delay: 0.26s;
+}
+
+.content-section:nth-child(4) {
+    animation-delay: 0.34s;
+}
+
+.content-section:nth-child(5) {
+    animation-delay: 0.42s;
+}
+
+.content-section:nth-child(6) {
+    animation-delay: 0.50s;
+}
+
+.article-body h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 2.2vw, 2rem);
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    color: var(--fg);
+    letter-spacing: -0.02em;
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+.article-body h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 36px;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 2px;
+}
+
+.article-body h3 {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--fg);
+    letter-spacing: -0.01em;
+}
+
+.article-body h4 {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    color: var(--fg);
+}
+
+.article-body p {
+    font-size: 0.98rem;
+    line-height: 1.85;
+    color: var(--fg-2);
+    margin-bottom: 1.2rem;
+}
+
+.article-body strong {
+    color: var(--fg);
+    font-weight: 600;
+}
+
+/* ─── HIGHLIGHT BOX ──────────────────────────────────────────── */
+.highlight-box {
+    background: var(--accent-dim);
+    border-left: 3px solid var(--accent);
+    padding: 1.75rem 2rem 1.75rem 2.25rem;
+    border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.highlight-box h3 {
+    color: var(--accent);
+    margin-bottom: 1rem;
+}
+
+/* ─── FEATURES LIST (cards) ──────────────────────────────────── */
+.features-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.25rem;
+    margin-top: 2rem;
+}
+
+.feature-item {
+    display: flex;
+    gap: 1.25rem;
+    padding: 1.5rem;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: border-color 0.25s ease, transform 0.25s var(--ease);
+}
+
+.feature-item:hover {
+    border-color: rgba(255, 51, 102, 0.3);
+    transform: translateY(-3px);
+}
+
+.feature-icon {
+    color: var(--accent);
+    min-width: 44px;
+    display: flex;
+    align-items: flex-start;
+    padding-top: 0.15rem;
+    flex-shrink: 0;
+}
+
+.feature-item h4 {
+    margin-bottom: 0.4rem;
+}
+
+.feature-item p {
+    font-size: 0.88rem;
+    margin-bottom: 0;
+    color: var(--fg-3);
+    line-height: 1.6;
+}
+
+/* ─── FEATURE LIST (bullet ul) ───────────────────────────────── */
+.feature-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    margin: 1.5rem 0;
+}
+
+.feature-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--fg-2);
+    font-size: 0.97rem;
+    line-height: 1.6;
+}
+
+.feature-list li svg {
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+/* ─── FINAL MESSAGE ──────────────────────────────────────────── */
+.final-message {
+    text-align: center;
+    margin-top: 4rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--border);
+}
+
+.final-message h2::after {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.final-message p {
+    font-size: 1.02rem;
+}
+
+.final-message strong {
+    color: var(--accent);
+}
+
+/* ─── CTA BUTTON ─────────────────────────────────────────────── */
+.cta-button {
+    margin-top: 2.5rem;
+}
+
+.cta-button a {
+    display: inline-block;
+    padding: 0.9rem 2.25rem;
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    border-radius: var(--radius);
+    transition: transform 0.25s var(--ease), box-shadow 0.25s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-button a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+}
+
+.cta-button a:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px var(--accent-glow);
+}
+
+.cta-button a:hover::after {
+    transform: translateX(0);
+}
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .hero {
+        grid-template-columns: 1fr;
+        padding: 3.5rem 1.5rem 2rem;
+        gap: 2.5rem;
+    }
+
+    .article-title {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 600px) {
+    #article-header {
+        padding: 0 1.25rem;
+    }
+
+    .hero {
+        padding: 3rem 1.25rem 1.5rem;
+    }
+
+    .article-body {
+        padding: 0.5rem 1.25rem 4rem;
+    }
+
+    .article-body h2 {
+        font-size: 1.35rem;
+    }
+
+    .features-list {
+        grid-template-columns: 1fr;
+    }
+
+    .final-message {
+        text-align: left;
+    }
+
+    .final-message h2::after {
+        left: 0;
+        transform: none;
+    }
+
+    .cta-button {
+        text-align: left;
+    }
+}
