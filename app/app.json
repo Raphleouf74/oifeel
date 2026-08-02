@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "android": {
+      "googleServicesFile": "./google-services.json"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#667eea"
+        }
+      ]
+    ]
+  }
+}

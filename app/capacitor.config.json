@@ -1,0 +1,6 @@
+{
+  "appId": "com.oifeel.app",
+  "appName": "oifeel.",
+  "webDir": ".", 
+  "bundledWebRuntime": false
+}

@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "build": "echo 'Static site — no build step required'"
+  },
+  "dependencies": {
+    "otplib": "^13.4.1",
+    "qrcode": "^1.5.4"
+  }
+}

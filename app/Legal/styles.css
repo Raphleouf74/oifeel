@@ -1,0 +1,98 @@
+
+/* Styles simples pour les pages légales */
+:root {
+  --bg: #fff;
+  --text: #111;
+  --muted: #666;
+  --accent: #0078d4;
+  --maxw: 900px;
+  --gap: 1rem;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  max-width: var(--maxw);
+  width: 100%;
+  box-shadow: 0 6px 30px rgba(16, 24, 40, 0.06);
+  border-radius: 8px;
+  padding: 2rem;
+  background: #fff;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--gap);
+  margin-bottom: 1rem;
+}
+
+.h-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.h-sub {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+button {
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+  padding: 0.45rem 0.7rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button.ghost {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+section {
+  margin-top: 1rem;
+  line-height: 1.55
+}
+
+h2 {
+  margin-top: 1.25rem;
+  font-size: 1.05rem
+}
+
+small.muted {
+  color: var(--muted)
+}
+
+.footer {
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: var(--muted)
+}
+
+@media (max-width:640px) {
+  body {
+    padding: 1rem
+  }
+
+  .container {
+    padding: 1rem
+  }
+}

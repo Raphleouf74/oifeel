@@ -1,0 +1,353 @@
+/* ===== comments.css — v3, d'après la maquette Figma =====
+   - Rangées de commentaires pleine largeur (fond teinté selon mood.color)
+   - Panneau de saisie séparé (2e colonne en desktop, empilé en mobile)
+   - Pilule like / dislike / report par commentaire
+   - Teinte dynamique via --c-tint-r/g/b injectées en JS (_applyCommentTint) */
+
+.cwrap {
+  --c-tint-r: 95;
+  --c-tint-g: 149;
+  --c-tint-b: 185;
+
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
+  border-top: 1px solid
+    rgba(var(--c-tint-r), var(--c-tint-g), var(--c-tint-b), 0.18);
+  padding: 14px;
+}
+
+/* ---- Bouton toggle (dans la barre d'actions du post) ---- */
+
+.ctoggle {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 5px;
+  color: var(--text);
+  opacity: 0.6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.ctoggle:hover {
+  opacity: 1;
+}
+
+.ctoggle.copen {
+  opacity: 1;
+  color: var(--accent);
+}
+
+.ctoggle .ccount {
+  font-size: 0.85rem;
+  font-weight: 600;
+  min-width: 10px;
+}
+
+/* ============================================================
+   COLONNE GAUCHE — liste des commentaires
+   ============================================================ */
+
+.clist-col {
+  flex: 1 1 60%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.clist {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.ccomment {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(var(--c-tint-r), var(--c-tint-g), var(--c-tint-b), 0.45);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  animation: cCommentIn 0.2s ease;
+}
+
+.clist .ccomment:last-child {
+  border-bottom: none;
+}
+
+@keyframes cCommentIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ccomment.cpending {
+  opacity: 0.6;
+}
+
+.cavatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.ctext-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.ctext {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  color: #fff;
+  word-break: break-word;
+}
+
+.ctext-short,
+.ctext-full {
+  white-space: pre-wrap;
+}
+
+.cexpand-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: 6px;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: underline;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.cexpand-btn:hover {
+  color: #fff;
+}
+
+/* ---- Actions (pilule like/dislike/report + date) ---- */
+
+.cactions-wrap {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.cactions-pill {
+  display: flex;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.cactions-pill button {
+  border: none;
+  padding: 4px 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.clike-btn {
+  background: #3fb950;
+  color: #fff;
+}
+
+.clike-btn.active {
+  background: #2e9140;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.cdislike-btn {
+  background: #f0524d;
+  color: #fff;
+}
+
+.cdislike-btn.active {
+  background: #d43b36;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.creport-btn {
+  background: #fff;
+  color: #1a1a1a;
+}
+
+.creport-btn:hover {
+  background: #eee;
+}
+
+.cdate {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.65);
+  padding-right: 2px;
+}
+
+/* ---- Voir plus de commentaires ---- */
+
+.cmore-wrap {
+  text-align: center;
+  padding-top: 6px;
+}
+
+.cmore-btn {
+  background: none;
+  border: none;
+  color: var(--accent, #5f95b9);
+  font-size: 0.8rem;
+  cursor: pointer;
+  opacity: 0.9;
+}
+
+.cmore-btn:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* ============================================================
+   COLONNE DROITE — panneau de saisie
+   ============================================================ */
+
+.cinput-col {
+  flex: 1 1 40%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: rgba(var(--c-tint-r), var(--c-tint-g), var(--c-tint-b), 0.15);
+  border-radius: 10px;
+  padding: 14px;
+  position: relative;
+}
+
+.cinput {
+  flex: 1;
+  min-height: 90px;
+  resize: none;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  font-family: inherit;
+}
+
+.cinput::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.cinput-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 10px;
+}
+
+.ccharcount {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  color: var(--muted, #aaaaaa);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 4px 10px;
+}
+
+.ctos {
+  flex: 1;
+  font-size: 0.68rem;
+  font-style: italic;
+  color: var(--muted, #aaaaaa);
+  line-height: 1.3;
+}
+
+.csend {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgb(var(--c-tint-r), var(--c-tint-g), var(--c-tint-b));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.csend:hover {
+  transform: scale(1.06);
+}
+
+.csend:active {
+  transform: scale(0.94);
+}
+
+/* ============================================================
+   RESPONSIVE — 2 colonnes en desktop, empilé en mobile
+   ============================================================ */
+
+@media (max-width: 769px) {
+  .cwrap {
+    flex-direction: column;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .ccomment {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .cavatar {
+    width: 26px;
+    height: 26px;
+    font-size: 0.7rem;
+  }
+
+  .ctext {
+    font-size: 0.82rem;
+  }
+
+  .cactions-pill button {
+    padding: 3px 9px;
+    font-size: 0.66rem;
+  }
+
+  .cinput-col {
+    padding: 10px;
+  }
+
+  .cinput {
+    min-height: 60px;
+  }
+
+  .cinput-footer {
+    flex-wrap: wrap;
+  }
+
+  .ctos {
+    order: 3;
+    flex-basis: 100%;
+  }
+}
