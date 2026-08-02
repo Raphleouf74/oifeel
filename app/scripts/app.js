@@ -2518,11 +2518,6 @@ document.addEventListener('DOMContentLoaded', () => {
         userIDspan.textContent = user.id;
         saveProfileLocal({ displayName: uname });
         hideModal();
-        if (openLogin) openLogin.classList.add('hidden');
-        if (openRegister) openRegister.classList.add('hidden');
-        if (guestBtn) guestBtn.classList.add('hidden');
-        if (logoutBtn) logoutBtn.classList.remove('hidden');
-        if (accountHeader) accountHeader.classList.remove('hidden');
         document.dispatchEvent(new CustomEvent('userLoggedIn'));
     }
 
@@ -2551,7 +2546,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showModal(register = false) {
         isRegister = register;
-        authTitle.textContent = register ? "inscription" : 'Connexion';
+        authTitle.textContent = register ? "inscription" : 'connexion';
         if (authModalForm) authModalForm.classList.add('shown');
         if (authModal) authModal.style.display = 'block';
         hideOtpStep();
@@ -2613,33 +2608,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    if (guestBtn) guestBtn.addEventListener('click', async () => {
-        try {
-            const user = await loginGuest();
-            const uname = (user && (user.displayName || user.display_name || user.username)) || 'Invité';
-            userName.textContent = uname;
-            userNameProfile.textContent = uname;
-            userIDspan.textContent = user.id;
-            saveProfileLocal({ displayName: uname });
-            if (openLogin) openLogin.classList.add('hidden');
-            if (openRegister) openRegister.classList.add('hidden');
-            if (guestBtn) guestBtn.classList.add('hidden');
-            if (logoutBtn) logoutBtn.classList.remove('hidden');
-            if (accountHeader) accountHeader.classList.remove('hidden');
-            // 🔥 Émettre événement de connexion
-            document.dispatchEvent(new CustomEvent('userLoggedIn'));
-            hideModal();
-        } catch (err) {
-            alert(err.message || 'Guest login failed');
-        }
-    });
-
     if (logoutBtn) logoutBtn.addEventListener('click', async () => {
         await logout();
         // clear UI
         if (logoutBtn) logoutBtn.classList.add('hidden');
-        if (openLogin) openLogin.classList.remove('hidden');
-        if (openRegister) openRegister.classList.remove('hidden');
         if (guestBtn) guestBtn.classList.remove('hidden');
         // restore stored profile name or default
         const saved = loadProfileLocal();
@@ -2679,14 +2651,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const uname = (user && (user.displayName || user.display_name || user.username)) || localProfile.displayName || 'non connecté';
             // userName.textContent = uname;
             saveProfileLocal({ displayName: uname });
-            if (openLogin) openLogin.classList.add('hidden');
-            if (openRegister) openRegister.classList.add('hidden');
             if (guestBtn) guestBtn.classList.add('hidden');
             if (logoutBtn) logoutBtn.classList.remove('hidden');
             if (accountHeader) accountHeader.classList.remove('hidden');
         } else {
-            if (logoutBtn) logoutBtn.classList.add('hidden');
-            if (openLogin) openLogin.classList.remove('hidden');
+            if (guestBtn) guestBtn.classList.remove('hidden');
         }
     })();
 
@@ -6692,7 +6661,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     emailInput.value = '';
                     emailCodeStep.classList.add('hidden');
                     emailSetup.classList.remove('hidden');
-                } 
+                }
             } catch (err) {
                 alert(err.message);
                 methodChoice.classList.remove('hidden');

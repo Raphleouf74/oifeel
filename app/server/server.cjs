@@ -17,9 +17,32 @@ const jwtService = require('./services/jwt.cjs');
 
 // ============================================================
 // 2FA — dépendances (npm install otplib qrcode twilio)
+// otplib v13+ utilise une API fonctionnelle (plus de classe "authenticator").
 // ============================================================
-const { authenticator } = require('otplib');
-const QRCode = require('qrcode');
+let otpGenerateSecret = null, otpVerify = null, otpGenerateURI = null;
+try {
+  const otplibPkg = require('otplib');
+  otpGenerateSecret = otplibPkg.generateSecret;
+  otpVerify = otplibPkg.verify;
+  otpGenerateURI = otplibPkg.generateURI;
+  if (!otpGenerateSecret || !otpVerify || !otpGenerateURI) {
+    console.error('❌ [2FA] otplib chargé mais des exports attendus manquent. Clés disponibles:', Object.keys(otplibPkg));
+  } else {
+    console.log('✅ [2FA] otplib chargé correctement (API fonctionnelle v13+)');
+  }
+} catch (e) {
+  console.error('❌ [2FA] Impossible de charger otplib — le TOTP sera indisponible:', e.message);
+}
+const totpReady = () => !!(otpGenerateSecret && otpVerify && otpGenerateURI);
+
+let QRCode = null;
+try {
+  const qrcodePkg = require('qrcode');
+  QRCode = qrcodePkg.toDataURL ? qrcodePkg : (qrcodePkg.default || null);
+  if (!QRCode) console.error('❌ [2FA] qrcode chargé mais export inattendu:', Object.keys(qrcodePkg));
+} catch (e) {
+  console.error('❌ [2FA] Impossible de charger qrcode — le QR code TOTP sera indisponible:', e.message);
+}
 
 
 // ============================================================
@@ -1806,7 +1829,6 @@ async function sendEmailOtp(user, code) {
 }
 
 
-
 app.use("/api/auth", (req, res, next) => {
   console.log("🔐 [Auth] %s %s", req.method, req.path);
   next();
@@ -1909,7 +1931,7 @@ app.post('/api/auth/login', async (req, res) => {
           const code = generateOtpCode();
           storeOtp(`login:${pendingToken}`, code);
           await sendEmailOtp(user, code);
-        } 
+        }
         // méthode 'totp' : rien à envoyer, le code vient de l'appli d'authentification
       } catch (sendErr) {
         console.error('❌ Erreur envoi code 2FA:', sendErr);
@@ -1967,7 +1989,10 @@ app.post('/api/auth/login/2fa/verify', async (req, res) => {
 
     let valid = false;
     if (pending.method === 'totp') {
-      valid = !!user.twoFactor?.totpSecret && authenticator.check(String(code).trim(), user.twoFactor.totpSecret);
+      if (totpReady() && user.twoFactor?.totpSecret) {
+        const checkResult = await otpVerify({ secret: user.twoFactor.totpSecret, token: String(code).trim() });
+        valid = checkResult.valid;
+      }
     } else {
       const result = verifyOtp(`login:${pendingToken}`, String(code).trim());
       valid = result.ok;
@@ -2023,7 +2048,6 @@ app.post('/api/auth/login/2fa/resend', async (req, res) => {
     const code = generateOtpCode();
     storeOtp(`login:${pendingToken}`, code);
     if (pending.method === 'email') await sendEmailOtp(user, code);
-    
 
     res.json({ ok: true });
   } catch (err) {
@@ -2113,13 +2137,16 @@ app.get('/api/auth/2fa/status', requireAuth, async (req, res) => {
 // ── TOTP (Google Authenticator) ──────────────────────────────
 app.post('/api/auth/2fa/totp/start', requireAuth, async (req, res) => {
   try {
+    if (!totpReady() || !QRCode) {
+      return res.status(503).json({ error: 'TOTP indisponible côté serveur (dépendance otplib/qrcode mal installée). Contacte l\'administrateur.' });
+    }
     const user = await UserModel.findById(req.session.user.id);
     if (!user) return res.status(401).json({ error: 'Non authentifié' });
 
-    const secret = authenticator.generateSecret();
+    const secret = otpGenerateSecret();
     otpStore.set(`totp-setup:${user._id}`, { hash: null, expiresAt: Date.now() + 10 * 60 * 1000, attempts: 0, meta: { secret } });
 
-    const otpauthUrl = authenticator.keyuri(user.displayName, 'oifeel.', secret);
+    const otpauthUrl = otpGenerateURI({ issuer: 'oifeel.', label: user.displayName, secret });
     const qrCode = await QRCode.toDataURL(otpauthUrl);
 
     res.json({ secret, qrCode });
@@ -2131,12 +2158,16 @@ app.post('/api/auth/2fa/totp/start', requireAuth, async (req, res) => {
 
 app.post('/api/auth/2fa/totp/verify', requireAuth, async (req, res) => {
   try {
+    if (!totpReady()) {
+      return res.status(503).json({ error: 'TOTP indisponible côté serveur (dépendance otplib mal installée). Contacte l\'administrateur.' });
+    }
     const { code } = req.body;
     const pending = otpStore.get(`totp-setup:${req.session.user.id}`);
     if (!pending || pending.expiresAt < Date.now()) {
       return res.status(400).json({ error: 'Session d\'activation expirée, recommence.' });
     }
-    if (!authenticator.check(String(code || '').trim(), pending.meta.secret)) {
+    const checkResult = await otpVerify({ secret: pending.meta.secret, token: String(code || '').trim() });
+    if (!checkResult.valid) {
       return res.status(401).json({ error: 'Code invalide' });
     }
 
@@ -2212,7 +2243,6 @@ app.post('/api/auth/2fa/email/verify', requireAuth, async (req, res) => {
     res.status(500).json({ error: 'Erreur lors de l\'activation' });
   }
 });
-
 
 
 // ── Désactivation du 2FA (confirmation par mot de passe) ──────
