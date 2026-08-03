@@ -522,6 +522,398 @@
                 </div>
             </div>
         </div>
+        <div
+            id="accountOverlay"
+            class="account-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-label="gestion du compte"
+        >
+            <div class="account-panel-wrap">
+                <!-- Header -->
+                <div class="account-header">
+                    <div class="account-title">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        gestion du compte
+                    </div>
+                    <button class="account-close" id="accountCloseBtn" aria-label="fermer">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <line
+                                x1="18"
+                                y1="6"
+                                x2="6"
+                                y2="18"
+                            />
+                            <line
+                                x1="6"
+                                y1="6"
+                                x2="18"
+                                y2="18"
+                            />
+                        </svg>
+                    </button>
+                </div>
+                <!-- Onglets -->
+                <div class="account-tabs">
+                    <button class="account-tab active" data-tab="profil">profil</button>
+                    <button class="account-tab" data-tab="securite">sécurité</button>
+                    <button class="account-tab" data-tab="a2f">A2F</button>
+                    <button class="account-tab" data-tab="contenu">contenu</button>
+                    <button class="account-tab" data-tab="donnees">mes données</button>
+                </div>
+                <!-- Corps -->
+                <div class="account-body">
+                    <!-- ── PROFIL ── -->
+                    <div class="account-section active" id="account-tab-profil">
+                        <div class="account-avatar-row">
+                            <div class="account-avatar-preview" id="accountAvatarPreview">Avatar</div>
+                            <div class="account-avatar-inputs">
+                                <label class="account-label">avatar (un emoji)</label>
+                                <input
+                                    class="account-input"
+                                    id="accountAvatarInput"
+                                    maxlength="2"
+                                    placeholder="👤"
+                                    style="width:90px"
+                                >
+                            </div>
+                        </div>
+                        <div class="account-field">
+                            <label class="account-label" for="accountDisplayName">pseudo</label>
+                            <input
+                                class="account-input"
+                                id="accountDisplayName"
+                                type="text"
+                                maxlength="50"
+                            >
+                        </div>
+                        <div class="account-field">
+                            <label class="account-label" for="accountBio">
+                                bio
+                                <span style="opacity:.45">(optionnel)</span>
+                            </label>
+                            <textarea
+                                class="account-textarea"
+                                id="accountBio"
+                                maxlength="200"
+                                rows="3"
+                                placeholder="dis quelque chose sur toi…"
+                            ></textarea>
+                            <div class="account-char-count">
+                                <span id="accountBioCount">0</span>
+                                / 200
+                            </div>
+                        </div>
+                        <button class="account-btn account-btn-primary" id="saveProfileBtn">sauvegarder le profil</button>
+                        <div class="account-msg" id="profileMsg"></div>
+                    </div>
+                    <!-- ── SÉCURITÉ ── -->
+                    <div class="account-section" id="account-tab-securite">
+                        <p class="account-section-title">adresse e-mail</p>
+                        <p style="font-size:12.5px;opacity:.55;margin-bottom:14px">
+                            l'e-mail est optionnel. utilisé uniquement si tu souhaites recevoir des infos de oifeel.
+                        </p>
+                        <div class="account-field">
+                            <label class="account-label" for="accountEmail">adresse e-mail</label>
+                            <input
+                                class="account-input"
+                                id="accountEmail"
+                                type="email"
+                                placeholder="ton@email.com"
+                            >
+                        </div>
+                        <div class="account-toggle-row">
+                            <span class="account-toggle-label">recevoir des e-mails de oifeel.</span>
+                            <label class="account-switch">
+                                <input type="checkbox" id="accountEmailNotif">
+                                <span class="account-switch-slider"></span>
+                            </label>
+                        </div>
+                        <button class="account-btn account-btn-primary" id="saveEmailBtn">sauvegarder l'e-mail</button>
+                        <div class="account-msg" id="emailMsg"></div>
+                        <hr class="account-divider">
+                        <p class="account-section-title">changer le mot de passe</p>
+                        <div class="account-field">
+                            <label class="account-label" for="accountOldPwd">mot de passe actuel</label>
+                            <input
+                                class="account-input"
+                                id="accountOldPwd"
+                                type="password"
+                                autocomplete="current-password"
+                            >
+                        </div>
+                        <div class="account-field">
+                            <label class="account-label" for="accountNewPwd">nouveau mot de passe</label>
+                            <input
+                                class="account-input"
+                                id="accountNewPwd"
+                                type="password"
+                                autocomplete="new-password"
+                            >
+                        </div>
+                        <div class="account-field">
+                            <label class="account-label" for="accountNewPwd2">confirmer le nouveau mot de passe</label>
+                            <input
+                                class="account-input"
+                                id="accountNewPwd2"
+                                type="password"
+                                autocomplete="new-password"
+                            >
+                        </div>
+                        <button class="account-btn account-btn-primary" id="changePasswordBtn">changer le mot de passe</button>
+                        <div class="account-msg" id="passwordMsg"></div>
+                    </div>
+                    <!-- ── A2F ── -->
+                    <div class="account-section" id="account-tab-a2f">
+                        <div class="more-section" id="more-security">
+                            <div class="setting-row" id="twoFactorStatusRow">
+                                <div class="setting-row-label">
+                                    <p>double authentification (2FA)</p>
+                                    <small id="twoFactorStatusText">chargement…</small>
+                                </div>
+                                <button
+                                    id="twoFactorManageBtn"
+                                    class="auth-submit-btn"
+                                    type="button"
+                                    style="width:auto;padding:8px 16px"
+                                >gérer</button>
+                            </div>
+                            <div id="twoFactorPanel" class="twofa-panel hidden">
+                                <div id="twoFactorMethodChoice">
+                                    <p class="twofa-hint">choisis une méthode de vérification :</p>
+                                    <div class="twofa-methods">
+                                        <button type="button" class="twofa-method-btn" data-method="totp">
+                                            <strong>appli d'authentification</strong>
+                                            <small>Google Authenticator, Authy…</small>
+                                        </button>
+                                        <button type="button" class="twofa-method-btn" data-method="email">
+                                            <strong>email</strong>
+                                            <small>reçois un code par email à chaque connexion</small>
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- Étape TOTP -->
+                                <div id="twofaTotpSetup" class="twofa-setup hidden">
+                                    <p class="twofa-hint">scanne ce QR code avec ton appli d'authentification, puis entre le code généré :</p>
+                                    <img id="twofaTotpQr" alt="QR code TOTP" style="max-width:180px;display:block;margin:10px auto">
+                                    <p class="twofa-hint" style="text-align:center">
+                                        ou entre cette clé manuellement :
+                                        <code id="twofaTotpSecret"></code>
+                                    </p>
+                                    <input
+                                        id="twofaTotpCode"
+                                        class="auth-input"
+                                        type="text"
+                                        inputmode="numeric"
+                                        maxlength="6"
+                                        placeholder="123456"
+                                    >
+                                    <div class="auth-form-error" id="twofaTotpError" style="display:none"></div>
+                                    <div class="auth-form-btns">
+                                        <button type="button" class="auth-submit-btn" id="twofaTotpConfirm">activer</button>
+                                        <button type="button" class="auth-cancel-btn" id="twofaTotpCancel">annuler</button>
+                                    </div>
+                                </div>
+                                <!-- Étape Email -->
+                                <div id="twofaEmailSetup" class="twofa-setup hidden">
+                                    <p class="twofa-hint">adresse email à utiliser :</p>
+                                    <input
+                                        id="twofaEmailInput"
+                                        class="auth-input"
+                                        type="email"
+                                        placeholder="ton@email.com"
+                                    >
+                                    <button
+                                        type="button"
+                                        class="auth-submit-btn"
+                                        id="twofaEmailSend"
+                                        style="margin-top:8px"
+                                    >envoyer le code</button>
+                                    <div id="twofaEmailCodeStep" class="hidden" style="margin-top:12px">
+                                        <input
+                                            id="twofaEmailCode"
+                                            class="auth-input"
+                                            type="text"
+                                            inputmode="numeric"
+                                            maxlength="6"
+                                            placeholder="123456"
+                                        >
+                                        <div class="auth-form-error" id="twofaEmailError" style="display:none"></div>
+                                        <div class="auth-form-btns">
+                                            <button type="button" class="auth-submit-btn" id="twofaEmailConfirm">activer</button>
+                                            <button type="button" class="auth-cancel-btn" id="twofaEmailCancel">annuler</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Désactivation -->
+                                <div id="twofaDisableSetup" class="twofa-setup hidden">
+                                    <p class="twofa-hint">confirme ton mot de passe pour désactiver le 2FA :</p>
+                                    <input
+                                        id="twofaDisablePassword"
+                                        class="auth-input"
+                                        type="password"
+                                        placeholder="mot de passe"
+                                    >
+                                    <div class="auth-form-error" id="twofaDisableError" style="display:none"></div>
+                                    <div class="auth-form-btns">
+                                        <button type="button" class="auth-submit-btn" id="twofaDisableConfirm">désactiver</button>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    id="twoFactorClosePanel"
+                                    class="auth-cancel-btn"
+                                    style="margin-top:14px"
+                                >fermer</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ── CONTENU ── -->
+                    <div class="account-section" id="account-tab-contenu">
+                        <p class="account-section-title">posts générés par IA</p>
+                        <p style="font-size:12.5px;opacity:.55;margin-bottom:14px">
+                            certains posts sont rédigés avec l'assistant IA intégré et portent le tag "généré par IA".
+              choisis comment tu veux les voir apparaître dans le fil.
+                        </p>
+                        <div class="account-radio-group" id="aiPrefGroup">
+                            <label class="account-radio-card">
+                                <input type="radio" name="aiPref" value="allow">
+                                <div>
+                                    <span class="account-radio-title">autoriser</span>
+                                    <span class="account-radio-desc">les posts IA s'affichent normalement, avec leur tag.</span>
+                                </div>
+                            </label>
+                            <label class="account-radio-card">
+                                <input type="radio" name="aiPref" value="avoid">
+                                <div>
+                                    <span class="account-radio-title">éviter</span>
+                                    <span class="account-radio-desc">les posts IA sont flous dans le fil, à révéler au clic.</span>
+                                </div>
+                            </label>
+                            <label class="account-radio-card">
+                                <input type="radio" name="aiPref" value="block">
+                                <div>
+                                    <span class="account-radio-title">bloquer totalement</span>
+                                    <span class="account-radio-desc">les posts IA n'apparaissent jamais dans ton fil.</span>
+                                </div>
+                            </label>
+                        </div>
+                        <button class="account-btn account-btn-primary" id="saveAiPrefBtn" style="margin-top:14px">sauvegarder</button>
+                        <div class="account-msg" id="aiPrefMsg"></div>
+                    </div>
+                    <!-- ── DONNÉES ── -->
+                    <div class="account-section" id="account-tab-donnees">
+                        <p class="account-section-title">données collectées</p>
+                        <ul class="account-data-list">
+                            <li>pseudo, avatar, bio, posts (public)</li>
+                            <li>adresse IP,email[si fourni] (pour la modération, données supprimées après 30 jours)</li>
+                        </ul>
+                        <hr class="account-divider">
+                        <p class="account-section-title">télécharger mes données (fichier .json)</p>
+                        <p style="font-size:12.5px;opacity:.55;margin-bottom:12px"></p>
+                        <button class="account-btn account-btn-secondary" id="exportDataBtn">télécharger mes données</button>
+                        <div class="account-msg" id="exportMsg"></div>
+                        <hr class="account-divider">
+                        <p class="account-section-title">documents légaux</p>
+                        <div class="account-legal-links">
+                            <a class="account-legal-link" href="/app/legal/TERMS_OF_SERVICE.html" target="_blank">
+                                conditions générales d'utilisation
+                                <svg
+                                    style="margin-left:auto;opacity:.4"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="13"
+                                    height="13"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                                    <polyline points="15 3 21 3 21 9"/>
+                                    <line
+                                        x1="10"
+                                        y1="14"
+                                        x2="21"
+                                        y2="3"
+                                    />
+                                </svg>
+                            </a>
+                            <a class="account-legal-link" href="/app/legal/PRIVACY_POLICY.html" target="_blank">
+                                politique de confidentialité
+                                <svg
+                                    style="margin-left:auto;opacity:.4"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="13"
+                                    height="13"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                >
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                                    <polyline points="15 3 21 3 21 9"/>
+                                    <line
+                                        x1="10"
+                                        y1="14"
+                                        x2="21"
+                                        y2="3"
+                                    />
+                                </svg>
+                            </a>
+                        </div>
+                        <hr class="account-divider">
+                        <div class="account-danger-zone">
+                            <p class="account-section-title">zone dangereuse</p>
+                            <p class="account-danger-hint">
+                                la suppression est définitive. tes posts resteront publiés.
+                            </p>
+                            <button class="account-btn account-btn-danger" id="deleteAccountBtn">supprimer mon compte</button>
+                            <div class="account-delete-confirm" id="deleteConfirmBox">
+                                <p>saisis ton mot de passe pour confirmer :</p>
+                                <input
+                                    class="account-input"
+                                    id="deleteConfirmPwd"
+                                    type="password"
+                                    placeholder="mot de passe"
+                                    style="margin-bottom:0"
+                                >
+                                <div class="account-delete-actions">
+                                    <button class="account-btn account-btn-ghost" id="cancelDeleteBtn">annuler</button>
+                                    <button class="account-btn account-btn-danger" id="confirmDeleteBtn">supprimer</button>
+                                </div>
+                            </div>
+                            <div class="account-msg" id="deleteMsg"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /account-body -->
+            </div>
+            <!-- /account-panel-wrap -->
+        </div>
+        <!-- /accountOverlay -->
         <nav id="nav" class="menu" role="navigation">
             <a class="hoverable link active" id="home">
                 <svg
@@ -616,7 +1008,8 @@
         </nav>
         <section id="home" class="tab active">
             <!-- Barre de sélection Posts / Stories -->
-            <div id="feed-selector" class="sort-bar">
+            <div id="feed-selector" class="sort-bar" role="tablist" aria-label="Sélection du feed">
+                <span class="feed-selector__indicator"></span>
                 <button class="sort-btn sort-btn--active" data-feed="posts" data-i18n="home_posts">posts</button>
                 <button class="sort-btn" data-feed="stories" data-i18n="home_stories">stories</button>
             </div>
@@ -1265,109 +1658,6 @@
                         <option value="avoid" data-i18n="ai_pref_avoid">afficher mais flouter le contenu</option>
                         <option value="block" data-i18n="ai_pref_block">masquer</option>
                     </select>
-                </div>
-            </div>
-            <div class="more-section" id="more-security">
-                <h2 class="more-section-title">sécurité</h2>
-                <div class="setting-row" id="twoFactorStatusRow">
-                    <div class="setting-row-label">
-                        <p>double authentification (2FA)</p>
-                        <small id="twoFactorStatusText">chargement…</small>
-                    </div>
-                    <button
-                        id="twoFactorManageBtn"
-                        class="auth-submit-btn"
-                        type="button"
-                        style="width:auto;padding:8px 16px"
-                    >gérer</button>
-                </div>
-                <div id="twoFactorPanel" class="twofa-panel hidden">
-                    <div id="twoFactorMethodChoice">
-                        <p class="twofa-hint">choisis une méthode de vérification :</p>
-                        <div class="twofa-methods">
-                            <button type="button" class="twofa-method-btn" data-method="totp">
-                                <strong>appli d'authentification</strong>
-                                <small>Google Authenticator, Authy…</small>
-                            </button>
-                            <button type="button" class="twofa-method-btn" data-method="email">
-                                <strong>email</strong>
-                                <small>reçois un code par email à chaque connexion</small>
-                            </button>
-                        </div>
-                    </div>
-                    <!-- Étape TOTP -->
-                    <div id="twofaTotpSetup" class="twofa-setup hidden">
-                        <p class="twofa-hint">scanne ce QR code avec ton appli d'authentification, puis entre le code généré :</p>
-                        <img id="twofaTotpQr" alt="QR code TOTP" style="max-width:180px;display:block;margin:10px auto">
-                        <p class="twofa-hint" style="text-align:center">ou entre cette clé manuellement :
-                            <code id="twofaTotpSecret"></code>
-                        </p>
-                        <input
-                            id="twofaTotpCode"
-                            class="auth-input"
-                            type="text"
-                            inputmode="numeric"
-                            maxlength="6"
-                            placeholder="123456"
-                        >
-                        <div class="auth-form-error" id="twofaTotpError" style="display:none"></div>
-                        <div class="auth-form-btns">
-                            <button type="button" class="auth-submit-btn" id="twofaTotpConfirm">activer</button>
-                            <button type="button" class="auth-cancel-btn" id="twofaTotpCancel">annuler</button>
-                        </div>
-                    </div>
-                    <!-- Étape Email -->
-                    <div id="twofaEmailSetup" class="twofa-setup hidden">
-                        <p class="twofa-hint">adresse email à utiliser :</p>
-                        <input
-                            id="twofaEmailInput"
-                            class="auth-input"
-                            type="email"
-                            placeholder="ton@email.com"
-                        >
-                        <button
-                            type="button"
-                            class="auth-submit-btn"
-                            id="twofaEmailSend"
-                            style="margin-top:8px"
-                        >envoyer le code</button>
-                        <div id="twofaEmailCodeStep" class="hidden" style="margin-top:12px">
-                            <input
-                                id="twofaEmailCode"
-                                class="auth-input"
-                                type="text"
-                                inputmode="numeric"
-                                maxlength="6"
-                                placeholder="123456"
-                            >
-                            <div class="auth-form-error" id="twofaEmailError" style="display:none"></div>
-                            <div class="auth-form-btns">
-                                <button type="button" class="auth-submit-btn" id="twofaEmailConfirm">activer</button>
-                                <button type="button" class="auth-cancel-btn" id="twofaEmailCancel">annuler</button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Désactivation -->
-                    <div id="twofaDisableSetup" class="twofa-setup hidden">
-                        <p class="twofa-hint">confirme ton mot de passe pour désactiver le 2FA :</p>
-                        <input
-                            id="twofaDisablePassword"
-                            class="auth-input"
-                            type="password"
-                            placeholder="mot de passe"
-                        >
-                        <div class="auth-form-error" id="twofaDisableError" style="display:none"></div>
-                        <div class="auth-form-btns">
-                            <button type="button" class="auth-submit-btn" id="twofaDisableConfirm">désactiver</button>
-                            <button type="button" class="auth-cancel-btn" id="twofaDisableCancel">annuler</button>
-                        </div>
-                    </div>
-                    <button
-                        type="button"
-                        id="twoFactorClosePanel"
-                        class="auth-cancel-btn"
-                        style="margin-top:14px"
-                    >fermer</button>
                 </div>
             </div>
             <div class="more-section" id="more-legal">

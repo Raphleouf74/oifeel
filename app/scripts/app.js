@@ -397,6 +397,7 @@ const nav = document.querySelector('nav');
 const header = document.querySelector('header');
 const profileheader = document.getElementById('accountheader');
 const tabSections = document.querySelectorAll('section.tab');
+const feedSelector = document.getElementById('feed-selector');
 
 // Chaque section scrollable doit déclencher l'effet de scroll du header
 if (tabSections.length) {
@@ -411,11 +412,13 @@ if (tabSections.length) {
                 profileheader.classList.add('scrolled');
                 nav.classList.add('scrolled');
                 sortbar.classList.add('scrolled');
+                feedSelector.classList.add('scrolled');
             } else {
                 header.classList.remove('scrolled');
                 profileheader.classList.remove('scrolled');
                 nav.classList.remove('scrolled');
                 sortbar.classList.remove('scrolled');
+                feedSelector.classList.remove('scrolled');
             }
         });
     });
@@ -469,7 +472,7 @@ async function checkSiteVersion() {
         localStorage.setItem('siteVersion', latest);
         localStorage.setItem('buildVersion', latestBuild);
 
-        console.log(`%c Version du site: ${latest} (${latestBuild})`, "color: blue; font-size: 16px;");
+        console.log(`%c version du site: ${latest} (${latestBuild})`, "color: blue; font-size: 16px;");
     } catch (error) {
         console.error('erreur lors de la vérification de la version du site:', error);
         showFeedback("error", "fb_error_verify_version");
@@ -1263,7 +1266,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             displayMood(offlineMood)
             showFeedback("error", "tu n'es pas connecté/e à internet. vérifie ta connexion puis réessaye");
-            console.log("tu es hors ligne");
+            
         }
     }, 4500);
 });
@@ -2276,7 +2279,6 @@ export async function loginUser(identifier, password) {
         if (errorData.banned) {
             showBanScreen(errorData);
             throw new Error('Account banned');
-            console.log('User is banned:', errorData);
         }
         throw new Error(txt || 'Login failed');
     }
@@ -2418,7 +2420,6 @@ export async function logout() {
 }
 
 function showBanScreen(banData) {
-    console.log('🚫 Affichage écran de ban:', banData);
     const banOverlay = document.getElementById('ban-overlay');
     const banReason = document.getElementById('ban-reason');
     const banUntil = document.getElementById('ban-until');
@@ -2581,7 +2582,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 finalizeLoggedInUI(result, usernameInput.value);
             }
         } catch (err) {
-            alert(err.message);
+            showFeedback(err.message || 'Erreur de connexion', 'error');
         }
     });
 
@@ -2690,7 +2691,6 @@ document.addEventListener('DOMContentLoaded', () => {
             saveBtn.addEventListener('click', () => {
                 const newProfile = { displayName: displayInput.value || undefined, emoji: emojiInput.value || undefined };
                 saveProfileLocal(newProfile);
-                alert('Profil enregistré');
             });
         } catch (e) { console.error('profile inject error', e); }
     }
@@ -2717,213 +2717,7 @@ function injectStyles() {
 }
 
 
-// ============================================================
-// HTML
-// ============================================================
-function injectHTML() {
-    if (document.getElementById('accountOverlay')) return;
 
-    document.body.insertAdjacentHTML('beforeend', `
-    <div id="accountOverlay" class="account-overlay" role="dialog" aria-modal="true" aria-label="gestion du compte">
-      <div class="account-panel-wrap">
-
-        <!-- Header -->
-        <div class="account-header">
-          <div class="account-title">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
-              <circle cx="12" cy="12" r="3"/>
-            </svg>
-            gestion du compte
-          </div>
-          <button class="account-close" id="accountCloseBtn" aria-label="fermer">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
-
-        <!-- Onglets -->
-        <div class="account-tabs">
-          <button class="account-tab active" data-tab="profil">profil</button>
-          <button class="account-tab" data-tab="securite">sécurité</button>
-          <button class="account-tab" data-tab="contenu">contenu</button>
-          <button class="account-tab" data-tab="donnees">mes données</button>
-        </div>
-
-        <!-- Corps -->
-        <div class="account-body">
-
-          <!-- ── PROFIL ── -->
-          <div class="account-section active" id="account-tab-profil">
-            <div class="account-avatar-row">
-              <div class="account-avatar-preview" id="accountAvatarPreview">Avatar</div>
-              <div class="account-avatar-inputs">
-                <label class="account-label">avatar (un emoji)</label>
-                <input class="account-input" id="accountAvatarInput" maxlength="2" placeholder="👤" style="width:90px">
-              </div>
-            </div>
-
-            <div class="account-field">
-              <label class="account-label" for="accountDisplayName">pseudo</label>
-              <input class="account-input" id="accountDisplayName" type="text" maxlength="50">
-            </div>
-
-            <div class="account-field">
-              <label class="account-label" for="accountBio">bio <span style="opacity:.45">(optionnel)</span></label>
-              <textarea class="account-textarea" id="accountBio" maxlength="200" rows="3" placeholder="dis quelque chose sur toi…"></textarea>
-              <div class="account-char-count"><span id="accountBioCount">0</span> / 200</div>
-            </div>
-
-            <button class="account-btn account-btn-primary" id="saveProfileBtn">sauvegarder le profil</button>
-            <div class="account-msg" id="profileMsg"></div>
-          </div>
-
-          <!-- ── SÉCURITÉ ── -->
-          <div class="account-section" id="account-tab-securite">
-
-            <p class="account-section-title">adresse e-mail</p>
-            <p style="font-size:12.5px;opacity:.55;margin-bottom:14px">
-              l'e-mail est optionnel. utilisé uniquement si tu souhaites recevoir des infos de oifeel.
-            </p>
-
-            <div class="account-field">
-              <label class="account-label" for="accountEmail">adresse e-mail</label>
-              <input class="account-input" id="accountEmail" type="email" placeholder="ton@email.com">
-            </div>
-
-            <div class="account-toggle-row">
-              <span class="account-toggle-label">recevoir des e-mails de oifeel.</span>
-              <label class="account-switch">
-                <input type="checkbox" id="accountEmailNotif">
-                <span class="account-switch-slider"></span>
-              </label>
-            </div>
-
-            <button class="account-btn account-btn-primary" id="saveEmailBtn">sauvegarder l'e-mail</button>
-            <div class="account-msg" id="emailMsg"></div>
-
-            <hr class="account-divider">
-
-            <p class="account-section-title">changer le mot de passe</p>
-
-            <div class="account-field">
-              <label class="account-label" for="accountOldPwd">mot de passe actuel</label>
-              <input class="account-input" id="accountOldPwd" type="password" autocomplete="current-password">
-            </div>
-            <div class="account-field">
-              <label class="account-label" for="accountNewPwd">nouveau mot de passe</label>
-              <input class="account-input" id="accountNewPwd" type="password" autocomplete="new-password">
-            </div>
-            <div class="account-field">
-              <label class="account-label" for="accountNewPwd2">confirmer le nouveau mot de passe</label>
-              <input class="account-input" id="accountNewPwd2" type="password" autocomplete="new-password">
-            </div>
-
-            <button class="account-btn account-btn-primary" id="changePasswordBtn">changer le mot de passe</button>
-            <div class="account-msg" id="passwordMsg"></div>
-          </div>
-
-          <!-- ── CONTENU ── -->
-          <div class="account-section" id="account-tab-contenu">
-
-            <p class="account-section-title">posts générés par IA</p>
-            <p style="font-size:12.5px;opacity:.55;margin-bottom:14px">
-              certains posts sont rédigés avec l'assistant IA intégré et portent le tag "généré par IA".
-              choisis comment tu veux les voir apparaître dans le fil.
-            </p>
-
-            <div class="account-radio-group" id="aiPrefGroup">
-              <label class="account-radio-card">
-                <input type="radio" name="aiPref" value="allow">
-                <div>
-                  <span class="account-radio-title">autoriser</span>
-                  <span class="account-radio-desc">les posts IA s'affichent normalement, avec leur tag.</span>
-                </div>
-              </label>
-              <label class="account-radio-card">
-                <input type="radio" name="aiPref" value="avoid">
-                <div>
-                  <span class="account-radio-title">éviter</span>
-                  <span class="account-radio-desc">les posts IA sont flous dans le fil, à révéler au clic.</span>
-                </div>
-              </label>
-              <label class="account-radio-card">
-                <input type="radio" name="aiPref" value="block">
-                <div>
-                  <span class="account-radio-title">bloquer totalement</span>
-                  <span class="account-radio-desc">les posts IA n'apparaissent jamais dans ton fil.</span>
-                </div>
-              </label>
-            </div>
-
-            <button class="account-btn account-btn-primary" id="saveAiPrefBtn" style="margin-top:14px">sauvegarder</button>
-            <div class="account-msg" id="aiPrefMsg"></div>
-          </div>
-
-          <!-- ── DONNÉES ── -->
-          <div class="account-section" id="account-tab-donnees">
-
-            <p class="account-section-title">données collectées</p>
-            <ul class="account-data-list">
-              <li>pseudo, avatar (public)</li>
-              <li>bio (publique)</li>
-              <li>tes posts publiés</li>
-              <li>adresse IP à la publication — supprimée après 30 jours, usage sécurité uniquement</li>
-              <li>e-mail (optionnel, si fourni)</li>
-            </ul>
-
-            <hr class="account-divider">
-
-            <p class="account-section-title">télécharger mes données (fichier .json)</p>
-            <p style="font-size:12.5px;opacity:.55;margin-bottom:12px">
-              télécharge toutes tes données au format JSON (conformité RGPD).
-              les adresses IP ne sont pas incluses.
-            </p>
-            <button class="account-btn account-btn-secondary" id="exportDataBtn">télécharger mes données</button>
-            <div class="account-msg" id="exportMsg"></div>
-
-            <hr class="account-divider">
-
-            <p class="account-section-title">documents légaux</p>
-            <div class="account-legal-links">
-              <a class="account-legal-link" href="/app/legal/TERMS_OF_SERVICE.html" target="_blank">
-                conditions générales d'utilisation
-                <svg style="margin-left:auto;opacity:.4" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              </a>
-              <a class="account-legal-link" href="/app/legal/PRIVACY_POLICY.html" target="_blank">
-                politique de confidentialité
-                <svg style="margin-left:auto;opacity:.4" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              </a>
-            </div>
-
-            <hr class="account-divider">
-
-            <div class="account-danger-zone">
-              <p class="account-section-title">zone dangereuse</p>
-              <p class="account-danger-hint">
-                la suppression est définitive. tes posts resteront publiés.
-              </p>
-              <button class="account-btn account-btn-danger" id="deleteAccountBtn">supprimer mon compte</button>
-              <div class="account-delete-confirm" id="deleteConfirmBox">
-                <p>saisis ton mot de passe pour confirmer :</p>
-                <input class="account-input" id="deleteConfirmPwd" type="password" placeholder="mot de passe" style="margin-bottom:0">
-                <div class="account-delete-actions">
-                  <button class="account-btn account-btn-ghost" id="cancelDeleteBtn">annuler</button>
-                  <button class="account-btn account-btn-danger" id="confirmDeleteBtn">supprimer</button>
-                </div>
-              </div>
-              <div class="account-msg" id="deleteMsg"></div>
-            </div>
-          </div>
-
-        </div><!-- /account-body -->
-      </div><!-- /account-panel-wrap -->
-    </div><!-- /accountOverlay -->
-  `);
-}
 
 
 // ============================================================
@@ -3068,10 +2862,8 @@ async function saveEmail() {
             headers,
             body: JSON.stringify({ email, emailNotifications: emailNotif })
         });
-        console.log('Status:', res.status);
 
         const data = await res.json();
-        console.log('Réponse API:', data);
         if (!res.ok) return showMsg('emailMsg', data.error || 'une erreur est survenue de notre côté lors de la sauvegarde.', 'error');
 
         showMsg('emailMsg', 'e-mail mis à jour avec succès.', 'success');
@@ -3261,7 +3053,6 @@ window.openAccountModal = openAccountModal;
 // ============================================================
 function init() {
     injectStyles();
-    injectHTML();
 
     // ── Fermer ───────────────────────────────────────────────
     document.getElementById('accountCloseBtn')?.addEventListener('click', closeAccountModal);
@@ -4055,7 +3846,6 @@ export async function ensureKeyPair(userId) {
 
     await _dbSet(`keypair_${userId}`, { publicKeyJwk, privateKeyJwk });
 
-    console.log('🔑 Nouvelle paire E2E générée pour', userId);
     return { publicKey: keyPair.publicKey, privateKey: keyPair.privateKey, publicKeyB64: _jwkToB64(publicKeyJwk) };
 }
 
@@ -4085,7 +3875,6 @@ export async function registerPublicKey(publicKeyB64, maxRetries = 5) {
             });
 
             if (res.ok) {
-                console.log(`✅ Clé E2E enregistrée sur le serveur (tentative ${attempt})`);
                 return true;
             }
 
@@ -4425,20 +4214,36 @@ function _initFeedSelector() {
     const feedSelector = document.getElementById('feed-selector');
     const storiesContainer = document.getElementById('stories-container');
     const postsContainer = document.getElementById('posts-container');
+    const buttons = feedSelector ? Array.from(feedSelector.querySelectorAll('.sort-btn')) : [];
+    const indicator = feedSelector ? feedSelector.querySelector('.feed-selector__indicator') : null;
 
-    if (!feedSelector) return;
+    if (!feedSelector || !buttons.length || !indicator) return;
 
-    feedSelector.querySelectorAll('.sort-btn').forEach(btn => {
+    const updateIndicator = () => {
+        const activeBtn = feedSelector.querySelector('.sort-btn--active');
+
+        if (!activeBtn) return;
+
+        const left = activeBtn.offsetLeft + 25;
+        const width = Math.max(activeBtn.offsetWidth - 50,16);
+
+        indicator.style.left = `${left}px`;
+        indicator.style.width = `${width}px`;
+    };
+
+    buttons.forEach(btn => {
         btn.addEventListener('click', () => {
             const feed = btn.dataset.feed;
 
             // Mettre à jour l'état actif du bouton
-            feedSelector.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('sort-btn--active'));
+            buttons.forEach(b => b.classList.remove('sort-btn--active'));
             btn.classList.add('sort-btn--active');
+            updateIndicator();
 
             // Afficher/masquer les containers
             if (feed === 'posts') {
                 postsContainer.classList.remove('hidden');
+                
                 storiesContainer.classList.add('hidden');
             } else if (feed === 'stories') {
                 storiesContainer.classList.remove('hidden');
@@ -4446,6 +4251,9 @@ function _initFeedSelector() {
             }
         });
     });
+
+    updateIndicator();
+    window.addEventListener('resize', updateIndicator);
 }
 
 // ─── Observer pour mettre à jour l'ordre original quand le feed change ─────
@@ -5005,12 +4813,10 @@ async function _initE2E(userId) {
 
 async function _retryE2ERegistration(userId, publicKeyB64) {
     if (_e2eReady) return;
-    console.log('🔁 E2E retry registration…');
     const ok = await registerPublicKey(publicKeyB64, 3);
     if (ok) {
         _e2eReady = true;
         invalidatePubKeyCache(userId);
-        console.log('✅ E2E clé enregistrée après retry');
         // Mettre à jour le badge dans la conv ouverte
         if (currentConversation) _showE2EBadge(currentConversation.otherUserId);
     } else {
@@ -5021,7 +4827,7 @@ async function _retryE2ERegistration(userId, publicKeyB64) {
 // ─── Init messages ────────────────────────────────────────────
 async function initMessages() {
     const user = await getCurrentUser();
-    if (!user) { console.log('⚠️ messages require login'); return; }
+    if (!user) {return; }
 
     currentUserId = user.id;
     if (window._messagesInitialized) return;
@@ -5580,7 +5386,7 @@ async function _tryDecrypt(msg, convId) {
 
 // ─── Partage de post ──────────────────────────────────────────
 window.sharePostInMessage = async function (postId, otherUserId) {
-    if (!currentUserId) { alert('Connexion requise'); return; }
+    if (!currentUserId) { showFeedback('Connexion requise', 'error'); return; }
     try {
         const res = await fetch(`${API}conversations/${otherUserId}/messages`, {
             method: 'POST',
@@ -5588,7 +5394,7 @@ window.sharePostInMessage = async function (postId, otherUserId) {
             credentials: 'include',
             body: JSON.stringify({ sharedPostId: postId })
         });
-        if (res.ok) alert('Post partagé!');
+        if (res.ok) showFeedback('success', 'Post partagé dans la conversation');
     } catch (err) { console.error('Share error:', err); }
 };
 
@@ -6184,7 +5990,6 @@ async function injectSuggestionsBanner() {
     try {
         const token = localStorage.getItem('moodshare_token');
         if (!token) {
-            console.log('🔒 Pas connecté, pas de suggestions');
             return;
         }
 
@@ -6663,7 +6468,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     emailSetup.classList.remove('hidden');
                 }
             } catch (err) {
-                alert(err.message);
+                showFeedback('error', err.message || 'Erreur réseau');
                 methodChoice.classList.remove('hidden');
             }
         });

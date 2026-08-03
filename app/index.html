@@ -584,7 +584,8 @@
         </nav>
         <section id="home" class="tab active">
             <!-- Barre de sélection Posts / Stories -->
-            <div id="feed-selector" class="sort-bar">
+            <div id="feed-selector" class="sort-bar" role="tablist" aria-label="Sélection du feed">
+                <span class="feed-selector__indicator"></span>
                 <button class="sort-btn sort-btn--active" data-feed="posts" data-i18n="home_posts">posts</button>
                 <button class="sort-btn" data-feed="stories" data-i18n="home_stories">stories</button>
             </div>
