@@ -354,13 +354,6 @@
   justify-content: center;
 }
 
-#MoreAccSettings a .hoverable {
-  width: 80%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-}
-
 #MoreAccSettings #image svg {
   stroke: white;
 }
@@ -2022,70 +2015,6 @@ a.download-apk-btn:hover {
     width: 100%;
     border: none;
     cursor: pointer;
-  }
-  #MoreAccSettings {
-    width: 70%;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  #MoreAccSettings a {
-    width: 100%;
-    border: none;
-    border: 3px black solid;
-    height: 250px;
-    overflow: hidden;
-    padding: 0;
-    background-color: transparent;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    flex-direction: column;
-    border-radius: 5px;
-    font-size: 1.4rem;
-    text-decoration: none;
-  }
-  #MoreAccSettings div {
-    width: 100%;
-    height: 75%;
-    display: flex;
-    align-items: center;
-    justify-content: left;
-    background: linear-gradient(
-      130deg,
-      rgb(50, 150, 255, 0.4),
-      black,
-      rgb(50, 255, 150, 0.4)
-    );
-  }
-  #MoreAccSettings div svg {
-    height: 80%;
-    width: auto;
-    margin-left: 10%;
-  }
-  #MoreAccSettings a:hover div svg {
-    transform: scale(1.3) translateX(25px);
-  }
-  #MoreAccSettings a button {
-    width: 100%;
-    font-size: 1.4rem;
-    height: 25%;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    border: none;
-    background-color: black;
-    color: white;
-  }
-  #MoreAccSettings a:hover {
-    transform: translateY(-5px);
-    background: black;
-    color: white;
-  }
-  #MoreAccSettings a:hover button {
-    color: white;
   }
   .language-picker {
     position: relative;

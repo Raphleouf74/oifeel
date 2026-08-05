@@ -42,7 +42,7 @@ if (-not $gitCommand) {
 }
 
 if (-not $gitCommand) {
-    Write-Host "Git n'est pas installé ou n'est pas dans votre PATH. Installez Git pour Windows puis relancez ce script." -ForegroundColor Red
+    Write-Host "Git n'est pas installe ou n'est pas dans votre PATH. Installez Git pour Windows puis relancez ce script." -ForegroundColor Red
     exit 1
 }
 
@@ -66,7 +66,7 @@ if ([string]::IsNullOrWhiteSpace($currentBranch) -or $currentBranch -eq "HEAD") 
 }
 
 if ([string]::IsNullOrWhiteSpace($currentBranch) -or $currentBranch -eq "HEAD") {
-    Write-Host "Impossible de déterminer la branche Git active. Assurez-vous d'exécuter ce script depuis un dépôt Git valide avec une branche locale." -ForegroundColor Red
+    Write-Host "Impossible de determiner la branche Git active. Assurez-vous d'executer ce script depuis un depôt Git valide avec une branche locale." -ForegroundColor Red
     exit 1
 }
 
@@ -77,58 +77,57 @@ if ($currentBranch -ne "main") {
 
 if ([string]::IsNullOrWhiteSpace($newVersion) -or $newVersion -eq "-") {
     $newVersion = $currentVersion
-    Write-Host "Version inchangée: $currentVersion"
+    Write-Host "Version inchangee: $currentVersion"
 }
 if ([string]::IsNullOrWhiteSpace($newBuild) -or $newBuild -eq "-") {
     $newBuild = $currentBuild
-    Write-Host "Build inchangé: $currentBuild"
+    Write-Host "Build inchange: $currentBuild"
 }
 else {
     $json.version = $newVersion
     $json.build = $newBuild
     $json | ConvertTo-Json -Depth 10 | Set-Content $versionFile -Encoding UTF8
-    Write-Host "version.json mis à jour à la version $newVersion (build $newBuild)"
+    Write-Host "version.json mis a jour a la version $newVersion (build $newBuild)"
 }
 Write-Host "Git pull en cours..."
-$hasCommits = (& $gitExe rev-parse --verify HEAD 2>$null)
 if ($LASTEXITCODE -eq 0) {
     $pullResult = (& $gitExe pull origin $currentBranch 2>&1)
     if ($pullResult -match "Merge automatique n'a pas abouti") {
-        Write-Host "⚠️ Des conflits de merge ont été détectés ! Résolution en cours..." -ForegroundColor Yellow
+        Write-Host "⚠️ Des conflits de merge ont ete detectes ! Resolution en cours..." -ForegroundColor Yellow
         
-        $mergeMessage = "Merge la branche main pour synchroniser avec les changements à distance"
+        $mergeMessage = "Merge la branche main pour synchroniser avec les changements a distance"
         Set-Content -Path ".git/MERGE_MSG" -Value $mergeMessage
         
         & $gitExe add .
         & $gitExe commit -m "$mergeMessage"
         
         if ($LASTEXITCODE -ne 0) {
-            Write-Host "❌ Merge échoué! Merci de résoudre les conflits manuellement" -ForegroundColor Red
+            Write-Host "❌ Merge echoue! Merci de resoudre les conflits manuellement" -ForegroundColor Red
             exit 1
         }
     }
 }
 else {
-    Write-Host "Aucun commit local détecté. Le script va créer le premier commit puis pousser vers origin/$currentBranch."
+    Write-Host "Aucun commit local detecte. Le script va creer le premier commit puis pousser vers origin/$currentBranch."
 }
 
 $json.version = $newVersion
 $json.build = $newBuild
 $json | ConvertTo-Json -Depth 10 | Set-Content $versionFile -Encoding UTF8
-Write-Host "version.json mis à jour → v$newVersion (build $newBuild)"
+Write-Host "version.json mis a jour → v$newVersion (build $newBuild)"
 
 & $gitExe add .
 & $gitExe commit -m "V$newVersion (build $newBuild)" 2>$null
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "Rien à commit."
+    Write-Host "Rien a commit."
 }
 
 & $gitExe push origin $currentBranch
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "Push échoué!"
+    Write-Host "Push echoue!"
     exit 1
 }
-Write-Host "Changements poussés avec succès !."
+Write-Host "Changements pousses avec succes !."
 if ($mode -eq "release") {
     Write-Host ""
     Write-Host "Creating GitHub release..."
@@ -144,10 +143,10 @@ $changelog
 "@
     $releaseFile = "RELEASE_NOTES_$tagName.txt"
     $releaseNotes | Out-File -Encoding UTF8 $releaseFile
-    Write-Host "Release notes enregistré à $releaseFile"
+    Write-Host "Release notes enregistre a $releaseFile"
 }
 Write-Host ""
-Write-Host "🎉 Operation effectue avec succès !"
+Write-Host "🎉 Operation effectue avec succes !"
 Write-Host "=============================="
 Write-Host "Version: $newVersion"
 Write-Host "Build: $newBuild"

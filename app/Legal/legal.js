@@ -32,6 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const juris = '%%JURISDICTION%%';
   // If you left placeholders, nothing harmful — editor can replace these.
   // Attach controls:
-  attachControls('printBtn','downloadBtn','Conditions_Générales_MoodShare');
+  attachControls('printBtn','downloadBtn','Conditions_Générales_oifeel');
   attachControls('printBtn2','downloadBtn2','Politique_de_confidentialité_oifeel');
 });

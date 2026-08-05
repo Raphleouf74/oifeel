@@ -1184,20 +1184,7 @@ section::-webkit-scrollbar-track {
     transform-origin: center;
     border: 1px solid black;
   }
-  #loader {
-    position: fixed;
-    inset: 0;
-    z-index: 99999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #5f95b9;
-    opacity: 1;
-    visibility: visible;
-    transition:
-      opacity 0.6s ease,
-      visibility 0.6s;
-  }
+
   :root {
     --accent: #5f95b9;
     --accent2: #161861;
@@ -1252,7 +1239,6 @@ section::-webkit-scrollbar-track {
       opacity 0.2s ease,
       transform 0.2s ease,
       box-shadow 0.2s ease;
-    border-radius: 5px !important;
   }
 }
 

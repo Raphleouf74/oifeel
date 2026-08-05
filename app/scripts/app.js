@@ -12,7 +12,7 @@ let _aiPostsPreference = localStorage.getItem('aiPostsPreference') || 'allow';
 
 async function loadAiPostsPreference() {
     try {
-        const token = localStorage.getItem('moodshare_token');
+        const token = localStorage.getItem('oifeel_token');
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const res = await fetch(`${API}users/me`, { credentials: 'include', headers });
         if (!res.ok) return; // invité non connecté: on garde la préférence locale
@@ -110,7 +110,7 @@ let _notifSSE = null;
 function _startNotifStream() {
     if (_notifSSEActive || _notifSSE) return;
 
-    const token = localStorage.getItem('moodshare_token');
+    const token = localStorage.getItem('oifeel_token');
     if (!token) return;
 
     _notifSSE = new EventSource(`${API}notifications/stream?token=${encodeURIComponent(token)}`);
@@ -147,7 +147,7 @@ function _startNotifStream() {
 }
 
 async function _pollNotifications() {
-    const token = localStorage.getItem('moodshare_token');
+    const token = localStorage.getItem('oifeel_token');
     if (!token) return;
 
     try {
@@ -172,7 +172,7 @@ document.addEventListener('userLoggedIn', () => {
 });
 // Et au chargement si déjà connecté
 (function () {
-    const token = localStorage.getItem('moodshare_token');
+    const token = localStorage.getItem('oifeel_token');
     if (token) setTimeout(_startNotifStream, 2000);
 })();
 
@@ -404,20 +404,16 @@ if (tabSections.length) {
 
     tabSections.forEach(section => {
         section.addEventListener('scroll', () => {
-            const sortbar = document.getElementById('sort-bar');
-            const sortbtn = document.querySelectorAll('#sort-bar .sort-btn');
             const currentScroll = section.scrollTop;
             if (currentScroll > 50) {
                 header.classList.add('scrolled');
                 profileheader.classList.add('scrolled');
                 nav.classList.add('scrolled');
-                sortbar.classList.add('scrolled');
                 feedSelector.classList.add('scrolled');
             } else {
                 header.classList.remove('scrolled');
                 profileheader.classList.remove('scrolled');
                 nav.classList.remove('scrolled');
-                sortbar.classList.remove('scrolled');
                 feedSelector.classList.remove('scrolled');
             }
         });
@@ -735,7 +731,7 @@ function displayMood(mood) {
         const isLiked = likeBtn.classList.contains('liked');
         try {
             const endpoint = isLiked ? `${API}posts/${mood.id}/unlike` : `${API}posts/${mood.id}/like`;
-            const token = localStorage.getItem('moodshare_token');
+            const token = localStorage.getItem('oifeel_token');
             const headers = token ? { Authorization: `Bearer ${token}` } : {};
             const res = await fetch(endpoint, { method: 'POST', credentials: 'include', headers });
             if (res.ok) {
@@ -1266,7 +1262,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             displayMood(offlineMood)
             showFeedback("error", "tu n'es pas connecté/e à internet. vérifie ta connexion puis réessaye");
-            
+
         }
     }, 4500);
 });
@@ -1989,44 +1985,6 @@ if (_stickerSearchBtn && _stickerSearchInput) {
 }
 
 
-
-// async function _searchStickers(query) {
-//     try {
-//         _stickerResults.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text);opacity:.6;">Recherche...</div>';
-
-//         // Tenter v2 en premier
-//         const res = await fetch(`https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(query)}&key=${TENOR_API_KEY}&client_key=moodshare&limit=100&media_filter=gif`);
-
-//         if (!res.ok) throw new Error('V2 failed');
-
-//         const data = await res.json();
-
-//         if (!data.results || data.results.length === 0) {
-//             _stickerResults.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text);opacity:.6;">Aucun résultat</div>';
-//             return;
-//         }
-
-//         _renderStickers(data.results, 'v2');
-//     } catch (err) {
-//         console.warn('⚠️ Tenor v2 failed, trying v1:', err);
-//         // Fallback v1
-//         try {
-//             const res = await fetch(`https://g.tenor.com/v1/search?q=${encodeURIComponent(query)}&key=${TENOR_V1_KEY}&limit=100`);
-//             const data = await res.json();
-
-//             if (!data.results || data.results.length === 0) {
-//                 _stickerResults.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text);opacity:.6;">Aucun résultat</div>';
-//                 return;
-//             }
-
-//             _renderStickers(data.results, 'v1');
-//         } catch (err2) {
-//             console.error('❌ Both Tenor APIs failed:', err2);
-//             _stickerResults.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text);opacity:.6;">Erreur de recherche</div>';
-//         }
-//     }
-// }
-
 function _renderStickers(results, apiVersion) {
     _stickerResults.innerHTML = '';
 
@@ -2221,15 +2179,15 @@ if (window.innerWidth > 768) {
 // sinon on utilise l'URL de production (Render)
 
 export function getToken() {
-    return localStorage.getItem('moodshare_token');
+    return localStorage.getItem('oifeel_token');
 }
 
 export function setToken(t) {
-    localStorage.setItem('moodshare_token', t);
+    localStorage.setItem('oifeel_token', t);
 }
 
 export function clearToken() {
-    localStorage.removeItem('moodshare_token');
+    localStorage.removeItem('oifeel_token');
 }
 
 export async function fetchWithAuth(path, opts = {}) {
@@ -2413,7 +2371,6 @@ export async function logout() {
     if (userNameProfile) userNameProfile.textContent = 'USERNAME';
     if (userIDspan) userIDspan.textContent = 'Connectez tu';
     if (accountAvatar) accountAvatar.alt = '';
-    saveProfileLocal({});
     // Hide ban screen if shown
     const banOverlay = document.getElementById('ban-overlay');
     if (banOverlay) banOverlay.classList.add('hidden');
@@ -2624,14 +2581,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Small helpers to persist simple profile prefs locally
     function saveProfileLocal(data) {
         try {
-            const cur = JSON.parse(localStorage.getItem('moodshare_profile') || '{}');
+            const cur = JSON.parse(localStorage.getItem('oifeel_profile') || '{}');
             const next = { ...cur, ...data };
-            localStorage.setItem('moodshare_profile', JSON.stringify(next));
+            localStorage.setItem('oifeel_profile', JSON.stringify(next));
             applyProfileToUI(next);
         } catch (e) { /* ignore */ }
     }
     function loadProfileLocal() {
-        try { return JSON.parse(localStorage.getItem('moodshare_profile') || '{}'); } catch (e) { return {}; }
+        try { return JSON.parse(localStorage.getItem('oifeel_profile') || '{}'); } catch (e) { return {}; }
     }
     function applyProfileToUI(profile) {
         if (!profile) return;
@@ -2749,7 +2706,7 @@ function setLoading(btnId, loading) {
 // ============================================================
 async function loadAccountData() {
     try {
-        const token = localStorage.getItem('moodshare_token');
+        const token = localStorage.getItem('oifeel_token');
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
         const res = await fetch(`${API}users/me`, { credentials: 'include', headers });
@@ -2808,7 +2765,7 @@ async function saveProfile() {
 
     setLoading('saveProfileBtn', true);
     try {
-        const token = localStorage.getItem('moodshare_token');
+        const token = localStorage.getItem('oifeel_token');
         const headers = {
             'Content-Type': 'application/json',
             ...(token ? { Authorization: `Bearer ${token}` } : {})
@@ -2850,7 +2807,7 @@ async function saveEmail() {
 
     setLoading('saveEmailBtn', true);
     try {
-        const token = localStorage.getItem('moodshare_token');
+        const token = localStorage.getItem('oifeel_token');
         const headers = {
             'Content-Type': 'application/json',
             ...(token ? { Authorization: `Bearer ${token}` } : {})
@@ -2884,7 +2841,7 @@ async function saveAiPreference() {
 
     setLoading('saveAiPrefBtn', true);
     try {
-        const token = localStorage.getItem('moodshare_token');
+        const token = localStorage.getItem('oifeel_token');
         const headers = {
             'Content-Type': 'application/json',
             ...(token ? { Authorization: `Bearer ${token}` } : {})
@@ -2927,7 +2884,7 @@ async function changePassword() {
 
     setLoading('changePasswordBtn', true);
     try {
-        const token = localStorage.getItem('moodshare_token');
+        const token = localStorage.getItem('oifeel_token');
         const headers = {
             'Content-Type': 'application/json',
             ...(token ? { Authorization: `Bearer ${token}` } : {})
@@ -2964,7 +2921,7 @@ async function exportData() {
     setLoading('exportDataBtn', true);
     showMsg('exportMsg', 'préparation des infos', 'info');
     try {
-        const token = localStorage.getItem('moodshare_token');
+        const token = localStorage.getItem('oifeel_token');
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
         const res = await fetch(`${API}users/me/export`, { credentials: 'include', headers });
@@ -2998,7 +2955,7 @@ async function confirmDeleteAccount() {
 
     setLoading('confirmDeleteBtn', true);
     try {
-        const token = localStorage.getItem('moodshare_token');
+        const token = localStorage.getItem('oifeel_token');
         const headers = {
             'Content-Type': 'application/json',
             ...(token ? { Authorization: `Bearer ${token}` } : {})
@@ -3291,7 +3248,7 @@ export function attachComments(postEl, postId, postColor) {
         try {
             const res = await fetch(`${API}posts/${postId}/comments`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', ...(localStorage.getItem('moodshare_token') ? { Authorization: `Bearer ${localStorage.getItem('moodshare_token')}` } : {}) },
+                headers: { 'Content-Type': 'application/json', ...(localStorage.getItem('oifeel_token') ? { Authorization: `Bearer ${localStorage.getItem('oifeel_token')}` } : {}) },
                 credentials: 'include',
                 body: JSON.stringify({ text, author: profile.displayName || '' })
             });
@@ -3440,7 +3397,7 @@ function _loadLocalComments(pid) {
     try { return JSON.parse(localStorage.getItem(`comments_${pid}`) || '[]'); } catch { return []; }
 }
 function _getProfile() {
-    try { return JSON.parse(localStorage.getItem('moodshare_profile') || '{}'); } catch { return {}; }
+    try { return JSON.parse(localStorage.getItem('oifeel_profile') || '{}'); } catch { return {}; }
 }
 
 
@@ -3780,7 +3737,7 @@ function _esc(t) {
 
 
 // crypte e2e
-const DB_NAME = 'moodshare_e2e';
+const DB_NAME = 'oifeel_e2e';
 const DB_VERSION = 1;
 const STORE_NAME = 'keys';
 
@@ -3856,7 +3813,7 @@ export async function ensureKeyPair(userId) {
  * Retente jusqu'à 5 fois avec délai croissant.
  */
 export async function registerPublicKey(publicKeyB64, maxRetries = 5) {
-    const token = localStorage.getItem('moodshare_token');
+    const token = localStorage.getItem('oifeel_token');
     if (!token) {
         console.warn('⚠️  E2E: pas de token, clé non enregistrée');
         return false;
@@ -3984,7 +3941,7 @@ export async function getSharedKey(myPrivateKey, theirPublicKey, convId) {
         {
             name: 'HKDF',
             hash: 'SHA-256',
-            salt: new TextEncoder().encode('moodshare-e2e-v1'),
+            salt: new TextEncoder().encode('oifeel-e2e-v1'),
             info: new TextEncoder().encode(convId)
         },
         hkdfKey,
@@ -4197,7 +4154,6 @@ export function initFeedExtras() {
 
 function _init() {
     _initFeedSelector();
-    _injectSortBar();
     _watchFeedChanges();
     _injectMoodOfDay();
     _initViewCounter();
@@ -4216,16 +4172,18 @@ function _initFeedSelector() {
     const postsContainer = document.getElementById('posts-container');
     const buttons = feedSelector ? Array.from(feedSelector.querySelectorAll('.sort-btn')) : [];
     const indicator = feedSelector ? feedSelector.querySelector('.feed-selector__indicator') : null;
+    const postBtn = document.querySelector('.sort-btn[data-feed="posts"]');
+
 
     if (!feedSelector || !buttons.length || !indicator) return;
 
     const updateIndicator = () => {
-        const activeBtn = feedSelector.querySelector('.sort-btn--active');
+        const activeBtn = feedSelector.querySelector('.sort-btn.active');
 
         if (!activeBtn) return;
 
         const left = activeBtn.offsetLeft + 25;
-        const width = Math.max(activeBtn.offsetWidth - 50,16);
+        const width = Math.max(activeBtn.offsetWidth - 50, 16);
 
         indicator.style.left = `${left}px`;
         indicator.style.width = `${width}px`;
@@ -4236,24 +4194,28 @@ function _initFeedSelector() {
             const feed = btn.dataset.feed;
 
             // Mettre à jour l'état actif du bouton
-            buttons.forEach(b => b.classList.remove('sort-btn--active'));
-            btn.classList.add('sort-btn--active');
+            buttons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
             updateIndicator();
 
             // Afficher/masquer les containers
             if (feed === 'posts') {
                 postsContainer.classList.remove('hidden');
-                
+
                 storiesContainer.classList.add('hidden');
             } else if (feed === 'stories') {
                 storiesContainer.classList.remove('hidden');
                 postsContainer.classList.add('hidden');
             }
         });
+        postBtn.classList.add('active');
+        updateIndicator();
     });
 
     updateIndicator();
     window.addEventListener('resize', updateIndicator);
+
+    
 }
 
 // ─── Observer pour mettre à jour l'ordre original quand le feed change ─────
@@ -4278,28 +4240,7 @@ const _feedState = {
     }
 };
 
-function _injectSortBar() {
-    const wall = document.getElementById('moodWall');
-    const bar = document.getElementById('sort-bar');
 
-    if (wall && bar && !bar.hasAttribute('data-initialized')) {
-        bar.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"/></svg>
-            <button class="sort-btn sort-btn--active" data-sort="recent">récents</button>
-            <button class="sort-btn" data-sort="popular">populaires</button>
-            <button class="sort-btn" data-sort="trending">tendances</button>
-        `;
-        bar.setAttribute('data-initialized', 'true');
-
-        bar.querySelectorAll('.sort-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                bar.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('sort-btn--active'));
-                btn.classList.add('sort-btn--active');
-                _sortFeed(btn.dataset.sort);
-            });
-        });
-    }
-}
 
 // Fonction pour sauvegarder l'ordre original des posts
 function _saveOriginalOrder() {
@@ -4602,7 +4543,7 @@ function _observeNewPosts() {
 
 async function _getCurrentUserId() {
     try {
-        const token = localStorage.getItem('moodshare_token');
+        const token = localStorage.getItem('oifeel_token');
         if (!token) return null;
         const res = await fetch('https://moodshare-7dd7.onrender.com/api/auth/me', {
             headers: { Authorization: `Bearer ${token}` },
@@ -4758,7 +4699,7 @@ export function t(key, vars = {}) {
 
 // messages
 
-const MESSAGE_CACHE_KEY = 'moodshare_messages_cache';
+const MESSAGE_CACHE_KEY = 'oifeel_messages_cache';
 
 // ─── Cache local ─────────────────────────────────────────────
 function getCached() {
@@ -4827,7 +4768,7 @@ async function _retryE2ERegistration(userId, publicKeyB64) {
 // ─── Init messages ────────────────────────────────────────────
 async function initMessages() {
     const user = await getCurrentUser();
-    if (!user) {return; }
+    if (!user) { return; }
 
     currentUserId = user.id;
     if (window._messagesInitialized) return;
@@ -4938,165 +4879,8 @@ function openUserSearch() {
     if (m) { m.style.display = 'flex'; document.getElementById('user-search-input').focus(); }
 }
 
-// function createStickerPicker() {
-//     if (document.getElementById('message-sticker-overlay')) return;
-
-//     _stickerOverlay = document.createElement('div');
-//     _stickerOverlay.id = 'message-sticker-overlay';
-//     _stickerOverlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;padding:20px;z-index:10000;background:rgba(0,0,0,.5);';
-//     _stickerOverlay.innerHTML = `
-//         <div style="width:90%;max-height:90vh;background:#fff;border-radius:5px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.2);">
-//             <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid #eee;">
-//                 <div>
-//                     <strong style="font-size:1rem;">Choisir un sticker</strong>
-//                     <div style="font-size:.9rem;color:#666;">Recherche Tenor GIF</div>
-//                 </div>
-//                 <button id="close-sticker-picker" style="border:none;background:none;font-size:1.5rem;line-height:1;cursor:pointer;">×</button>
-//             </div>
-//             <div style="padding:14px 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-//                 <input id="sticker-search-input" type="text" placeholder="rechercher un sticker..." style="flex:1;min-width:180px;padding:10px 12px;border:1px solid #ccc;border-radius:5px;outline:none;" />
-//                 <button id="sticker-search-btn" style="padding:10px 16px;border:none;border-radius:5px;background:#2d8cff;color:#fff;cursor:pointer;">Rechercher</button>
-//             </div>
-//             <div id="sticker-results" style="padding:0 16px 16px;overflow:auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;"></div>
-//         </div>
-//     `;
-//     document.body.appendChild(_stickerOverlay);
-
-//     _stickerOverlay.addEventListener('click', (e) => {
-//         if (e.target === _stickerOverlay) {
-//             _stickerOverlay.style.display = 'none';
-//         }
-//     });
-
-//     document.getElementById('close-sticker-picker').addEventListener('click', () => {
-//         _stickerOverlay.style.display = 'none';
-//     });
-
-//     document.getElementById('sticker-search-btn').addEventListener('click', () => {
-//         const q = document.getElementById('sticker-search-input').value.trim();
-//         if (q) _searchStickers(q);
-//     });
-
-//     document.getElementById('sticker-search-input').addEventListener('keypress', (e) => {
-//         if (e.key === 'Enter') {
-//             e.preventDefault();
-//             const q = document.getElementById('sticker-search-input').value.trim();
-//             if (q) _searchStickers(q);
-//         }
-//     });
-// }
-
-// function injectStickerButton() {
-//     const wrapper = document.querySelector('.messages-input-wrap');
-//     if (!wrapper || document.getElementById('sticker-button')) return;
-
-//     const button = document.createElement('button');
-//     button.id = 'sticker-button';
-//     button.type = 'button';
-//     button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sticker-icon lucide-sticker"><path d="M21 9a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 15 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"/><path d="M15 3v5a1 1 0 0 0 1 1h5"/><path d="M8 13h.01"/><path d="M16 13h.01"/><path d="M10 16s.8 1 2 1c1.3 0 2-1 2-1"/></svg><h3>Sticker</h3>';
-//     button.title = 'Ajouter un sticker';
-//     button.style.cssText = 'display:flex;flex-direction:row;justify-content:space-evenly;align-items:center;margin-right:8px;padding:0 12px;border:none;border-radius:5px;background:#f3f4f6;color:#111;cursor:pointer;';
-
-//     button.addEventListener('click', () => {
-//         _stickerOverlay.style.display = 'flex';
-//         if (!document.getElementById('sticker-results').children.length) {
-//             _loadTrendingStickers();
-//         }
-//     });
-
-//     wrapper.insertBefore(button, wrapper.firstChild);
-
-//     const preview = document.createElement('div');
-//     preview.id = 'sticker-preview';
-//     preview.style.cssText = 'display:none;padding:8px 12px;margin-top:10px;border:1px solid #e2e8f0;border-radius:5px;background:#fafafa;max-width:260px;';
-//     wrapper.parentNode.insertBefore(preview, wrapper.nextSibling);
-// }
-
-// function _updateStickerPreview() {
-//     const preview = document.getElementById('sticker-preview');
-//     if (!preview) return;
-//     if (_selectedStickerUrl) {
-//         preview.style.display = 'flex';
-//         preview.style.alignItems = 'center';
-//         preview.style.justifyContent = 'space-between';
-//         preview.innerHTML = `
-//             <img src="${_selectedStickerUrl}" alt="sticker" style="max-width:120px;max-height:96px;border-radius:5px;object-fit:contain;" />
-//             <button id="clear-sticker-btn" style="margin-left:10px;padding:6px 10px;border:none;border-radius:5px;background:#ef4444;color:#fff;cursor:pointer;">Supprimer</button>
-//         `;
-//         document.getElementById('clear-sticker-btn').addEventListener('click', () => {
-//             _selectedStickerUrl = null;
-//             _updateStickerPreview();
-//         });
-//     } else {
-//         preview.style.display = 'none';
-//         preview.innerHTML = '';
-//     }
-// }
 
 
-async function _loadTrendingStickers() {
-    try {
-        _stickerResults.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text);opacity:.6;">Chargement des tendances...</div>';
-
-        // Tenter v2 en premier
-        const res = await fetch(`https://tenor.googleapis.com/v2/featured?key=${TENOR_API_KEY}&client_key=moodshare&limit=100&media_filter=gif`);
-
-        if (!res.ok) throw new Error('V2 failed');
-
-        const data = await res.json();
-        _renderStickers(data.results, 'v2');
-    } catch (err) {
-        console.warn('⚠️ Tenor v2 failed, trying v1:', err);
-        // Fallback v1
-        try {
-            const res = await fetch(`https://g.tenor.com/v1/trending?key=${TENOR_V1_KEY}&limit=100`);
-            const data = await res.json();
-            _renderStickers(data.results, 'v1');
-        } catch (err2) {
-            console.error('❌ Both Tenor APIs failed:', err2);
-            _stickerResults.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text);opacity:.6;">Impossible de charger les stickers</div>';
-        }
-    }
-}
-
-async function _searchStickers(query) {
-    const results = document.getElementById('sticker-results');
-    if (!results) return;
-    results.innerHTML = '<div style="grid-column:1/-1;padding:20px;text-align:center;color:#666;">Recherche...</div>';
-    try {
-        const res = await fetch(`https://g.tenor.com/v1/search?q=${encodeURIComponent(query)}&key=${TENOR_V1_KEY}&limit=24`);
-        const data = await res.json();
-        if (!data.results || !data.results.length) {
-            results.innerHTML = '<div style="grid-column:1/-1;padding:20px;text-align:center;color:#666;">Aucun résultat</div>';
-            return;
-        }
-        _renderStickerResults(data.results);
-    } catch (err) {
-        console.error('❌ Recherche stickers échouée:', err);
-        results.innerHTML = '<div style="grid-column:1/-1;padding:20px;text-align:center;color:#666;">Erreur de recherche</div>';
-    }
-}
-
-function _renderStickerResults(items) {
-    const results = document.getElementById('sticker-results');
-    if (!results) return;
-    results.innerHTML = '';
-    items.forEach(item => {
-        const media = item.media?.[0];
-        const gifUrl = media?.gif?.url || media?.tinygif?.url || media?.mediumgif?.url;
-        const thumbUrl = media?.nanogif?.url || media?.tinygif?.url || gifUrl;
-        if (!gifUrl) return;
-        const div = document.createElement('div');
-        div.style.cssText = 'border-radius:5px;overflow:hidden;cursor:pointer;position:relative;';
-        div.innerHTML = `<img src="${thumbUrl}" alt="sticker" style="width:100%;height:100%;object-fit:cover;display:block;"/>`;
-        div.addEventListener('click', () => {
-            _selectedStickerUrl = gifUrl;
-            _updateStickerPreview();
-            _stickerOverlay.style.display = 'none';
-        });
-        results.appendChild(div);
-    });
-}
 
 
 function closeUserSearch() {
@@ -5988,7 +5772,7 @@ export async function initSocial() {
 
 async function injectSuggestionsBanner() {
     try {
-        const token = localStorage.getItem('moodshare_token');
+        const token = localStorage.getItem('oifeel_token');
         if (!token) {
             return;
         }
@@ -6131,7 +5915,7 @@ async function viewProfile(userId) {
     btn.style.display = 'none';
 
     try {
-        const token = localStorage.getItem('moodshare_token');
+        const token = localStorage.getItem('oifeel_token');
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const res = await fetch(`${API}social/profile/${userId}`, { credentials: 'include', headers });
         if (!res.ok) throw new Error('Profil introuvable');
@@ -6176,7 +5960,7 @@ function _renderProfileFollowBtn(btn) {
 
 async function _toggleProfileViewFollow(btn) {
     if (!_profileViewTargetId) return;
-    const token = localStorage.getItem('moodshare_token');
+    const token = localStorage.getItem('oifeel_token');
     if (!token) { showFeedback('warning', 'not_logged_in'); return; }
 
     const action = _profileViewIsFollowing ? 'unfollow' : 'follow';
@@ -6207,7 +5991,7 @@ async function _toggleProfileViewFollow(btn) {
 
 async function handleQuickFollow(userId, btn, card) {
     try {
-        const token = localStorage.getItem('moodshare_token');
+        const token = localStorage.getItem('oifeel_token');
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
         const res = await fetch(`${API}social/follow/${userId}`, {

@@ -872,13 +872,14 @@ body.dark .post-actions button:hover {
   color: #666;
   margin-right: 4px;
 }
-
+#feed-selector * {
+  transition: all 0.2s ease-in-out;
+}
 .sort-btn {
   text-align: center;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(255, 255, 255, 0);
   border: 1px solid transparent;
   color: #ffffff;
   scale: 1;
@@ -891,9 +892,39 @@ body.dark .post-actions button:hover {
   opacity: 0;
   pointer-events: none;
 }
-
-#sort-bar:hover .sort-btn,
 #feed-selector .sort-btn {
+  position: relative;
+  z-index: 2;
+  width: auto;
+  padding: 8px 18px;
+  font-size: 2rem;
+  height: 60px;
+  border-radius: 17px;
+  color: rgba(255, 255, 255, 0.78);
+  transition: all 0.2s ease;
+  opacity: 1;
+  pointer-events: auto;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+#feed-selector.scrolled .sort-btn {
+  height: 50px;
+  border-radius: 18px;
+}
+#feed-selector .sort-btn.active {
+  background-size: 400% 400%;
+  background-position: 0% 50%;
+  background: linear-gradient(
+    to top,
+    rgba(124, 58, 237, 0.4) 15%,
+    transparent
+  );
+  color: #ffffff;
+  font-weight: 700;
+  transform: scale(1.05);
+}
+
+#sort-bar:hover .sort-btn-{
   opacity: 1;
   pointer-events: auto;
 }
@@ -901,7 +932,7 @@ body.dark .post-actions button:hover {
 #feed-selector {
   position: fixed;
 
-  width: 300px;
+  width: auto;
   top: 10px;
   left: 50%;
   transform: translateX(-50%);
@@ -909,7 +940,7 @@ body.dark .post-actions button:hover {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: rgba(50,50, 50, 0.3);
+  background: rgba(50, 50, 50, 0.3);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-radius: 25px;
@@ -924,28 +955,7 @@ body.dark .post-actions button:hover {
   height: 45px;
 }
 
-#feed-selector .sort-btn {
-  position: relative;
-  z-index: 2;
-  width: 150px;
-  padding: 8px 18px;
-  font-size: 2rem;
-  border-radius: 17px;
-  color: rgba(255, 255, 255, 0.78);
-  background: transparent;
-  transition:
-    background-color 0.2s ease;
-}
 
-#feed-selector .sort-btn:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-}
-
-#feed-selector .sort-btn--active {
-  color: #ffffff;
-  font-weight: 700;
-  background: transparent;
-}
 
 .feed-selector__indicator {
   position: absolute;
@@ -962,8 +972,8 @@ body.dark .post-actions button:hover {
   z-index: 1;
 }
 
-.sort-btn:hover {
-  background-color: rgb(125, 125, 125, 0.8);
+.sort-btn:hover, #feed-selector .sort-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .sort-btn--active {
@@ -1591,50 +1601,7 @@ body.dark .post-actions button:hover {
   .mainlogo h1 {
     pointer-events: none;
   }
-  .link {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    flex: 1;
-    height: 100%;
-    border-radius: var(--radius);
-    color: var(--muted);
-    text-decoration: none;
-    font-weight: 500;
-    overflow: hidden;
-  }
-  .link:hover,
-  .link:focus-visible {
-    color: var(--text);
-    background: rgba(255, 255, 255, 0.08);
-  }
-  .link.active {
-    color: #fff;
-    background: var(--accent);
-  }
-  .link.active svg {
-    fill: rgba(255, 255, 255, 0.15);
-    stroke: #fff;
-  }
-  .link-icon {
-    width: 24px;
-    height: 24px;
-    flex-shrink: 0;
-  }
-  .link:hover .link-icon {
-    transform: scale(1.08);
-  }
-  .link-title {
-    margin-left: 0;
-    opacity: 1;
-    transform: none;
-    white-space: nowrap;
-    font-size: 10px;
-    line-height: 1;
-  }
+  
   #moodWall {
     display: flex;
     gap: -100px;
@@ -1741,36 +1708,7 @@ body.dark .post-actions button:hover {
   .feedback-welcome {
     background: rgba(0, 188, 212, 0.9);
   }
-  .story.add-story {
-    width: 66px;
-    height: 66px;
-    border-radius: 5px;
-    background: transparent;
-    border: 2px dashed rgba(128, 128, 128, 0.35);
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: all 0.2s;
-    opacity: 0.7;
-    rotate: 0;
-  }
-  .story.add-story:hover {
-    border-color: var(--accent, #2563eb);
-    background: rgba(95, 149, 185, 0.07);
-    opacity: 1;
-    transform: scale(1.06);
-    rotate: 90deg;
-  }
-  .story.add-story:hover svg {
-    rotate: -90deg;
-    stroke-width: 2.5;
-  }
-  .story.add-story svg {
-    transition: all 0.2s;
-  }
+  
   .sv-bubble {
     display: flex;
     flex-direction: column;
@@ -2310,18 +2248,6 @@ body.dark .post-actions button:hover {
     padding: 10px;
     font-size: 0.9rem;
   }
-  #feed-selector {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 12px;
-    background: transparent;
-    border-radius: 8px;
-  }
-  #feed-selector .sort-btn {
-    padding: 8px 20px;
-  }
   .feed-container {
     display: block;
   }
@@ -2366,53 +2292,12 @@ body.dark .post-actions button:hover {
     left: calc((100% - 250px) / 2);
     width: 250px;
   }
-  #sort-bar.scrolled .sort-btn {
-    width: 75px;
-    font-size: 0.9rem;
-  }
   .sort-label {
     font-size: 1.5rem;
     color: #666;
     margin-right: 4px;
   }
-  .sort-btn,
-  #sort-bar.scrolled:hover .sort-btn {
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: rgba(255, 255, 255, 0);
-    border: 1px solid transparent;
-    color: #ffffff;
-    scale: 1;
-    border-radius: 5px;
-    padding: 6px 16px;
-    width: 150px;
-    font-size: 1.25rem;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .sort-btn:hover,
-  #sort-bar.scrolled:hover .sort-btn:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
-    scale: 0.9;
-  }
-  .sort-btn--active,
-  #sort-bar.scrolled:hover .sort-btn--active {
-    background: rgb(255, 255, 255);
-    scale: 1;
-    border-color: rgb(22, 0, 145);
-    color: rgb(22, 0, 145);
-  }
-  .sort-btn--active:hover,
-  #sort-bar.scrolled:hover .sort-btn--active:hover {
-    background: rgb(255, 255, 255);
-    color: rgb(22, 0, 145);
-    scale: 1.05;
-  }
-  .mood-today,
-  #dc-link {
+  .mood-today{
     display: flex;
     align-items: center;
     gap: 14px;
@@ -2574,5 +2459,40 @@ body.dark .post-actions button:hover {
   .btn-favorite.favorited {
     background: rgba(255, 215, 0, 0.2);
     border-color: rgba(255, 215, 0, 0.5);
+  }
+  .link {
+    height: 80px;
+    width: 75%;
+    margin-bottom: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.2s;
+  }
+  .link.active {
+    color: #fff;
+    scale: 1.1;
+    background: var(--accent);
+  }
+  .link.active svg {
+    fill: rgba(255, 255, 255, 0.15);
+    stroke: #fff;
+  }
+  #nav a#create {
+    background: rgba(175, 175, 255, 0.35);
+  }
+  .link-icon {
+    width: 35px;
+    height: 35px;
+    flex-shrink: 0;
+  }
+  .link:hover .link-icon {
+    transform: scale(1.08);
+  }
+  .link-title {
+    margin-left: 15px;
+    opacity: 1;
+    transform: none;
+    white-space: nowrap;
+    font-size: 2rem;
+    line-height: 1;
   }
 }

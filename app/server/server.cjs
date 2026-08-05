@@ -368,7 +368,7 @@ app.use((req, res, next) => {
 });
 
 app.get('/ping', (req, res) => {
-  res.set('x-server', 'moodshare-server');
+  res.set('x-server', 'oifeel-server');
   res.json({ ok: true, time: Date.now() });
 });
 

@@ -26,7 +26,8 @@ header.scrolled {
   opacity: 0.7;
 }
 
-#accountheader {
+#accountheader,
+#accountheader.scrolled:hover {
   position: fixed;
   top: 18px;
   right: 24px;
@@ -36,6 +37,7 @@ header.scrolled {
   gap: 12px;
 
   height: 52px;
+  width: 150px;
   padding: 0 16px;
 
   border-radius: 14px;
@@ -52,13 +54,28 @@ header.scrolled {
   transition: 0.2s;
 }
 
+#accountheader.scrolled {
+  width: 32px;
+}
+#userName,
+#accountheader.scrolled:hover #userName {
+  position: absolute;
+  right: 12.5px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  opacity: 1;
+  transform: translateX(0);
+  transition: all 0.2s ease-in-out;
+}
+#accountheader.scrolled #userName {
+  opacity: 0;
+
+  transform: translateX(25px);
+}
+
 #accountheader:hover {
   border-color: rgba(95, 149, 185, 0.45);
   background: rgba(26, 26, 26, 0.92);
-}
-#userName {
-  font-size: 0.95rem;
-  font-weight: 600;
 }
 
 #accountheader svg {
@@ -774,33 +791,16 @@ body.focus-mode .tab.active {
   }
 }
 
-@media (max-width: 769px) and (max-width: 769px) {
-  header {
-    width: 150px;
-    height: 50px;
-    top: 10px;
-    left: 10px;
-  }
-  header.scrolled {
-    width: 100px;
-    height: 30px;
-  }
-}
-
 @media (max-width: 769px) {
   header {
     text-align: center;
-    padding: 1rem;
-    width: 250px;
-    top: 10px;
-    left: -25px;
-    border-radius: 5px;
-    height: 75px;
+    width: 67.5px;
+    height: 67.5px;
     background: transparent;
     position: fixed;
     display: flex;
     align-items: center;
-    justify-content: space-evenly;
+    justify-content: center;
     z-index: 99999999999999999999;
   }
   header img {
@@ -811,37 +811,8 @@ body.focus-mode .tab.active {
     align-items: center;
     justify-content: center;
   }
-  header.scrolled {
-    height: 30px;
-    width: 100px;
-    top: 10px;
-    left: 10px;
-    border-radius: 5px;
-  }
   #accountheader {
-    pointer-events: all;
-    text-align: center;
-    position: fixed;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-    top: 15px;
-    right: 25px;
-    width: 35px;
-    font-size: 2.5rem;
-    height: 35px;
-    padding: 5px;
-    border-radius: 5px;
-    background: rgba(95, 149, 185, 0.18);
-  }
-  #accountheader svg {
-    height: 100%;
-    width: 100%;
-  }
-  #accountheader.scrolled img {
-    opacity: 0;
+    width: 20%;
   }
   header h1 {
     opacity: 1;
@@ -852,38 +823,35 @@ body.focus-mode .tab.active {
     opacity: 0;
     transform: translateY(-3px);
   }
-  header.scrolled .logodraw {
-    scale: 0.8;
-  }
   nav {
     position: fixed;
-    bottom: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(94vw, 480px);
-    height: 64px;
+    top: 0;
+    left: 0;
+    width: 97%;
+    height: 100vh;
     display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    background: var(--menu-bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-    z-index: 2000;
-    padding: 0.5rem;
-    gap: 4px;
+    transform: translateY(-100px);
+    padding: none;
+    pointer-events: none;
+    transition: all 0.3s ease-in-out;
+    opacity: 0;
+  }
+  nav.shown {
+    transform: translateY(0);
+    pointer-events: all;
     opacity: 1;
   }
-  nav.scrolled {
-    height: 56px;
+
+  nav #link {
+    pointer-events: none !important;
   }
-  nav a#create {
-    background: var(--accent-2);
+  nav.shown #link {
+    pointer-events: all !important;
   }
-  nav a#create.active {
-    background: var(--accent);
-  }
+
   section#create {
     margin-top: 0;
     padding: 25px;
@@ -1133,5 +1101,12 @@ body.focus-mode .tab.active {
     justify-content: space-between;
     font-size: 0.78rem;
     opacity: 0.8;
+  }
+  header.scrolled {
+    scale: 1;
+    top: 5px;
+    left: 5px;
+    transform: translateX(-0) translateY(-0);
+    opacity: 0.7;
   }
 }
