@@ -18,6 +18,14 @@ header img {
   transition: all 0.3s ease;
 }
 
+header img:hover {
+  transform: scale(1.15) translateY(5px) translateX(5px) ;
+}
+
+header img:active {
+  transform: scale(0.95);
+}
+
 header.scrolled {
   scale: 0.75;
   top: 5px;

@@ -2477,6 +2477,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveProfileLocal({ displayName: uname });
         hideModal();
         document.dispatchEvent(new CustomEvent('userLoggedIn'));
+        location.reload(); // reload to refresh UI and fetch user data
     }
 
     function showOtpStep(method) {
@@ -3315,11 +3316,7 @@ function _render(wrap, comments, maxShow, postId) {
                 </p>
             </div>
             <div class="cactions-wrap">
-                <div class="cactions-pill">
-                    <button class="clike-btn${c._reaction === 'like' ? ' active' : ''}" type="button" aria-label="like"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-thumbs-up-icon lucide-thumbs-up"><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/><path d="M7 10v12"/></svg></button>
-                    <button class="cdislike-btn${c._reaction === 'dislike' ? ' active' : ''}" type="button" aria-label="dislike"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-thumbs-down-icon lucide-thumbs-down"><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z"/><path d="M17 14V2"/></svg></button>
-                    <button class="creport-btn" type="button" aria-label="signaler"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flag-icon lucide-flag"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"/></svg></button>
-                </div>
+                
                 <span class="cdate">${c.pending ? 'envoi…' : date}</span>
             </div>
         `;
@@ -3333,30 +3330,6 @@ function _render(wrap, comments, maxShow, postId) {
                 expandBtn.hidden = true;
             });
         }
-
-        // Like / dislike (visuel uniquement pour l'instant)
-        const likeBtn = el.querySelector('.clike-btn');
-        const dislikeBtn = el.querySelector('.cdislike-btn');
-        likeBtn.addEventListener('click', () => {
-            _setCommentReaction(c, 'like');
-            likeBtn.classList.toggle('active', c._reaction === 'like');
-            dislikeBtn.classList.remove('active');
-        });
-        dislikeBtn.addEventListener('click', () => {
-            _setCommentReaction(c, 'dislike');
-            dislikeBtn.classList.toggle('active', c._reaction === 'dislike');
-            likeBtn.classList.remove('active');
-        });
-
-        // Report : réutilise la modal de signalement du post pour l'instant
-        // (le report ciblé par commentaire n'existe pas encore côté API,
-        // donc ce bouton signale le post entier — à affiner si besoin).
-        const reportBtn = el.querySelector('.creport-btn');
-        reportBtn.addEventListener('click', () => {
-            if (typeof openReportModal === 'function') {
-                openReportModal(postId);
-            }
-        });
 
         list.appendChild(el);
     });
@@ -3868,7 +3841,10 @@ const _pubKeyMemCache = new Map(); // userId → CryptoKey | null
  * Retourne null si l'utilisateur n'a pas encore de clé E2E.
  */
 export async function fetchPublicKey(userId) {
-    // 1. Cache mémoire
+    // 1. Cache mémoire (seulement les résultats POSITIFS : une absence de
+    // clé ne doit jamais être mise en cache indéfiniment, sinon on reste
+    // bloqué pour toute la session si l'autre utilisateur termine son
+    // enregistrement E2E juste après notre premier essai)
     if (_pubKeyMemCache.has(userId)) return _pubKeyMemCache.get(userId);
 
     // 2. Cache IndexedDB (évite un appel réseau)
@@ -3887,19 +3863,20 @@ export async function fetchPublicKey(userId) {
         });
 
         if (!res.ok) {
-            _pubKeyMemCache.set(userId, null);
-            return null;
+            return null; // pas mis en cache : on retentera au prochain appel
         }
 
         const data = await res.json();
 
         if (!data.publicKey) {
-            // Pas encore de clé E2E pour cet utilisateur
-            _pubKeyMemCache.set(userId, null);
+            // Pas encore de clé E2E pour cet utilisateur : ne PAS mettre en
+            // cache, pour qu'un prochain appel (ex: à l'arrivée d'un
+            // nouveau message) retente et trouve la clé si elle a été
+            // enregistrée entre-temps.
             return null;
         }
 
-        // Mettre en cache
+        // Mettre en cache (uniquement le résultat positif)
         await _dbSet(`pubkey_${userId}`, { b64: data.publicKey, cachedAt: Date.now() });
         const key = await _importPublicKeyB64(data.publicKey);
         _pubKeyMemCache.set(userId, key);
@@ -3907,8 +3884,7 @@ export async function fetchPublicKey(userId) {
 
     } catch (err) {
         console.warn('⚠️  fetchPublicKey réseau:', err.message);
-        _pubKeyMemCache.set(userId, null);
-        return null;
+        return null; // pas mis en cache : on retentera au prochain appel
     }
 }
 
@@ -4215,7 +4191,7 @@ function _initFeedSelector() {
     updateIndicator();
     window.addEventListener('resize', updateIndicator);
 
-    
+
 }
 
 // ─── Observer pour mettre à jour l'ordre original quand le feed change ─────
@@ -4787,7 +4763,8 @@ async function initMessages() {
                 if (!participants?.includes(currentUserId)) return;
                 if (message.senderId === currentUserId) return;
 
-                const decrypted = await _tryDecrypt(message, conversationId);
+                const otherUserId = participants.find(id => id !== currentUserId);
+                const decrypted = await _tryDecrypt(message, conversationId, otherUserId);
                 const displayMsg = { ...message, content: decrypted ?? message.content, _wasEncrypted: !!decrypted };
 
                 const cache = getCached();
@@ -4945,7 +4922,7 @@ async function loadConversations() {
                 if (lastMsg.encrypted) {
                     // Tenter déchiffrement pour la preview
                     const convId = [currentUserId, otherUserId].sort().join('_');
-                    const plain = await _tryDecrypt(lastMsg, convId);
+                    const plain = await _tryDecrypt(lastMsg, convId, otherUserId);
                     preview = plain ? plain.substring(0, 60) : '🔒 message chiffré';
                 } else {
                     preview = lastMsg.content.substring(0, 60);
@@ -5002,7 +4979,7 @@ async function openConversation(otherUserId, otherName) {
         // Déchiffrer en parallèle
         const decryptedMsgs = await Promise.all(msgs.map(async (msg) => {
             if (!msg.content || msg.sharedPostId || !msg.encrypted) return msg;
-            const plain = await _tryDecrypt(msg, convId);
+            const plain = await _tryDecrypt(msg, convId, otherUserId);
             return { ...msg, content: plain ?? msg.content, _wasEncrypted: plain !== null };
         }));
 
@@ -5156,10 +5133,18 @@ async function _showE2EBadge(otherUserId) {
 }
 
 // ─── Déchiffrement gracieux ───────────────────────────────────
-async function _tryDecrypt(msg, convId) {
+async function _tryDecrypt(msg, convId, otherUserId) {
     if (!msg.content || !msg.encrypted || !_myPrivateKey) return null;
     try {
-        const theirKey = await fetchPublicKey(msg.senderId);
+        // Toujours dériver la clé partagée avec l'AUTRE participant de la
+        // conversation, jamais avec l'expéditeur du message : pour nos
+        // propres messages envoyés, msg.senderId === currentUserId, ce qui
+        // récupérait notre propre clé publique et calculait une clé AES
+        // erronée (ECDH(moi, moi) != ECDH(moi, eux)). Cette mauvaise clé
+        // était ensuite mise en cache sous le même convId, ce qui cassait
+        // aussi le déchiffrement de tous les messages reçus dans la même
+        // conversation.
+        const theirKey = await fetchPublicKey(otherUserId);
         if (!theirKey) return null;
         const aesKey = await getSharedKey(_myPrivateKey, theirKey, convId);
         return await decryptMessage(msg.content, aesKey);
