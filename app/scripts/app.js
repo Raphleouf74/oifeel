@@ -6203,6 +6203,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('userLoggedIn', refreshStatus);
 
     manageBtn.addEventListener('click', async () => {
+        const token = localStorage.getItem('oifeel_token');
+        if (!token) { showFeedback('warning', 'not_logged_in'); return; }
         const opening = panel.classList.contains('hidden');
         panel.classList.toggle('hidden');
         if (opening) {

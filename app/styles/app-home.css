@@ -1484,6 +1484,10 @@ body.dark .post-actions button:hover {
   fill: #e0245e;
 }
 
+#account-tab-a2f .hidden {
+  display: none;
+}
+
 @media (max-width: 700px) {
   #permalink-panel {
     padding: 22px;

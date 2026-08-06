@@ -269,6 +269,28 @@
   border-bottom: 1px solid var(--border);
 }
 
+#twoFactorStatusRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--menu-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+
+#twoFactorManageBtn {
+  width: 25%;
+  
+  padding: 8px 16px;
+  background: var(--accent2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
 .more-section:last-of-type {
   border-bottom: none;
 }
@@ -281,9 +303,9 @@
   align-self: center;
 }
 
-.setting-row {
+.more-section .setting-row {
   width: 80%;
-  max-width: 420px;
+  max-width: 500px;
   display: flex;
   align-items: center;
   justify-content: space-between;
