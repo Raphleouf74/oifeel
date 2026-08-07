@@ -3710,6 +3710,7 @@ function _esc(t) {
 
 
 // crypte e2e
+// crypte e2e
 const DB_NAME = 'oifeel_e2e';
 const DB_VERSION = 1;
 const STORE_NAME = 'keys';
@@ -3847,15 +3848,19 @@ export async function fetchPublicKey(userId) {
     // enregistrement E2E juste après notre premier essai)
     if (_pubKeyMemCache.has(userId)) return _pubKeyMemCache.get(userId);
 
-    // 2. Cache IndexedDB (évite un appel réseau)
-    const cached = await _dbGet(`pubkey_${userId}`).catch(() => null);
-    if (cached?.b64) {
-        const key = await _importPublicKeyB64(cached.b64);
-        _pubKeyMemCache.set(userId, key);
-        return key;
-    }
+    // NB : on ne met plus les clés des AUTRES utilisateurs en cache
+    // IndexedDB (persistant entre sessions). Ce cache n'avait aucune
+    // expiration ni mécanisme d'invalidation : si un utilisateur perdait
+    // son propre trousseau local (ex: stockage du navigateur effacé) et en
+    // regénérait un nouveau, tous ceux qui avaient déjà mis en cache son
+    // ANCIENNE clé publique restaient bloqués avec un secret partagé
+    // définitivement faux, sans aucun moyen de s'en rendre compte — d'où
+    // des messages qui restent chiffrés indéfiniment pour eux. Le cache
+    // mémoire (réinitialisé à chaque session) suffit à éviter les appels
+    // réseau répétés pendant une même session, sans risquer une clé
+    // périmée sur le long terme.
 
-    // 3. Appel serveur
+    // 2. Appel serveur
     try {
         const res = await fetch(`${API}users/${userId}/public-key`, {
             credentials: 'include',
@@ -3876,8 +3881,7 @@ export async function fetchPublicKey(userId) {
             return null;
         }
 
-        // Mettre en cache (uniquement le résultat positif)
-        await _dbSet(`pubkey_${userId}`, { b64: data.publicKey, cachedAt: Date.now() });
+        // Mettre en cache (mémoire seulement, pour la durée de la session)
         const key = await _importPublicKeyB64(data.publicKey);
         _pubKeyMemCache.set(userId, key);
         return key;
@@ -3893,9 +3897,7 @@ export async function fetchPublicKey(userId) {
  */
 export function invalidatePubKeyCache(userId) {
     _pubKeyMemCache.delete(userId);
-    _dbSet(`pubkey_${userId}`, null).catch(() => { });
 }
-
 // ─── Dérivation de la clé partagée (ECDH + HKDF) ────────────
 
 const _sharedKeyCache = new Map();
@@ -4705,14 +4707,36 @@ async function _initE2E(userId) {
         _myPrivateKey = privateKey;
         _myPublicKeyB64 = publicKeyB64;
 
-        // Vérifier si notre clé est déjà sur le serveur
-        const existing = await fetchPublicKey(userId);
-        if (existing) {
+        // Vérifier que la clé publique déjà enregistrée sur le serveur
+        // correspond bien à NOTRE clé privée locale actuelle. On ne peut
+        // pas se contenter de vérifier qu'"une" clé existe : si le
+        // trousseau local a été régénéré (stockage du navigateur effacé,
+        // autre profil/appareil, etc.) alors que le serveur garde encore
+        // l'ancienne clé publique, la clé privée locale et la clé publique
+        // publiée ne forment plus une paire cohérente. Résultat : tout le
+        // monde continue de chiffrer avec l'ancienne clé publique, que
+        // notre nouvelle clé privée ne peut plus déchiffrer — silencieusement
+        // et définitivement, jusqu'à ce qu'on republie la bonne clé ici.
+        let serverKeyB64 = null;
+        try {
+            const res = await fetch(`${API}users/${userId}/public-key`, {
+                credentials: 'include',
+                cache: 'no-store'
+            });
+            if (res.ok) {
+                const data = await res.json();
+                serverKeyB64 = data.publicKey || null;
+            }
+        } catch (err) {
+            console.warn('⚠️  E2E: vérification de la clé serveur impossible:', err.message);
+        }
+
+        if (serverKeyB64 === publicKeyB64) {
             _e2eReady = true;
             return;
         }
 
-        // Pas encore enregistrée → tenter l'enregistrement
+        // Absente ou désynchronisée → (ré)enregistrer notre clé actuelle
         const ok = await registerPublicKey(publicKeyB64, 5);
         _e2eReady = ok;
 
@@ -4727,6 +4751,7 @@ async function _initE2E(userId) {
         console.error('❌ E2E init error:', err);
     }
 }
+
 
 async function _retryE2ERegistration(userId, publicKeyB64) {
     if (_e2eReady) return;
