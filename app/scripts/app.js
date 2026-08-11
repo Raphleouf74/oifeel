@@ -2760,6 +2760,8 @@ async function loadAccountData() {
             const pwdSection = document.querySelector('#account-tab-securite hr:last-of-type')?.nextElementSibling;
             document.getElementById('changePasswordBtn')?.closest('.account-field')?.remove();
         }
+        const googleBadge = document.getElementById('accountGoogleBadge');
+        if (googleBadge) googleBadge.style.display = user.googleLinked ? 'inline-flex' : 'none';
 
     } catch (err) {
         console.warn('⚠️ Impossible de charger les données du compte:', err);
@@ -6346,5 +6348,3 @@ document.getElementById('googleAuthBtn')?.addEventListener('click', () => {
     window.location.href = API + 'auth/google';
 });
 // Badge "compte lié à Google"
-const googleBadge = document.getElementById('accountGoogleBadge');
-if (googleBadge) googleBadge.style.display = user.googleLinked ? 'inline-flex' : 'none';

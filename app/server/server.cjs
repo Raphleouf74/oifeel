@@ -163,6 +163,7 @@ const userSchema = new mongoose.Schema({
 
   // googleId: { type: String, default: null, index: true, sparse: true },
   googleId: { type: String, default: null, index: true, sparse: true },
+  verified: { type: Boolean, default: false },
 }, { _id: false });
 
 userSchema.index({ displayName: 'text' });
@@ -1530,12 +1531,12 @@ app.get('/api/admin/reports', requireAdmin, (req, res) => {
 app.get('/api/admin/users', requireAdmin, async (req, res) => {
   try {
     const users = await UserModel.find({})
-      .select('_id displayName avatar isGuest email emailNotifications createdAt followersCount followingCount postsCount bannedUntil bannedReason permanentlyBanned')
-      .lean();
+      .select('_id displayName verified avatar isGuest email emailNotifications createdAt followersCount followingCount postsCount bannedUntil bannedReason permanentlyBanned').lean();
 
     res.json(users.map((u) => ({
       id: u._id,
       displayName: u.displayName,
+      verified: u.verified || false,
       avatar: u.avatar,
       isGuest: u.isGuest,
       email: u.email || null,
@@ -2661,7 +2662,7 @@ app.get('/api/users/search', requireAuth, async (req, res) => {
       displayName: { $regex: query, $options: 'i' },
       _id: { $ne: req.session.user.id }
     })
-      .select('_id displayName')
+      .select('_id displayName verified')
       .limit(20)
       .lean();
 
