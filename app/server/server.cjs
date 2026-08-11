@@ -1309,7 +1309,7 @@ app.get('/api/social/suggestions', requireAuth, async (req, res) => {
       },
       isGuest: false
     })
-      .select('_id displayName bio avatar followersCount')
+      .select('_id displayName verified bio avatar followersCount')
       .sort({ followersCount: -1, createdAt: -1 })
       .limit(5)
       .lean();
@@ -1330,7 +1330,7 @@ app.get('/api/social/followers/:userId', async (req, res) => {
 
     const followers = await UserModel.find({
       _id: { $in: user.followers || [] }
-    }).select('_id displayName avatar').lean();
+    }).select('_id displayName verified avatar').lean();
 
     res.json({ followers });
   } catch (err) {
@@ -1348,7 +1348,7 @@ app.get('/api/social/following/:userId', async (req, res) => {
 
     const following = await UserModel.find({
       _id: { $in: user.following || [] }
-    }).select('_id displayName avatar').lean();
+    }).select('_id displayName verified avatar').lean();
 
     res.json({ following });
   } catch (err) {

@@ -4926,7 +4926,7 @@ async function searchUsers(query) {
             div.className = 'user-search-item';
             div.innerHTML = `
                 <div class="user-avatar">${user.displayName[0].toUpperCase()}</div>
-                <div class="user-info"><div class="user-name">${user.displayName}</div></div>
+                <div class="user-info"><div class="user-name">${user.displayName}${verifiedBadge(user.verified)}</div></div>
                 <button class="btn-start-chat">message</button>`;
             div.querySelector('.btn-start-chat').addEventListener('click', () => {
                 closeUserSearch();
@@ -6347,4 +6347,9 @@ document.addEventListener('DOMContentLoaded', () => {
 document.getElementById('googleAuthBtn')?.addEventListener('click', () => {
     window.location.href = API + 'auth/google';
 });
-// Badge "compte lié à Google"
+function verifiedBadge(isVerified) {
+    if (!isVerified) return '';
+    return `<svg class="verified-badge" width="19" height="19" viewBox="0 0 24 24" fill="#4c9eff" xmlns="http://www.w3.org/2000/svg" title="compte certifié">
+        <path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="#4c9eff"/>
+    </svg>`;
+}

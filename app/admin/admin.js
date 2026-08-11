@@ -1056,6 +1056,9 @@ function renderUsers() {
                 ${allUsers
             .map((u) => {
                 const name = u.displayName || u.username || "Utilisateur";
+                const verifBadge = u.verified ? '<span class="chip" style="background:#4c9eff22;color:#4c9eff;">✓ certifié</span>' : '';
+
+
                 const avatar = u.avatar || name.charAt(0).toUpperCase();
                 const badge = u.isGuest ? '<span class="chip chip-ephemeral">Invité</span>' : '';
                 let status = '';
@@ -1094,7 +1097,7 @@ function renderUsers() {
                                         ${avatar}
                                     </div>
                                     <div>
-                                        <div>${name}</div>
+                                        <div>${name} ${verifBadge}</div>
                                         <div style="font-size:12px;color:var(--muted);">${u.id}</div>
                                     </div>
                                 </div>
@@ -1375,4 +1378,10 @@ async function sendAnnouncementEmail() {
         btn.disabled = false;
         btn.textContent = '📧 Envoyer';
     }
+}
+function verifiedBadge(isVerified) {
+    if (!isVerified) return '';
+    return `<svg class="verified-badge" width="19" height="19" viewBox="0 0 24 24" fill="#4c9eff" xmlns="http://www.w3.org/2000/svg" title="compte certifié">
+        <path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="#4c9eff"/>
+    </svg>`;
 }
