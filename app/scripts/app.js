@@ -6345,3 +6345,6 @@ document.addEventListener('DOMContentLoaded', () => {
 document.getElementById('googleAuthBtn')?.addEventListener('click', () => {
     window.location.href = API + 'auth/google';
 });
+// Badge "compte lié à Google"
+const googleBadge = document.getElementById('accountGoogleBadge');
+if (googleBadge) googleBadge.style.display = user.googleLinked ? 'inline-flex' : 'none';

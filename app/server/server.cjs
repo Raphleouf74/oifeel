@@ -912,7 +912,7 @@ app.get("/api/auth/me", async (req, res) => {
     if (!user) return res.status(401).json({ error: "User not found" });
     const banData = checkBanSync(user);
     if (banData) return res.status(403).json({ error: "Banni", banData });
-    res.json({ user: { id: user._id, displayName: user.displayName } });
+    res.json({ user: { id: user._id, displayName: user.displayName, googleLinked: !!user.googleId } });
   } catch (err) {
     console.error('Error getting current user:', err);
     res.status(500).json({ error: 'Server error' });
@@ -1006,14 +1006,7 @@ app.post("/api/posts/:id/share", async (req, res) => {
 // AUTH MIDDLEWARE — accepte session ET JWT Bearer token
 // ============================================================
 async function requireAuth(req, res, next) {
-  // 1. Session OK (login classique)
-  if (req.session?.user?.id) {
-    const banData = await checkBan(req.session.user.id);
-    if (banData) return res.status(403).json({ error: 'Banni', banData });
-    return next();
-  }
-
-  // 2. JWT présent (token retourné par /login)
+  // 1. JWT présent → priorité (fiable même en cross-domain, contrairement au cookie de session)
   if (req.user?.id) {
     try {
       const userId = req.user.id;
@@ -1026,12 +1019,19 @@ async function requireAuth(req, res, next) {
       if (!user) return res.status(401).json({ error: 'Non authentifié' });
       const banData = checkBanSync(user);
       if (banData) return res.status(403).json({ error: 'Banni', banData });
-      req.session.user = { id: user._id, displayName: user.displayName };
+      req.session.user = { id: user._id, displayName: user.displayName }; // resynchronise la session
       return next();
     } catch (err) {
       console.error('❌ requireAuth JWT hydration error:', err);
       return res.status(401).json({ error: 'Non authentifié' });
     }
+  }
+
+  // 2. Pas de JWT → on retombe sur la session (cas où le front n'envoie pas de token)
+  if (req.session?.user?.id) {
+    const banData = await checkBan(req.session.user.id);
+    if (banData) return res.status(403).json({ error: 'Banni', banData });
+    return next();
   }
 
   return res.status(401).json({ error: 'Non authentifié' });
@@ -3204,6 +3204,11 @@ app.get('/api/auth/google/callback', async (req, res) => {
     }
 
     user.lastLogin = new Date();
+    user.lastLoginIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim()
+      || req.headers['x-real-ip']
+      || req.socket?.remoteAddress
+      || null;
+    user.lastLoginIpAt = new Date();
     await user.save();
 
     req.session.user = { id: user._id, displayName: user.displayName };
