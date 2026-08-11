@@ -3,7 +3,20 @@ window.openPermalinkModal = openPostModal;
 const API_BASE = "https://moodshare-7dd7.onrender.com";
 const API = API_BASE + '/api/';
 
+(function handleGoogleAuthRedirect() {
+    const params = new URLSearchParams(window.location.search);
+    const authToken = params.get('authToken');
+    const authError = params.get('authError');
 
+    if (authToken) {
+        localStorage.setItem('oifeel_token', authToken);
+        window.history.replaceState({}, document.title, window.location.pathname);
+        location.reload();
+    } else if (authError) {
+        console.error('Connexion Google échouée:', authError);
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+})();
 
 // ============================================================
 // PRÉFÉRENCE D'AFFICHAGE DES POSTS IA — allow | avoid | block
@@ -6213,15 +6226,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (status.enabled) {
                 const labels = { totp: 'appli d\'authentification', email: `email (${status.email || ''})` };
                 statusText.textContent = `activé — ${labels[status.method] || status.method}`;
+                manageBtn.classList.remove('disabled');
                 manageBtn.textContent = 'gérer';
             } else {
                 statusText.textContent = 'désactivé — recommandé pour sécuriser ton compte';
+                manageBtn.classList.remove('disabled');
                 manageBtn.textContent = 'activer';
             }
             return status;
         } catch (e) {
             statusText.textContent = 'connecte-toi pour gérer le 2FA';
             return null;
+            manageBtn.classList.add('disabled');
         }
     }
     refreshStatus();
@@ -6325,4 +6341,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     document.getElementById('twofaDisableCancel')?.addEventListener('click', () => panel.classList.add('hidden'));
+});
+document.getElementById('googleAuthBtn')?.addEventListener('click', () => {
+    window.location.href = API + 'auth/google';
 });

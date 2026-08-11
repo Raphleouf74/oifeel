@@ -291,6 +291,11 @@
   border-radius: var(--radius);
 }
 
+#twoFactorManageBtn.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 .more-section:last-of-type {
   border-bottom: none;
 }

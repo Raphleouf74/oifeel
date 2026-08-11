@@ -10,7 +10,7 @@ else {
 }
 Write-Host ""
 Write-Host "=============================="
-Write-Host "      oifeel Push Manager     "
+Write-Host "      oifeel. Push Manager     "
 Write-Host "=============================="
 Write-Host "Version actuelle: $currentVersion"
 Write-Host "Build actuel:       $currentBuild"

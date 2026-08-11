@@ -159,7 +159,10 @@ const userSchema = new mongoose.Schema({
     phone: { type: String, default: null },
     phoneVerified: { type: Boolean, default: false },
     emailVerified: { type: Boolean, default: false }
-  }
+  },
+
+  // googleId: { type: String, default: null, index: true, sparse: true },
+  googleId: { type: String, default: null, index: true, sparse: true },
 }, { _id: false });
 
 userSchema.index({ displayName: 'text' });
@@ -3132,6 +3135,89 @@ app.delete('/api/auth/account', requireAuth, async (req, res) => {
   }
 });
 
+const { OAuth2Client } = require('google-auth-library');
+const googleClient = new OAuth2Client(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  process.env.GOOGLE_REDIRECT_URI
+);
+
+// ── GET /api/auth/google — redirige vers l'écran de connexion Google ──
+app.get('/api/auth/google', (req, res) => {
+  const state = crypto.randomBytes(16).toString('hex');
+  req.session.oauthState = state; // protection CSRF
+
+  const url = googleClient.generateAuthUrl({
+    access_type: 'online',
+    scope: ['openid', 'email', 'profile'],
+    prompt: 'select_account',
+    state
+  });
+
+  req.session.save(() => res.redirect(url));
+});
+
+// ── GET /api/auth/google/callback — Google revient ici avec un code ──
+app.get('/api/auth/google/callback', async (req, res) => {
+  const FRONTEND_URL = process.env.FRONTEND_URL || 'https://oifeel.netlify.app';
+  try {
+    const { code, state } = req.query;
+
+    if (!code || state !== req.session.oauthState) {
+      return res.redirect(`${FRONTEND_URL}/?authError=invalid_state`);
+    }
+    delete req.session.oauthState;
+
+    if (!mongoReady) return res.redirect(`${FRONTEND_URL}/?authError=db_unavailable`);
+
+    const { tokens } = await googleClient.getToken(code);
+    const ticket = await googleClient.verifyIdToken({
+      idToken: tokens.id_token,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name } = payload;
+
+    let user = await UserModel.findOne({ googleId });
+
+    if (!user) {
+      // Pas encore lié — on regarde si un compte existant a le même email
+      user = email ? await UserModel.findOne({ email }) : null;
+
+      if (user) {
+        user.googleId = googleId;
+      } else {
+        user = new UserModel({
+          _id: Date.now().toString(),
+          displayName: (name || email.split('@')[0]).slice(0, 13),
+          password: hashPassword(crypto.randomBytes(32).toString('hex')), // jamais utilisé, comme pour les invités
+          email: email || null,
+          googleId,
+          createdAt: new Date()
+        });
+      }
+    }
+
+    const banStatus = checkUserBan(user);
+    if (banStatus.banned) {
+      return res.redirect(`${FRONTEND_URL}/?authError=banned`);
+    }
+
+    user.lastLogin = new Date();
+    await user.save();
+
+    req.session.user = { id: user._id, displayName: user.displayName };
+    await new Promise((resolve, reject) => {
+      req.session.save((err) => (err ? reject(err) : resolve()));
+    });
+
+    const token = jwtService.sign({ id: user._id }, '7d');
+    res.redirect(`${FRONTEND_URL}/?authToken=${token}`);
+  } catch (err) {
+    console.error('❌ Google OAuth error:', err);
+    res.redirect(`${FRONTEND_URL}/?authError=oauth_failed`);
+  }
+});
 
 // ── GET /api/admin/posts/:id/ip — Voir l'IP d'un post (admin) ────
 app.get('/api/admin/posts/:id/ip', requireAdmin, async (req, res) => {
