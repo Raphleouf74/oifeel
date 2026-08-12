@@ -5,6 +5,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>oifeel.</title>
         <link rel="icon" href="/app/assets/logo/app_logo_dark.png" type="image/png">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Caveat:wght@600;700&family=Fredoka:wght@500;600&family=Space+Mono:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="/app/styles/base.css">
         <link rel="stylesheet" href="/app/styles/layout.css">
         <link rel="stylesheet" href="/app/styles/shared-components.css">
@@ -1081,7 +1084,7 @@
                         class="create-textarea"
                         maxlength="200"
                         resize="none"
-                        rows="4"
+                        rows="6"
                         placeholder="ce que tu ressens en ce moment... personne ne juge ici 🤝"
                     ></textarea>
                     <div class="create-char-count">
@@ -1126,12 +1129,7 @@
                             </div>
                         </label>
                         <!-- Music picker button -->
-                        <button
-                            type="button"
-                            class="create-tool-btn create-advanced-tool"
-                            id="musicToolBtn"
-                            title="ajoute un extrait musical"
-                        >
+                        <button type="button" class="create-tool-btn create-advanced-tool" id="musicToolBtn">
                             <svg
                                 width="20"
                                 height="20"
@@ -1706,6 +1704,38 @@
                         <option value="avoid" data-i18n="ai_pref_avoid">afficher mais flouter le contenu</option>
                         <option value="block" data-i18n="ai_pref_block">masquer</option>
                     </select>
+                </div>
+                <div class="setting-row setting-row-stacked" id="themePersonalizationRow">
+                    <div class="setting-row-label">
+                        <p data-i18n="settings_theme_title">personnalisation du compte</p>
+                        <small data-i18n="settings_theme_sub">
+                            visible sur ton profil et tes posts (sauf ceux publiés en anonyme)
+                        </small>
+                    </div>
+                    <div id="themeControls">
+                        <div class="theme-control">
+                            <label for="themeAccentColor" data-i18n="settings_theme_color">couleur d'accent</label>
+                            <input type="color" id="themeAccentColor" value="#5f95b9">
+                        </div>
+                        <div class="theme-control">
+                            <label for="themeFontSelect" data-i18n="settings_theme_font">police</label>
+                            <select id="themeFontSelect" title="police du compte">
+                                <option value="default" class="font-default">classique</option>
+                                <option value="elegant" class="font-elegant">élégante</option>
+                                <option value="hand" class="font-hand">manuscrite</option>
+                                <option value="round" class="font-round">ronde</option>
+                                <option value="mono" class="font-mono">mono</option>
+                                <option value="display" class="font-display">affiche</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="themePreview">
+                        <div id="themePreviewCard">
+                            <span id="themePreviewEmoji">✨</span>
+                            <span id="themePreviewText">aperçu de ton style sur oifeel.</span>
+                        </div>
+                        <small id="themeSaveStatus"></small>
+                    </div>
                 </div>
             </div>
             <div class="more-section" id="more-legal">

@@ -21,6 +21,30 @@
   --radius: 8px;
 }
 
+/* ============================================================
+   PERSONNALISATION — polices prédéfinies pour la signature de compte
+   (voir sanitizeTheme côté serveur pour la liste des valeurs valides)
+   ============================================================ */
+.font-default {
+  font-family: "DM Sans", sans-serif;
+}
+.font-elegant {
+  font-family: "Playfair Display", serif;
+}
+.font-hand {
+  font-family: "Caveat", cursive;
+}
+.font-round {
+  font-family: "Fredoka", sans-serif;
+}
+.font-mono {
+  font-family: "Space Mono", monospace;
+}
+.font-display {
+  font-family: "Bebas Neue", sans-serif;
+  letter-spacing: 0.02em;
+}
+
 body {
   font-family: "DM Sans", sans-serif;
   margin: 0;

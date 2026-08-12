@@ -164,6 +164,17 @@ const userSchema = new mongoose.Schema({
   // googleId: { type: String, default: null, index: true, sparse: true },
   googleId: { type: String, default: null, index: true, sparse: true },
   verified: { type: Boolean, default: false },
+
+  // ── Personnalisation du compte — visible par les autres sur le
+  // profil et sur les posts (hors posts publiés en anonyme) ──
+  theme: {
+    accentColor: { type: String, default: '#5f95b9' },
+    font: {
+      type: String,
+      enum: ['default', 'elegant', 'hand', 'round', 'mono', 'display'],
+      default: 'default'
+    }
+  },
 }, { _id: false });
 
 userSchema.index({ displayName: 'text' });
@@ -598,7 +609,7 @@ app.get("/api/stories", (req, res) => {
   }
 });
 
-app.get("/api/posts", (req, res) => {
+app.get("/api/posts", async (req, res) => {
   const page = Math.max(1, parseInt(req.query.page || '1', 10));
   const limit = Math.min(100, Math.max(1, parseInt(req.query.limit || '200', 10)));
   const sort = req.query.sort || 'recent'; // recent | popular | trending
@@ -617,7 +628,8 @@ app.get("/api/posts", (req, res) => {
   // default: recent — already ordered unshift
 
   const start = (page - 1) * limit;
-  const paged = result.slice(start, start + limit);
+  let paged = result.slice(start, start + limit);
+  paged = await attachAuthorThemes(paged);
   res.json(paged.map(sanitizePostForPublic));
 });
 
@@ -628,6 +640,52 @@ function sanitizeText(text) {
     throw new Error("Contenu interdit detecté");
   }
   return text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+const THEME_FONTS = ['default', 'elegant', 'hand', 'round', 'mono', 'display'];
+const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
+
+// Valide/nettoie un thème de compte envoyé par le client. Renvoie
+// uniquement les champs valides ; ignore silencieusement le reste
+// plutôt que de rejeter toute la requête pour une seule valeur invalide.
+function sanitizeTheme(theme, fallback) {
+  const base = fallback && typeof fallback === 'object'
+    ? { accentColor: fallback.accentColor, font: fallback.font }
+    : { accentColor: '#5f95b9', font: 'default' };
+
+  if (!theme || typeof theme !== 'object') return base;
+
+  const out = { ...base };
+  if (typeof theme.accentColor === 'string' && HEX_COLOR_RE.test(theme.accentColor)) {
+    out.accentColor = theme.accentColor;
+  }
+  if (typeof theme.font === 'string' && THEME_FONTS.includes(theme.font)) {
+    out.font = theme.font;
+  }
+  return out;
+}
+
+// Attache le thème public de l'auteur (`authorTheme`) à une liste de posts,
+// via un seul lookup groupé — jamais pour les posts publiés en anonyme,
+// pour ne pas laisser la personnalisation trahir l'identité de l'auteur.
+async function attachAuthorThemes(postsArr) {
+  const ids = [...new Set(
+    postsArr.filter(p => p && !p.anonymous && p.userId).map(p => p.userId)
+  )];
+  if (!ids.length) return postsArr;
+
+  try {
+    const authors = await UserModel.find({ _id: { $in: ids } }).select('theme').lean();
+    const themeById = new Map(authors.map(a => [a._id, a.theme || null]));
+    return postsArr.map(p => {
+      if (!p || p.anonymous || !p.userId) return p;
+      const theme = themeById.get(p.userId);
+      return theme ? { ...p, authorTheme: theme } : p;
+    });
+  } catch (err) {
+    console.error('❌ Erreur attachAuthorThemes:', err);
+    return postsArr; // en cas d'erreur, on renvoie les posts sans thème plutôt que de faire échouer la requête
+  }
 }
 
 // Construit un objet track "propre" à partir de ce que le client envoie,
@@ -687,14 +745,19 @@ app.post("/api/posts", async (req, res) => {
 
     posts.unshift(newPost);
     await persistPost(newPost);
-    try { sendSSE('new_post', sanitizePostForPublic(newPost)); } catch (e) { console.error('❌ Erreur SSE:', e); }
+
+    // Attache le thème de l'auteur pour un affichage immédiat (sans attendre
+    // un refetch du feed), sauf si le post est publié en anonyme.
+    const [newPostWithTheme] = await attachAuthorThemes([newPost]);
+
+    try { sendSSE('new_post', sanitizePostForPublic(newPostWithTheme)); } catch (e) { console.error('❌ Erreur SSE:', e); }
 
     // Incrémenter postsCount
     if (!isAnon && userId && mongoReady) {
       UserModel.findByIdAndUpdate(userId, { $inc: { postsCount: 1 } }).catch(() => { });
     }
 
-    res.status(201).json(sanitizePostForPublic(newPost));
+    res.status(201).json(sanitizePostForPublic(newPostWithTheme));
   } catch (err) {
     return res.status(400).json({ error: "Contenu invalide" });
   }
@@ -1140,7 +1203,8 @@ app.get("/api/social/profile/:userId", async (req, res) => {
         followersCount: 0,
         followingCount: 0,
         followers: [],
-        following: []
+        following: [],
+        theme: { accentColor: '#5f95b9', font: 'default' }
       };
     }
 
@@ -1182,7 +1246,7 @@ app.get("/api/social/profile/:userId", async (req, res) => {
 app.put("/api/social/profile", requireAuth, async (req, res) => {
   try {
     const currentUserId = req.session.user.id;
-    const { displayName, avatar, bio } = req.body;
+    const { displayName, avatar, bio, theme } = req.body;
 
     const user = await UserModel.findById(currentUserId);
     if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
@@ -1192,6 +1256,9 @@ app.put("/api/social/profile", requireAuth, async (req, res) => {
     if (displayName !== undefined) {
       user.displayName = displayName.substring(0, 50);
       req.session.user.displayName = user.displayName;
+    }
+    if (theme !== undefined) {
+      user.theme = sanitizeTheme(theme, user.theme);
     }
 
     await user.save();
@@ -1205,7 +1272,8 @@ app.put("/api/social/profile", requireAuth, async (req, res) => {
         id: user._id,
         displayName: user.displayName,
         bio: user.bio,
-        avatar: user.avatar
+        avatar: user.avatar,
+        theme: user.theme
       }
     });
   } catch (error) {
@@ -2746,10 +2814,11 @@ app.get('/api/users/:userId/posts', async (req, res) => {
 // ============================================================
 
 // GET /api/posts/:id — Post unique (pour permalink)
-app.get('/api/posts/:id', (req, res) => {
+app.get('/api/posts/:id', async (req, res) => {
   const post = posts.find(p => String(p.id) === String(req.params.id));
   if (!post) return res.status(404).json({ error: 'Post non trouvé' });
-  res.json(sanitizePostForPublic(post));
+  const [postWithTheme] = await attachAuthorThemes([post]);
+  res.json(sanitizePostForPublic(postWithTheme));
 });
 
 // POST /api/posts/:id/view — Incrémenter les vues
@@ -2945,7 +3014,8 @@ app.get('/api/users/me', requireAuth, async (req, res) => {
       followingCount: user.followingCount || 0,
       createdAt: user.createdAt,
       isGuest: user.isGuest || false,
-      aiPostsPreference: user.aiPostsPreference || 'allow'
+      aiPostsPreference: user.aiPostsPreference || 'allow',
+      theme: user.theme || { accentColor: '#5f95b9', font: 'default' }
     });
   } catch (err) {
     console.error('❌ Erreur récupération profil:', err);

@@ -417,6 +417,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 });
 
+
+
 const nav = document.querySelector('nav');
 const header = document.querySelector('header');
 const profileheader = document.getElementById('accountheader');
@@ -4575,7 +4577,16 @@ function _injectMoodOfDay() {
     });
 
 }
+const maxLines = 6;
 
+moodInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+        const lines = moodInput.value.split('\n').length;
+        if (lines >= maxLines) {
+            e.preventDefault(); // Bloque la touche Entrée
+        }
+    }
+});
 // ─── 2. Bannière Mood du jour ────────────────────────────────
 
 // ─── 3. Compteur de vues ────────────────────────────────────
