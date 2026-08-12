@@ -630,11 +630,27 @@ function sanitizeText(text) {
   return text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+// Construit un objet track "propre" à partir de ce que le client envoie,
+// pour ne jamais stocker/renvoyer de champs arbitraires non prévus.
+function sanitizeTrack(track) {
+  if (!track || typeof track !== "object") return null;
+  const preview = typeof track.preview === "string" ? track.preview : null;
+  if (!preview) return null; // sans extrait audio, pas d'intérêt à garder le morceau
+  return {
+    title: sanitizeText(String(track.title || "").slice(0, 120)),
+    artist: sanitizeText(String(track.artist || "").slice(0, 120)),
+    cover: typeof track.cover === "string" ? track.cover.slice(0, 500) : null,
+    preview: preview.slice(0, 500),
+    link: typeof track.link === "string" ? track.link.slice(0, 500) : null
+  };
+}
+
 app.post("/api/posts", async (req, res) => {
   try {
 
     const cleanText = sanitizeText(req.body.text);
     const cleanEmoji = sanitizeText(req.body.emoji);
+    const cleanTrack = sanitizeTrack(req.body.track);
     // 1. Capturer l'IP (APRÈS les lignes const cleanText / cleanEmoji)
     const clientIp =
       (req.headers['x-forwarded-for']?.split(',')[0]?.trim()
@@ -652,6 +668,7 @@ app.post("/api/posts", async (req, res) => {
       color: req.body.color,
       textColor: req.body.textColor,
       stickerUrl: req.body.stickerUrl || null,
+      track: cleanTrack,
       anonymous: isAnon,
       id: Date.now().toString(),
       userId: isAnon ? null : userId,
@@ -813,6 +830,45 @@ app.post('/api/ai/generate-post', async (req, res) => {
   }
 });
 
+// ============================================================
+// MUSIQUE — recherche de morceaux via l'API Deezer (proxy serveur)
+// Deezer ne gère pas le CORS pour les appels navigateur, et Spotify
+// ne fournit plus les preview_url en 30s depuis nov. 2024 : on passe
+// donc par Deezer, qui reste gratuit, sans clé, et fournit un vrai
+// extrait mp3 de 30s par morceau (champ "preview").
+// ============================================================
+app.get('/api/music/search', async (req, res) => {
+  try {
+    const q = String(req.query.q || '').trim().slice(0, 100);
+    if (!q) return res.json({ results: [] });
+
+    const deezerRes = await fetch(`https://api.deezer.com/search?q=${encodeURIComponent(q)}&limit=15`);
+
+    if (!deezerRes.ok) {
+      console.error('❌ Erreur Deezer:', deezerRes.status);
+      return res.status(502).json({ error: "Recherche musicale indisponible pour le moment." });
+    }
+
+    const deezerData = await deezerRes.json();
+
+    const results = (deezerData?.data || [])
+      .filter(t => t.preview) // uniquement les morceaux avec un extrait 30s exploitable
+      .slice(0, 12)
+      .map(t => ({
+        title: t.title,
+        artist: t.artist?.name || '',
+        cover: t.album?.cover_medium || t.album?.cover || null,
+        preview: t.preview,
+        link: t.link || null
+      }));
+
+    res.json({ results });
+  } catch (err) {
+    console.error('❌ Erreur recherche musique:', err);
+    res.status(500).json({ error: "Erreur serveur lors de la recherche musicale." });
+  }
+});
+
 app.post('/api/posts/:id/report', async (req, res) => {
   try {
     const targetPost = posts.find(p => p.id == req.params.id);
@@ -847,6 +903,7 @@ app.post('/api/posts/:id/repost', async (req, res) => {
       emoji: orig.emoji,
       color: orig.color,
       textColor: orig.textColor,
+      track: orig.track || null,
       id: Date.now().toString(),
       likes: 0,
       aiGenerated: !!orig.aiGenerated,

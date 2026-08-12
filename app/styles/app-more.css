@@ -1214,6 +1214,15 @@ a.download-apk-btn:hover {
   font-size: 2.75rem;
   display: block;
   margin-bottom: 4px;
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  gap: 10px;
+}
+
+.suggestion-name svg {
+  height: 30px;
+  width: 30px;
 }
 
 .suggestion-stats {

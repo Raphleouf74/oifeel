@@ -535,6 +535,107 @@ body.dark .sv-bubble__face {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
+/* ---- Pilule musique (extrait Deezer, 30s) ---- */
+
+.post-track {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  max-width: calc(100% - 32px);
+  padding: 6px 14px 6px 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+}
+
+.post-track-cover {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.post-track-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.post-track-title {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+.post-track-artist {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.75);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+.post-track-play {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  margin-left: 2px;
+  background: #fff;
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease;
+}
+
+.post-track-play:hover {
+  transform: scale(1.08);
+}
+
+.post-track-play svg {
+  width: 12px;
+  height: 12px;
+}
+
+.post-track-play.playing {
+  background: #5f95b9;
+  color: #fff;
+}
+
+@media (max-width: 769px) {
+  .post-track {
+    bottom: 10px;
+    padding: 5px 12px 5px 5px;
+    gap: 7px;
+  }
+
+  .post-track-cover {
+    width: 26px;
+    height: 26px;
+  }
+
+  .post-track-title,
+  .post-track-artist {
+    max-width: 110px;
+  }
+}
+
 #postoptions {
   height: 50px;
   padding: 14px 18px;
@@ -778,6 +879,10 @@ body.dark .post-actions button:hover {
   font-size: 0.95rem;
   color: var(--text);
   margin-bottom: 2px;
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  gap: 5px;
 }
 
 .conv-preview {
@@ -914,17 +1019,13 @@ body.dark .post-actions button:hover {
 #feed-selector .sort-btn.active {
   background-size: 400% 400%;
   background-position: 0% 50%;
-  background: linear-gradient(
-    to top,
-    rgba(124, 58, 237, 0.4) 15%,
-    transparent
-  );
+  background: linear-gradient(to top, rgba(124, 58, 237, 0.4) 15%, transparent);
   color: #ffffff;
   font-weight: 700;
   transform: scale(1.05);
 }
 
-#sort-bar:hover .sort-btn-{
+#sort-bar:hover .sort-btn- {
   opacity: 1;
   pointer-events: auto;
 }
@@ -955,8 +1056,6 @@ body.dark .post-actions button:hover {
   height: 45px;
 }
 
-
-
 .feed-selector__indicator {
   position: absolute;
   bottom: 6px;
@@ -972,7 +1071,8 @@ body.dark .post-actions button:hover {
   z-index: 1;
 }
 
-.sort-btn:hover, #feed-selector .sort-btn:hover {
+.sort-btn:hover,
+#feed-selector .sort-btn:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
@@ -1335,6 +1435,82 @@ body.dark .post-actions button:hover {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
+#permalink-track {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 320px;
+  padding: 8px 16px 8px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+#permalink-track img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+#permalink-track .permalink-track-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+#permalink-track .permalink-track-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 190px;
+}
+
+#permalink-track .permalink-track-artist {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.75);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 190px;
+}
+
+#permalink-track button {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  margin-left: 2px;
+  background: #fff;
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease;
+}
+
+#permalink-track button:hover {
+  transform: scale(1.08);
+}
+
+#permalink-track button svg {
+  width: 13px;
+  height: 13px;
+}
+
+#permalink-track button.playing {
+  background: #5f95b9;
+  color: #fff;
+}
+
 #permalink-ephemeral {
   padding: 8px 14px;
 
@@ -1605,7 +1781,7 @@ body.dark .post-actions button:hover {
   .mainlogo h1 {
     pointer-events: none;
   }
-  
+
   #moodWall {
     display: flex;
     gap: -100px;
@@ -1712,7 +1888,7 @@ body.dark .post-actions button:hover {
   .feedback-welcome {
     background: rgba(0, 188, 212, 0.9);
   }
-  
+
   .sv-bubble {
     display: flex;
     flex-direction: column;
@@ -2227,6 +2403,10 @@ body.dark .post-actions button:hover {
     font-size: 0.95rem;
     color: var(--text);
     margin-bottom: 2px;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    gap: 5px;
   }
   .conv-preview {
     font-size: 0.8rem;
@@ -2301,7 +2481,7 @@ body.dark .post-actions button:hover {
     color: #666;
     margin-right: 4px;
   }
-  .mood-today{
+  .mood-today {
     display: flex;
     align-items: center;
     gap: 14px;

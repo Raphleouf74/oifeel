@@ -72,6 +72,10 @@ header.scrolled {
   font-size: 0.95rem;
   font-weight: 600;
   opacity: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
   transform: translateX(0);
   transition: all 0.2s ease-in-out;
 }

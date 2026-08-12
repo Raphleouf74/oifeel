@@ -2,7 +2,18 @@ window.openPermalinkModal = openPostModal;
 
 const API_BASE = "https://moodshare-7dd7.onrender.com";
 const API = API_BASE + '/api/';
+// Liste des comptes certifiés (à remplir avec les vrais _id Mongo des 2 comptes oifeel)
+const VERIFIED_USER_IDS = new Set([
+    '1786479728376',
+    '1771767358625'
+]);
 
+function verifiedBadge(userId) {
+    if (!userId || !VERIFIED_USER_IDS.has(String(userId))) return '';
+    return `<svg class="verified-badge" width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" title="compte certifié">
+        <path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="#4c9eff"/>
+    </svg>`;
+}
 (function handleGoogleAuthRedirect() {
     const params = new URLSearchParams(window.location.search);
     const authToken = params.get('authToken');
@@ -587,6 +598,23 @@ ephemeralToggle.addEventListener('change', () => {
 });
 
 
+// Lecteur audio partagé pour les extraits musicaux du feed : un seul
+// extrait joue à la fois, quel que soit le post.
+let _feedTrackAudio = null;
+let _feedTrackPlayingBtn = null;
+
+function _stopFeedTrack() {
+    if (_feedTrackAudio) {
+        _feedTrackAudio.pause();
+        _feedTrackAudio = null;
+    }
+    if (_feedTrackPlayingBtn) {
+        _feedTrackPlayingBtn.classList.remove('playing');
+        _feedTrackPlayingBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+        _feedTrackPlayingBtn = null;
+    }
+}
+
 function displayMood(mood) {
     const moodcard = document.createElement("div");
     moodcard.className = "post";
@@ -632,6 +660,50 @@ function displayMood(mood) {
     }
 
     content.appendChild(innerWrap);
+
+    // Pilule musique (extrait 30s via Deezer)
+    if (mood.track && mood.track.preview) {
+        const trackPill = document.createElement('div');
+        trackPill.className = 'post-track';
+
+        const trackCover = document.createElement('img');
+        trackCover.className = 'post-track-cover';
+        trackCover.src = mood.track.cover || '';
+        trackCover.alt = '';
+
+        const trackInfo = document.createElement('div');
+        trackInfo.className = 'post-track-info';
+        trackInfo.innerHTML = `
+            <span class="post-track-title">${mood.track.title}</span>
+            <span class="post-track-artist">${mood.track.artist}</span>
+        `;
+
+        const trackPlayBtn = document.createElement('button');
+        trackPlayBtn.type = 'button';
+        trackPlayBtn.className = 'post-track-play';
+        trackPlayBtn.dataset.preview = mood.track.preview;
+        trackPlayBtn.setAttribute('aria-label', 'écouter l\'extrait');
+        trackPlayBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+
+        trackPlayBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const wasPlaying = trackPlayBtn.classList.contains('playing');
+            _stopFeedTrack();
+            if (!wasPlaying) {
+                _feedTrackAudio = new Audio(mood.track.preview);
+                _feedTrackAudio.play().catch(() => { });
+                _feedTrackAudio.addEventListener('ended', _stopFeedTrack);
+                trackPlayBtn.classList.add('playing');
+                trackPlayBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>`;
+                _feedTrackPlayingBtn = trackPlayBtn;
+            }
+        });
+
+        trackPill.appendChild(trackCover);
+        trackPill.appendChild(trackInfo);
+        trackPill.appendChild(trackPlayBtn);
+        content.appendChild(trackPill);
+    }
 
     // Tag "généré par IA"
     if (mood.aiGenerated) {
@@ -1462,6 +1534,7 @@ if (submitBtn) {
                     textColor: document.getElementById('textColor')?.value || null,
                     emoji,
                     stickerUrl: _selectedStickerUrl || null,
+                    track: _selectedTrack || null,
                     createdAt: new Date().toISOString(),
                     expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
                 };
@@ -1500,6 +1573,7 @@ if (submitBtn) {
                     textColor: document.getElementById('textColor')?.value || null,
                     emoji,
                     stickerUrl: _selectedStickerUrl || null,
+                    track: _selectedTrack || null,
                     ephemeral: ephemeralToggle.checked,
                     expiresAt,
                     aiGenerated: _lastAiGeneratedText !== null && text === _lastAiGeneratedText.trim()
@@ -1523,6 +1597,8 @@ if (submitBtn) {
             document.querySelector(".moodEmoji").value = "";
             _selectedEmoji = '👋';
             _selectedStickerUrl = null;
+            _selectedTrack = null;
+            _updateChosenTrackPreview();
             _lastAiGeneratedText = null;
             ephemeralToggle.checked = false;
             if (storyModeToggle) storyModeToggle.checked = false;
@@ -2028,6 +2104,163 @@ function _renderStickers(results, apiVersion) {
     });
 }
 
+// ============================================================
+// MUSIQUE — recherche & sélection d'un extrait via l'API Deezer
+// (proxy serveur /api/music/search, pas de clé requise côté client)
+// ============================================================
+const _musicToolBtn = document.getElementById('musicToolBtn');
+const _musicOverlay = document.getElementById('musicPickerOverlay');
+const _musicSearchInput = document.getElementById('musicSearchInput');
+const _musicSearchBtn = document.getElementById('musicSearchBtn');
+const _musicResults = document.getElementById('musicResults');
+const _chosenTrackPreview = document.getElementById('chosenTrackPreview');
+const _chosenTrackCover = document.getElementById('chosenTrackCover');
+const _chosenTrackTitle = document.getElementById('chosenTrackTitle');
+const _chosenTrackArtist = document.getElementById('chosenTrackArtist');
+const _chosenTrackRemove = document.getElementById('chosenTrackRemove');
+let _selectedTrack = null;
+let _musicPreviewAudio = null; // lecteur audio partagé pour auditionner dans la modale
+let _musicSearchDebounce = null;
+
+function _updateChosenTrackPreview() {
+    if (!_chosenTrackPreview) return;
+    if (_selectedTrack) {
+        _chosenTrackCover.src = _selectedTrack.cover || '';
+        _chosenTrackTitle.textContent = _selectedTrack.title;
+        _chosenTrackArtist.textContent = _selectedTrack.artist;
+        _chosenTrackPreview.hidden = false;
+    } else {
+        _chosenTrackPreview.hidden = true;
+    }
+}
+
+function _stopMusicPreview() {
+    if (_musicPreviewAudio) {
+        _musicPreviewAudio.pause();
+        _musicPreviewAudio = null;
+    }
+    _musicResults?.querySelectorAll('.music-item-play.playing').forEach(b => b.classList.remove('playing'));
+}
+
+if (_musicToolBtn && _musicOverlay) {
+    _musicToolBtn.addEventListener('click', () => {
+        _musicOverlay.style.setProperty('display', 'flex', 'important');
+        _musicSearchInput?.focus();
+    });
+
+    _musicOverlay.querySelector('.create-picker-close-music').addEventListener('click', () => {
+        _musicOverlay.style.setProperty('display', 'none', 'important');
+        _stopMusicPreview();
+    });
+
+    _musicOverlay.addEventListener('click', (e) => {
+        if (e.target === _musicOverlay) {
+            _musicOverlay.style.setProperty('display', 'none', 'important');
+            _stopMusicPreview();
+        }
+    });
+}
+
+if (_musicSearchBtn && _musicSearchInput) {
+    _musicSearchBtn.addEventListener('click', () => {
+        const q = _musicSearchInput.value.trim();
+        if (q) _searchMusic(q);
+    });
+
+    _musicSearchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const q = _musicSearchInput.value.trim();
+            if (q) _searchMusic(q);
+        }
+    });
+
+    // Recherche "live" avec un léger debounce, comme pour les stickers
+    _musicSearchInput.addEventListener('input', () => {
+        clearTimeout(_musicSearchDebounce);
+        const q = _musicSearchInput.value.trim();
+        if (!q) { _musicResults.innerHTML = ''; return; }
+        _musicSearchDebounce = setTimeout(() => _searchMusic(q), 400);
+    });
+}
+
+async function _searchMusic(query) {
+    if (!_musicResults) return;
+    _musicResults.innerHTML = '<div class="music-empty">recherche...</div>';
+    try {
+        const res = await fetch(`${API}music/search?q=${encodeURIComponent(query)}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        _renderMusicResults(data.results || []);
+    } catch (err) {
+        console.error('Erreur recherche musique:', err);
+        _musicResults.innerHTML = '<div class="music-empty">recherche indisponible, réessaie plus tard</div>';
+    }
+}
+
+function _renderMusicResults(results) {
+    _stopMusicPreview();
+    _musicResults.innerHTML = '';
+
+    if (!results.length) {
+        _musicResults.innerHTML = '<div class="music-empty">aucun résultat</div>';
+        return;
+    }
+
+    results.forEach(track => {
+        const item = document.createElement('div');
+        item.className = 'music-item';
+
+        const cover = document.createElement('img');
+        cover.src = track.cover || '';
+        cover.alt = '';
+
+        const info = document.createElement('div');
+        info.className = 'music-item-info';
+        info.innerHTML = `
+            <span class="music-item-title">${track.title}</span>
+            <span class="music-item-artist">${track.artist}</span>
+        `;
+
+        const playBtn = document.createElement('button');
+        playBtn.type = 'button';
+        playBtn.className = 'music-item-play';
+        playBtn.setAttribute('aria-label', 'écouter l\'extrait');
+        playBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+
+        playBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isPlaying = playBtn.classList.contains('playing');
+            _stopMusicPreview();
+            if (!isPlaying) {
+                _musicPreviewAudio = new Audio(track.preview);
+                _musicPreviewAudio.play().catch(() => { });
+                _musicPreviewAudio.addEventListener('ended', () => playBtn.classList.remove('playing'));
+                playBtn.classList.add('playing');
+            }
+        });
+
+        item.appendChild(cover);
+        item.appendChild(info);
+        item.appendChild(playBtn);
+
+        item.addEventListener('click', () => {
+            _selectedTrack = track;
+            _updateChosenTrackPreview();
+            _stopMusicPreview();
+            _musicOverlay.style.setProperty('display', 'none', 'important');
+        });
+
+        _musicResults.appendChild(item);
+    });
+}
+
+if (_chosenTrackRemove) {
+    _chosenTrackRemove.addEventListener('click', () => {
+        _selectedTrack = null;
+        _updateChosenTrackPreview();
+    });
+}
+
 // Preview live
 // function _ {
 //     const text = _moodInput.value || 'Ton message apparaîtra ici...';
@@ -2484,10 +2717,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function finalizeLoggedInUI(user, fallbackName) {
         const uname = (user && (user.displayName || user.display_name || user.username)) || fallbackName || 'non connecté';
-        userName.textContent = uname;
-        userNameProfile.textContent = uname;
+        userName.innerHTML = `${uname} ${verifiedBadge(user.id)}`;
+        userNameProfile.innerHTML = `${uname} ${verifiedBadge(user.id)}`;
         userIDspan.textContent = user.id;
-        saveProfileLocal({ displayName: uname });
+        // On stocke le pseudo et l'id "propres" — le badge est recalculé au rendu, jamais figé en localStorage
+        saveProfileLocal({ displayName: uname, id: user.id });
         hideModal();
         document.dispatchEvent(new CustomEvent('userLoggedIn'));
         location.reload(); // reload to refresh UI and fetch user data
@@ -2587,9 +2821,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (guestBtn) guestBtn.classList.remove('hidden');
         // restore stored profile name or default
         const saved = loadProfileLocal();
-        userName.textContent = saved && saved.displayName ? saved.displayName : 'non connecté';
-        userNameProfile.textContent = saved && saved.displayName ? saved.displayName : 'non connecté';
-        userIDspan.textContent = saved && saved.id ? saved.id : 'Connectez tu';
+        const restoredName = (saved && saved.displayName) ? saved.displayName : 'non connecté';
+        // Pas de badge ici : l'utilisateur est déconnecté, on affiche juste le pseudo en texte brut
+        userName.textContent = restoredName;
+        userNameProfile.textContent = restoredName;
+        userIDspan.textContent = restoredName;
     });
 
     // Small helpers to persist simple profile prefs locally
@@ -2606,8 +2842,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function applyProfileToUI(profile) {
         if (!profile) return;
-        if (profile.displayName && userName) userName.textContent = profile.displayName;
-        if (profile.displayName && userNameProfile) userNameProfile.textContent = profile.displayName;
+        if (profile.displayName && userName) userName.innerHTML = `${profile.displayName} ${verifiedBadge(profile.id)}`;
+        if (profile.displayName && userNameProfile) userNameProfile.innerHTML = `${profile.displayName} ${verifiedBadge(profile.id)}`;
         if (profile.id && userIDspan) userIDspan.textContent = profile.id;
         if (profile.emoji && accountAvatar) accountAvatar.alt = profile.emoji;
     }
@@ -2622,7 +2858,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (user) {
             const uname = (user && (user.displayName || user.display_name || user.username)) || localProfile.displayName || 'non connecté';
             // userName.textContent = uname;
-            saveProfileLocal({ displayName: uname });
+            saveProfileLocal({ displayName: uname, id: user.id });
             if (guestBtn) guestBtn.classList.add('hidden');
             if (logoutBtn) logoutBtn.classList.remove('hidden');
             if (accountHeader) accountHeader.classList.remove('hidden');
@@ -4926,7 +5162,7 @@ async function searchUsers(query) {
             div.className = 'user-search-item';
             div.innerHTML = `
                 <div class="user-avatar">${user.displayName[0].toUpperCase()}</div>
-                <div class="user-info"><div class="user-name">${user.displayName}${verifiedBadge(user.verified)}</div></div>
+                <div class="user-info"><div class="user-name">${user.displayName}${verifiedBadge(user._id)}</div></div>
                 <button class="btn-start-chat">message</button>`;
             div.querySelector('.btn-start-chat').addEventListener('click', () => {
                 closeUserSearch();
@@ -4968,13 +5204,12 @@ async function loadConversations() {
                     preview = lastMsg.content.substring(0, 60);
                 }
             }
-
             const div = document.createElement('div');
             div.className = 'conversation-item';
             div.innerHTML = `
                 <div class="conv-avatar">${otherName[0].toUpperCase()}</div>
                 <div class="conv-info">
-                    <div class="conv-name">${otherName}</div>
+                    <div class="conv-name">${otherName}${verifiedBadge(otherUserId)}</div>
                     <div class="conv-preview">${preview}</div>
                 </div>`;
             div.addEventListener('click', () => openConversation(otherUserId, otherName));
@@ -5292,6 +5527,16 @@ function extractMoodFromEl(postEl, postId) {
     const stickerSrc = postEl.querySelector('.post-sticker')?.src || null;
     const isEphemeral = postEl.classList.contains('ephemeral');
 
+    // Le morceau n'est pas dans le DOM sous forme de data-attributes séparés,
+    // donc on le reconstruit à partir de la pilule musique déjà rendue.
+    const trackEl = postEl.querySelector('.post-track');
+    const track = trackEl ? {
+        title: trackEl.querySelector('.post-track-title')?.textContent || '',
+        artist: trackEl.querySelector('.post-track-artist')?.textContent || '',
+        cover: trackEl.querySelector('.post-track-cover')?.src || null,
+        preview: trackEl.querySelector('.post-track-play')?.dataset.preview || null
+    } : null;
+
     return {
         id: postId,
         emoji,
@@ -5300,6 +5545,7 @@ function extractMoodFromEl(postEl, postId) {
         likes: parseInt(likeCount, 10) || 0,
         createdAt: dateText,
         stickerUrl: stickerSrc,
+        track,
         ephemeral: isEphemeral
     };
 }
@@ -5354,6 +5600,49 @@ function renderModal(mood, postId, postEl) {
         stickerImg.src = mood.stickerUrl;
         stickerImg.alt = 'Sticker';
         card.appendChild(stickerImg);
+    }
+
+    if (mood.track && mood.track.preview) {
+        const trackPill = document.createElement('div');
+        trackPill.id = 'permalink-track';
+
+        const cover = document.createElement('img');
+        cover.src = mood.track.cover || '';
+        cover.alt = '';
+
+        const info = document.createElement('div');
+        info.className = 'permalink-track-info';
+        info.innerHTML = `
+            <span class="permalink-track-title">${mood.track.title}</span>
+            <span class="permalink-track-artist">${mood.track.artist}</span>
+        `;
+
+        const playBtn = document.createElement('button');
+        playBtn.type = 'button';
+        playBtn.setAttribute('aria-label', 'écouter l\'extrait');
+        playBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+
+        playBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const wasPlaying = playBtn.classList.contains('playing');
+            _stopFeedTrack();
+            if (!wasPlaying) {
+                _feedTrackAudio = new Audio(mood.track.preview);
+                _feedTrackAudio.play().catch(() => { });
+                _feedTrackAudio.addEventListener('ended', () => {
+                    playBtn.classList.remove('playing');
+                    playBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+                });
+                playBtn.classList.add('playing');
+                playBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>`;
+                _feedTrackPlayingBtn = playBtn;
+            }
+        });
+
+        trackPill.appendChild(cover);
+        trackPill.appendChild(info);
+        trackPill.appendChild(playBtn);
+        card.appendChild(trackPill);
     }
 
     if (mood.ephemeral) {
@@ -5847,7 +6136,7 @@ async function injectSuggestionsBanner() {
                 card.innerHTML = `
         <div class="suggestion-avatar">${user.avatar || '👤'}</div>
         <div class="suggestion-info">
-          <strong class="suggestion-name">${escHtml(user.displayName)}</strong>
+          <strong class="suggestion-name">${escHtml(user.displayName)}${verifiedBadge(user._id)}</strong>
           <small class="suggestion-stats">${user.followersCount || 0} followers • ${user.postsCount || 0} posts</small>
           ${user.bio ? `<p class="suggestion-bio">${escHtml(user.bio.substring(0, 50))}...</p>` : ''}
         </div>
@@ -6347,9 +6636,3 @@ document.addEventListener('DOMContentLoaded', () => {
 document.getElementById('googleAuthBtn')?.addEventListener('click', () => {
     window.location.href = API + 'auth/google';
 });
-function verifiedBadge(isVerified) {
-    if (!isVerified) return '';
-    return `<svg class="verified-badge" width="19" height="19" viewBox="0 0 24 24" fill="#4c9eff" xmlns="http://www.w3.org/2000/svg" title="compte certifié">
-        <path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="#4c9eff"/>
-    </svg>`;
-}
