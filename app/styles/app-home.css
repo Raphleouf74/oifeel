@@ -539,38 +539,28 @@ body.dark .sv-bubble__face {
 
 .post-track {
   position: absolute;
-  top: 25px;
-  left: 10px;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
   display: flex;
-  justify-content: center;
   align-items: center;
   gap: 9px;
-  width: 250px;
+  max-width: calc(100% - 32px);
   padding: 6px 14px 6px 6px;
-  height: 50px;
-  border-radius: 99px 40px 40px 99px;
+  border-radius: 999px;
   background: rgba(0, 0, 0, 0.35);
-  -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
   z-index: 2;
 }
 
 .post-track-cover {
-  position: absolute;
-  left: 6px;
-  top:4px;
-  width: 55px;
-  height: 55px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-  animation: rotate 25s linear infinite;
-}
-
-@keyframes rotate {
-  0% {rotate: 0;}
-  100% {rotate: 360deg;}
 }
 
 .post-track-info {
@@ -581,7 +571,7 @@ body.dark .sv-bubble__face {
 }
 
 .post-track-title {
-  font-size: 1.2rem;
+  font-size: 0.76rem;
   font-weight: 700;
   color: #fff;
   white-space: nowrap;
@@ -591,7 +581,7 @@ body.dark .sv-bubble__face {
 }
 
 .post-track-artist {
-  font-size: 1rem;
+  font-size: 0.68rem;
   color: rgba(255, 255, 255, 0.75);
   white-space: nowrap;
   overflow: hidden;
@@ -601,9 +591,9 @@ body.dark .sv-bubble__face {
 
 .post-track-play {
   flex-shrink: 0;
-  width: 45px;
-  height: 45px;
-  border-radius: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
   border: none;
   margin-left: 2px;
   background: #fff;
@@ -611,18 +601,16 @@ body.dark .sv-bubble__face {
   display: flex;
   align-items: center;
   justify-content: center;
-  position: absolute;
-  right:10px;
   transition: transform 0.15s ease;
 }
 
-.post-track-play:hover svg{
-  transform: scale(1.08) translateX(5px);
+.post-track-play:hover {
+  transform: scale(1.08);
 }
 
 .post-track-play svg {
-  width: 30px;
-  height: 30px;
+  width: 12px;
+  height: 12px;
 }
 
 .post-track-play.playing {
@@ -1451,22 +1439,21 @@ body.dark .post-actions button:hover {
   display: flex;
   align-items: center;
   gap: 10px;
+  max-width: 320px;
   padding: 8px 16px 8px 8px;
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.3);
-  -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
-  
+  -webkit-backdrop-filter: blur(6px);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
 }
 
 #permalink-track img {
-  width: 45px;
-  height: 45px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-  animation: rotate 5s infinite linear;
 }
 
 #permalink-track .permalink-track-info {
@@ -1477,7 +1464,7 @@ body.dark .post-actions button:hover {
 }
 
 #permalink-track .permalink-track-title {
-  font-size:1.2rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: #fff;
   white-space: nowrap;
@@ -1487,19 +1474,21 @@ body.dark .post-actions button:hover {
 }
 
 #permalink-track .permalink-track-artist {
-  font-size: 1rem;
+  font-size: 0.78rem;
   color: rgba(255, 255, 255, 0.75);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 190px;
 }
 
 #permalink-track button {
-  transform: translateX(8px);
-  width: 45px;
-  height: 45px;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   border: none;
+  margin-left: 2px;
   background: #fff;
   color: #1a1a1a;
   display: flex;
@@ -1509,12 +1498,12 @@ body.dark .post-actions button:hover {
 }
 
 #permalink-track button:hover {
-  transform: scale(1.08) translateX(8px);
+  transform: scale(1.08);
 }
 
 #permalink-track button svg {
-  width: 30px;
-  height: 30px;
+  width: 13px;
+  height: 13px;
 }
 
 #permalink-track button.playing {

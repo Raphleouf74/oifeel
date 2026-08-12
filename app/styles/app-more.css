@@ -283,7 +283,7 @@
 
 #twoFactorManageBtn {
   width: 25%;
-  
+
   padding: 8px 16px;
   background: var(--accent2);
   color: var(--text);
@@ -337,6 +337,93 @@
   border-radius: var(--radius);
   padding: 8px 10px;
   font-family: inherit;
+}
+
+/* ---- Personnalisation du compte (couleur + police) ---- */
+
+.more-section .setting-row.setting-row-stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+}
+
+#themeControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.theme-control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.theme-control label {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.theme-control input[type="color"] {
+  width: 52px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-3);
+  cursor: pointer;
+}
+
+.theme-control select {
+  background: var(--bg-3);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+}
+
+.theme-control select option {
+  background: var(--bg-3);
+  color: var(--text);
+}
+
+#themePreview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+#themePreviewCard {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  transition: border-color 0.2s ease;
+}
+
+#themePreviewEmoji {
+  font-size: 1.3rem;
+}
+
+#themePreviewText {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+#themeSaveStatus {
+  color: var(--muted);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+#themeSaveStatus.visible {
+  opacity: 1;
 }
 
 .export-data-btn {
@@ -1783,7 +1870,7 @@ a.download-apk-btn:hover {
   animation: account-spin 0.7s linear infinite;
 }
 
-@media (max-width: 769px)  {
+@media (max-width: 769px) {
   .upload-feedback {
     width: 90%;
     padding: 1rem;

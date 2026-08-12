@@ -643,6 +643,13 @@ function displayMood(mood) {
     textSpan.textContent = mood.text;
     textSpan.className = "post-text";
 
+    // Signature de compte (police + accent) — jamais appliquée aux posts
+    // publiés en anonyme, pour ne pas trahir l'identité de l'auteur.
+    if (mood.authorTheme && !mood.anonymous) {
+        applyThemeFontClass(textSpan, mood.authorTheme.font);
+        content.style.boxShadow = `inset 4px 0 0 ${mood.authorTheme.accentColor}`;
+    }
+
     // Appliquer couleur de texte si fournie, sinon choisir automatiquement
     const textColor = mood.textColor || (() => { return getBrightness(mood.color || "#ffffff") < 128 ? "#FFFFFF" : "#000000"; })();
 
@@ -2905,9 +2912,116 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     injectProfileSettings();
+    _initThemeSettings();
 });
 // Expose logout globally for ban screen
 window.logout = logout;
+
+// ============================================================
+// PERSONNALISATION DU COMPTE — couleur d'accent + police, visible
+// par les autres sur le profil et les posts (sauf posts anonymes)
+// ============================================================
+const THEME_FONT_CLASS = {
+    default: 'font-default',
+    elegant: 'font-elegant',
+    hand: 'font-hand',
+    round: 'font-round',
+    mono: 'font-mono',
+    display: 'font-display'
+};
+const THEME_FONT_CLASSES = Object.values(THEME_FONT_CLASS);
+
+function applyThemeFontClass(el, font) {
+    if (!el) return;
+    el.classList.remove(...THEME_FONT_CLASSES);
+    el.classList.add(THEME_FONT_CLASS[font] || THEME_FONT_CLASS.default);
+}
+
+let _themeSaveDebounce = null;
+
+function _updateThemePreview() {
+    const accentInput = document.getElementById('themeAccentColor');
+    const fontSelect = document.getElementById('themeFontSelect');
+    const card = document.getElementById('themePreviewCard');
+    const text = document.getElementById('themePreviewText');
+    if (!accentInput || !fontSelect || !card) return;
+
+    card.style.borderColor = accentInput.value;
+    card.style.boxShadow = `inset 4px 0 0 ${accentInput.value}`;
+    applyThemeFontClass(text, fontSelect.value);
+}
+
+async function _saveThemeSettings() {
+    const accentInput = document.getElementById('themeAccentColor');
+    const fontSelect = document.getElementById('themeFontSelect');
+    const status = document.getElementById('themeSaveStatus');
+    if (!accentInput || !fontSelect) return;
+
+    const token = localStorage.getItem('oifeel_token');
+    if (!token) return; // pas connecté: rien à sauvegarder côté serveur
+
+    try {
+        if (status) { status.textContent = 'enregistrement…'; status.classList.add('visible'); }
+        const res = await fetch(`${API}social/profile`, {
+            method: 'PUT',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({
+                theme: { accentColor: accentInput.value, font: fontSelect.value }
+            })
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (status) {
+            status.textContent = 'enregistré ✓';
+            setTimeout(() => status.classList.remove('visible'), 1500);
+        }
+    } catch (err) {
+        console.error('Erreur sauvegarde thème:', err);
+        if (status) { status.textContent = 'erreur — réessaie'; status.classList.add('visible'); }
+    }
+}
+
+function _initThemeSettings() {
+    const accentInput = document.getElementById('themeAccentColor');
+    const fontSelect = document.getElementById('themeFontSelect');
+    if (!accentInput || !fontSelect) return;
+
+    const onChange = () => {
+        _updateThemePreview();
+        clearTimeout(_themeSaveDebounce);
+        _themeSaveDebounce = setTimeout(_saveThemeSettings, 500);
+    };
+    accentInput.addEventListener('input', onChange);
+    fontSelect.addEventListener('change', onChange);
+
+    // Charger le thème actuel du compte
+    (async () => {
+        const token = localStorage.getItem('oifeel_token');
+        if (!token) { _updateThemePreview(); return; }
+        try {
+            const res = await fetch(`${API}users/me`, {
+                credentials: 'include',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (!res.ok) return;
+            const user = await res.json();
+            const theme = user.theme || { accentColor: '#5f95b9', font: 'default' };
+            accentInput.value = theme.accentColor || '#5f95b9';
+            fontSelect.value = theme.font || 'default';
+
+            // Applique aussi directement à l'aperçu de son propre profil
+            // dans l'onglet "plus", pour un retour visuel immédiat.
+            const ownName = document.getElementById('userNameProfile');
+            const ownBio = document.getElementById('profileBio');
+            if (ownName) { ownName.style.color = theme.accentColor; applyThemeFontClass(ownName, theme.font); }
+            if (ownBio) applyThemeFontClass(ownBio, theme.font);
+        } catch (err) {
+            console.warn('⚠️ Impossible de charger le thème du compte:', err);
+        } finally {
+            _updateThemePreview();
+        }
+    })();
+}
 
 
 // ============================================================
@@ -5548,6 +5662,24 @@ function extractMoodFromEl(postEl, postId) {
         preview: trackEl.querySelector('.post-track-play')?.dataset.preview || null
     } : null;
 
+    // Même logique pour la signature de compte (police + accent) : on la relit
+    // depuis la classe de police et le box-shadow déjà appliqués par displayMood()
+    // (absents par construction si le post a été publié en anonyme).
+    let authorTheme = null;
+    const postTextEl = postEl.querySelector('.post-text');
+    const contentEl = postEl.querySelector('.post-content');
+    if (postTextEl && contentEl) {
+        const fontClass = THEME_FONT_CLASSES.find(c => postTextEl.classList.contains(c));
+        const boxShadow = contentEl.style.boxShadow;
+        const colorMatch = boxShadow && boxShadow.match(/inset 4px 0 0 (.+)/);
+        if (fontClass || colorMatch) {
+            authorTheme = {
+                font: Object.keys(THEME_FONT_CLASS).find(k => THEME_FONT_CLASS[k] === fontClass) || 'default',
+                accentColor: colorMatch ? colorMatch[1] : '#5f95b9'
+            };
+        }
+    }
+
     return {
         id: postId,
         emoji,
@@ -5557,6 +5689,7 @@ function extractMoodFromEl(postEl, postId) {
         createdAt: dateText,
         stickerUrl: stickerSrc,
         track,
+        authorTheme,
         ephemeral: isEphemeral
     };
 }
@@ -5586,6 +5719,11 @@ function renderModal(mood, postId, postEl) {
     card.id = 'permalink-card';
     card.style.background = mood.color || '#222';
 
+    // Signature de compte (police + accent) — jamais pour les posts anonymes
+    if (mood.authorTheme && !mood.anonymous) {
+        card.style.boxShadow = `inset 6px 0 0 ${mood.authorTheme.accentColor}`;
+    }
+
     // Calcul couleur texte auto
     const textColor = mood.textColor || getAutoTextColor(mood.color || '#222');
 
@@ -5602,6 +5740,9 @@ function renderModal(mood, postId, postEl) {
         textEl.id = 'permalink-text';
         textEl.textContent = mood.text;
         textEl.style.color = textColor;
+        if (mood.authorTheme && !mood.anonymous) {
+            applyThemeFontClass(textEl, mood.authorTheme.font);
+        }
         card.appendChild(textEl);
     }
 
@@ -6185,6 +6326,7 @@ async function injectSuggestionsBanner() {
 // ============================================================
 let _profileViewTargetId = null;
 let _profileViewIsFollowing = false;
+let _profileViewTheme = null;
 
 function createProfileViewModal() {
     if (document.getElementById('profile-view-modal')) return;
@@ -6255,7 +6397,18 @@ async function viewProfile(userId) {
         document.getElementById('profile-view-followers').textContent = u.followersCount || 0;
         document.getElementById('profile-view-following').textContent = u.followingCount || 0;
 
+        // Signature de compte : couleur d'accent + police, choisies par cet
+        // utilisateur, appliquées à son nom/bio quand on visite son profil.
+        const theme = u.theme || { accentColor: '#5f95b9', font: 'default' };
+        const nameEl = document.getElementById('profile-view-name');
+        const bioEl = document.getElementById('profile-view-bio');
+        nameEl.style.color = theme.accentColor;
+        applyThemeFontClass(nameEl, theme.font);
+        applyThemeFontClass(bioEl, theme.font);
+        document.getElementById('profile-view-avatar').style.boxShadow = `0 0 0 3px ${theme.accentColor}`;
+
         _profileViewIsFollowing = !!u.isFollowing;
+        _profileViewTheme = theme;
 
         if (!u.isOwnProfile) {
             btn.style.display = 'block';
@@ -6278,7 +6431,7 @@ function _renderProfileFollowBtn(btn) {
         btn.style.color = '#334155';
     } else {
         btn.textContent = '+ Suivre';
-        btn.style.background = '#2563eb';
+        btn.style.background = (_profileViewTheme && _profileViewTheme.accentColor) || '#2563eb';
         btn.style.color = '#fff';
     }
 }
