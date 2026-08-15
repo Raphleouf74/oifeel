@@ -75,6 +75,16 @@ const postSchema = new mongoose.Schema({
   color: String,
   textColor: String,
   stickerUrl: { type: String, default: null },
+  track: {
+    type: {
+      title: { type: String, default: null },
+      artist: { type: String, default: null },
+      cover: { type: String, default: null },
+      preview: { type: String, default: null },
+      link: { type: String, default: null }
+    },
+    default: null
+  },
   anonymous: { type: Boolean, default: false },
   likes: { type: Number, default: 0 },
   views: { type: Number, default: 0 },
@@ -616,17 +626,6 @@ app.get("/api/posts", async (req, res) => {
 
   let result = [...posts];
 
-  if (sort === 'popular') {
-    result.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-  } else if (sort === 'trending') {
-    result.sort((a, b) => {
-      const scoreA = (a.likes || 0) * 2 + (a.views || 0) * 0.1;
-      const scoreB = (b.likes || 0) * 2 + (b.views || 0) * 0.1;
-      return scoreB - scoreA;
-    });
-  }
-  // default: recent — already ordered unshift
-
   const start = (page - 1) * limit;
   let paged = result.slice(start, start + limit);
   paged = await attachAuthorThemes(paged);
@@ -693,7 +692,7 @@ async function attachAuthorThemes(postsArr) {
 function sanitizeTrack(track) {
   if (!track || typeof track !== "object") return null;
   const preview = typeof track.preview === "string" ? track.preview : null;
-  if (!preview) return null; // sans extrait audio, pas d'intérêt à garder le morceau
+  if (!preview) return null ; // sans extrait audio, pas d'intérêt à garder le morceau
   return {
     title: sanitizeText(String(track.title || "").slice(0, 120)),
     artist: sanitizeText(String(track.artist || "").slice(0, 120)),

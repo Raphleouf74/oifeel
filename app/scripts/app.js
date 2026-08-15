@@ -1539,13 +1539,14 @@ if (submitBtn) {
             if (isStory) {
                 const storyData = {
                     text,
-                    color,
+                    color: window._v2SelectedGradient || color,
                     textColor: document.getElementById('textColor')?.value || null,
                     emoji,
                     stickerUrl: _selectedStickerUrl || null,
                     track: _selectedTrack || null,
                     createdAt: new Date().toISOString(),
-                    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+                    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                    aiGenerated: _lastAiGeneratedText !== null && text === _lastAiGeneratedText.trim()
                 };
 
                 const resStory = await fetch(`${API}stories`, {
@@ -1597,6 +1598,7 @@ if (submitBtn) {
                 });
 
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                else {console.log(newMood)}
 
                 const savedMood = await response.json();
                 showFeedback("success", "fb_post_shared"); // au lieu d'un texte brut

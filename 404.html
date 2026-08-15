@@ -3,11 +3,163 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>404 — Page introuvable</title>
+        <title>erreur 404.</title>
+        <link rel="icon" href="/app/assets/logo/app_logo_dark.png" type="image/png">
+        <style>
+            @font-face {
+                font-family: "DM Sans";
+                src: url("/app/fonts/DMSans-VariableFont_opsz\,wght.ttf") format("truetype");
+                font-weight: 800;
+                font-style: normal;
+            }
+            :root {
+                --bg: #111111;
+                --bg-2: #0a0a0a;
+                --bg-3: #1a1a1a;
+                --border: rgba(255, 255, 255, 0.08);
+                --accent: #5f95b9;
+                --accent-glow: rgba(95, 149, 185, 0.25);
+                --text: #ffffff;
+                --muted: #aaaaaa;
+                --radius: 8px;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            html, body {
+                height: 100%;
+                margin: 0;
+            }
+
+            body {
+                font-family: "DM Sans", sans-serif;
+                background: radial-gradient(circle at 50% 0%, var(--bg-3) 0%, var(--bg-2) 55%, var(--bg) 100%);
+                color: var(--text);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 24px;
+            }
+
+            .card {
+                width: 100%;
+                max-width: 1000px;
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 18px;
+            }
+
+            .logo {
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                height: 150px;
+                border-radius: 10px;
+                object-fit: contain;
+                opacity: 0.95;
+            }
+
+            .emoji {
+                font-size: 7.5rem;
+                line-height: 1;
+                filter: drop-shadow(0 0 24px var(--accent-glow));
+            }
+
+            h1 {
+                width: 100%;
+                margin: 0;
+                font-size: 10rem;
+                font-weight: 700;
+                letter-spacing: -0.03em;
+                background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+            }
+
+            h2 {
+                width: 100%;
+                margin: 0;
+                font-size: 2.5rem;
+                font-weight: 600;
+            }
+
+            p {
+                width: 100%;
+                margin: 0;
+                color: var(--muted);
+                font-size: 2rem;
+                line-height: 1.5;
+                
+            }
+
+            .home-link {
+                margin-top: 8px;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 12px 24px;
+                border-radius: 999px;
+                background: var(--accent);
+                color: #fff;
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 0.95rem;
+                box-shadow: 0 8px 24px var(--accent-glow);
+                transition: transform 0.15s ease, box-shadow 0.15s ease;
+            }
+
+            .home-link:hover {
+                transform: translateY(-2px) scale(1.1);
+                box-shadow: 0 10px 28px var(--accent-glow);
+            }
+
+            .home-link:active {
+                transform: translateY(0);
+            }
+
+            .home-link svg {
+                width: 16px;
+                height: 16px;
+            }
+
+            .brand {
+                margin-top: 28px;
+                font-size: 0.8rem;
+                color: var(--muted);
+                letter-spacing: 0.02em;
+            }
+
+            .brand strong {
+                color: var(--text);
+            }
+        </style>
     </head>
     <body>
-        <h1>404</h1>
-        <p>Cette page n'existe pas.</p>
-        <a href="/">Retour à l'accueil</a>
+        <div class="card">
+            <img class="logo" src="/app/assets/logo/app_logo_dark.png" alt="oifeel. Logo">
+            <span class="emoji">._.</span>
+            <h1>404</h1>
+            <h2>umh, un cul-de-sac</h2>
+            <p>la page cherchée a disparue, a été déplacée, ou n'existe pas.</p>
+            <a class="home-link" href="/">
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <path d="M3 11.5 12 4l9 7.5"/>
+                    <path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/>
+                </svg>
+                retour à l'accueil
+            </a>
+        </div>
     </body>
 </html>
