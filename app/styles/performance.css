@@ -33,8 +33,12 @@
   }
 
   @keyframes rotateSimple {
-    0% { rotate: 0; }
-    100% { rotate: 360deg; }
+    0% {
+      rotate: 0;
+    }
+    100% {
+      rotate: 360deg;
+    }
   }
 
   /* Réduire la fréquence de mise à jour du marquee */
@@ -43,9 +47,15 @@
   }
 
   @keyframes track-marquee-slow {
-    0% { transform: translateX(calc(1 * var(--marquee-distance, 25px))); }
-    50% { transform: translateX(calc(-1 * var(--marquee-distance, 25px))); }
-    100% { transform: translateX(calc(-1 * var(--marquee-distance, 25px))); }
+    0% {
+      transform: translateX(calc(1 * var(--marquee-distance, 25px)));
+    }
+    50% {
+      transform: translateX(calc(-1 * var(--marquee-distance, 25px)));
+    }
+    100% {
+      transform: translateX(calc(-1 * var(--marquee-distance, 25px)));
+    }
   }
 
   /* Optimiser will-change (utiliser avec parcimonie) */
