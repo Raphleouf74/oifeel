@@ -30,6 +30,23 @@ function verifiedBadge(userId) {
 })();
 
 // ============================================================
+// PERFORMANCE OPTIMIZATIONS — Adaptive animations & throttling
+// ============================================================
+
+// Détecter la connexion (2G, 3G, 4G) et désactiver animations si nécessaire
+window._connection = { slow: false };
+
+if ('connection' in navigator) {
+    const conn = navigator.connection;
+    const isSlowNet = conn.effectiveType && ['slow-2g', '2g', '3g'].includes(conn.effectiveType);
+    const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window._connection.slow = isSlowNet || isReducedMotion;
+    if (window._connection.slow) {
+        document.documentElement.setAttribute('data-low-perf', 'true');
+    }
+}
+
+// ============================================================
 // PRÉFÉRENCE D'AFFICHAGE DES POSTS IA — allow | avoid | block
 // ============================================================
 let _aiPostsPreference = localStorage.getItem('aiPostsPreference') || 'allow';
@@ -96,40 +113,73 @@ function showMaintenanceOverlay() {
 
 // ── 1. SSE principal pour le feed (posts + stories) ──────────
 // Ce flux existe déjà côté serveur (/api/stream)
+window.__oifeelSSE = window.__oifeelSSE || {};
+
 try {
-    const feedSSE = new EventSource(`${API}stream`, { withCredentials: true });
+    if (!window.__oifeelSSE.feed) {
+        const feedSSE = new EventSource(`${API}stream`, { withCredentials: true });
+        window.__oifeelSSE.feed = feedSSE;
 
-    feedSSE.addEventListener('new_post', (e) => {
-        try {
-            const post = JSON.parse(e.data);
-            if (!document.querySelector(`.post[data-id="${post.id}"]`)) displayMood(post);
-        } catch (err) { console.warn('Invalid new_post event', err); }
-    });
+        feedSSE.addEventListener('new_post', (e) => {
+            try {
+                const post = JSON.parse(e.data);
+                if (!document.querySelector(`.post[data-id="${post.id}"]`)) displayMood(post);
+            } catch (err) { console.warn('Invalid new_post event', err); }
+        });
 
-    feedSSE.addEventListener('new_story', (e) => {
-        try { addStoryToList(JSON.parse(e.data)); } catch (err) { console.warn('Invalid new_story event', err); }
-    });
+        feedSSE.addEventListener('new_story', (e) => {
+            try { addStoryToList(JSON.parse(e.data)); } catch (err) { console.warn('Invalid new_story event', err); }
+        });
 
-    feedSSE.addEventListener('stories_update', (e) => {
-        try { JSON.parse(e.data).forEach(s => addStoryToList(s)); } catch (err) { console.warn('Invalid stories_update event', err); }
-    });
+        feedSSE.addEventListener('stories_update', (e) => {
+            try { JSON.parse(e.data).forEach(s => addStoryToList(s)); } catch (err) { console.warn('Invalid stories_update event', err); }
+        });
 
-
-
-    feedSSE.addEventListener('connected', () => { /* ok */ });
-    feedSSE.onerror = () => { /* reconnexion automatique gérée par le navigateur */ };
+        feedSSE.addEventListener('connected', () => { /* ok */ });
+        feedSSE.onerror = () => { /* reconnexion automatique gérée par le navigateur */ };
+    }
 } catch (err) {
     console.warn('Feed SSE not supported:', err);
 }
 
+window.addEventListener('beforeunload', () => {
+    Object.values(window.__oifeelSSE || {}).forEach((sse) => {
+        try { sse.close?.(); } catch (_) { }
+    });
+    if (_notifPollTimer) {
+        clearInterval(_notifPollTimer);
+        _notifPollTimer = null;
+    }
+    if (_notifSSE) {
+        try { _notifSSE.close(); } catch (_) { }
+        _notifSSE = null;
+    }
+    if (_banUpdateTimer) {
+        clearInterval(_banUpdateTimer);
+        _banUpdateTimer = null;
+    }
+    _notifSSEActive = false;
+}, { once: true });
+
 // ── 2. SSE dédié aux notifications (/api/notifications/stream) ─
-// Détecte si l'endpoint existe avant de s'y connecter,
-// bascule sur polling si absent — sans jamais spammer la console.
+// On évite les boucles de reconnexion manuelles ; le navigateur gère déjà la reprise
+// de connexion SSE. On garde un fallback polling simple si le flux tombe.
 
 let _notifSSEActive = false;
 let _notifPollTimer = null;
-let _notifReconnectTimer = null;
 let _notifSSE = null;
+
+function _stopNotifStream() {
+    if (_notifPollTimer) {
+        clearInterval(_notifPollTimer);
+        _notifPollTimer = null;
+    }
+    if (_notifSSE) {
+        try { _notifSSE.close(); } catch (_) { }
+        _notifSSE = null;
+    }
+    _notifSSEActive = false;
+}
 
 function _startNotifStream() {
     if (_notifSSEActive || _notifSSE) return;
@@ -156,17 +206,12 @@ function _startNotifStream() {
     };
 
     _notifSSE.onerror = () => {
-        if (_notifSSE) _notifSSE.close();
-        _notifSSE = null;
-        _notifSSEActive = false;
+        _stopNotifStream();
 
         if (!_notifPollTimer) {
             _notifPollTimer = setInterval(_pollNotifications, 30000);
             _pollNotifications();
         }
-
-        clearTimeout(_notifReconnectTimer);
-        _notifReconnectTimer = setTimeout(_startNotifStream, 45000);
     };
 }
 
@@ -191,14 +236,21 @@ async function _pollNotifications() {
 const _notifSeenIds = new Set();
 
 // Démarrer le flux de notifs après connexion
-document.addEventListener('userLoggedIn', () => {
-    _startNotifStream();
-});
+if (!window._notifStreamListenerAdded) {
+    window._notifStreamListenerAdded = true;
+    document.addEventListener('userLoggedIn', () => {
+        _startNotifStream();
+    });
+}
+
 // Et au chargement si déjà connecté
-(function () {
-    const token = localStorage.getItem('oifeel_token');
-    if (token) setTimeout(_startNotifStream, 2000);
-})();
+if (!window._notifStreamBootstrapDone) {
+    window._notifStreamBootstrapDone = true;
+    (function () {
+        const token = localStorage.getItem('oifeel_token');
+        if (token) setTimeout(_startNotifStream, 2000);
+    })();
+}
 
 // ── 3. Système de notifications (toasts + cloche + panneau) ───
 
@@ -418,6 +470,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 
+// ============================================================
+// THROTTLE/DEBOUNCE UTILITIES — Éviter les calculs répétitifs
+// ============================================================
+
+function throttle(fn, delay) {
+    let last = 0;
+    return function (...args) {
+        const now = Date.now();
+        if (now - last >= delay) {
+            last = now;
+            return fn(...args);
+        }
+    };
+}
+
+function debounce(fn, delay) {
+    let timeoutId;
+    return function (...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => fn(...args), delay);
+    };
+}
 
 const nav = document.querySelector('nav');
 const header = document.querySelector('header');
@@ -426,23 +500,25 @@ const tabSections = document.querySelectorAll('section.tab');
 const feedSelector = document.getElementById('feed-selector');
 
 // Chaque section scrollable doit déclencher l'effet de scroll du header
+// Optimisé avec throttle pour éviter trop de reflows
 if (tabSections.length) {
+    const handleScroll = throttle((sectionEl) => {
+        const currentScroll = sectionEl.scrollTop;
+        if (currentScroll > 50) {
+            header.classList.add('scrolled');
+            profileheader.classList.add('scrolled');
+            nav.classList.add('scrolled');
+            feedSelector.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+            profileheader.classList.remove('scrolled');
+            nav.classList.remove('scrolled');
+            feedSelector.classList.remove('scrolled');
+        }
+    }, 66); // ~60fps throttle
 
     tabSections.forEach(section => {
-        section.addEventListener('scroll', () => {
-            const currentScroll = section.scrollTop;
-            if (currentScroll > 50) {
-                header.classList.add('scrolled');
-                profileheader.classList.add('scrolled');
-                nav.classList.add('scrolled');
-                feedSelector.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-                profileheader.classList.remove('scrolled');
-                nav.classList.remove('scrolled');
-                feedSelector.classList.remove('scrolled');
-            }
-        });
+        section.addEventListener('scroll', () => handleScroll(section), { passive: true });
     });
 }
 
@@ -617,6 +693,28 @@ function _stopFeedTrack() {
     }
 }
 
+function applyTrackTitleMarquee(titleEl) {
+    const update = () => {
+        const shouldMarquee = titleEl.scrollWidth > titleEl.clientWidth + 1;
+        titleEl.classList.toggle('is-marquee', shouldMarquee);
+
+        if (shouldMarquee) {
+            const distance = Math.max(titleEl.scrollWidth - titleEl.clientWidth, 0);
+            titleEl.style.setProperty('--marquee-distance', `${distance}px`);
+            titleEl.style.setProperty('--marquee-duration', `${Math.max(Math.min(3 + distance /50))}s`);
+        }
+    };
+
+    requestAnimationFrame(update);
+
+    if (window.ResizeObserver) {
+        const ro = new ResizeObserver(update);
+        ro.observe(titleEl);
+    } else {
+        window.addEventListener('resize', update, { once: false });
+    }
+}
+
 function displayMood(mood) {
     const moodcard = document.createElement("div");
     moodcard.className = "post";
@@ -682,10 +780,24 @@ function displayMood(mood) {
 
         const trackInfo = document.createElement('div');
         trackInfo.className = 'post-track-info';
-        trackInfo.innerHTML = `
-            <span class="post-track-title">${mood.track.title}</span>
-            <span class="post-track-artist">${mood.track.artist}</span>
-        `;
+
+        const trackTitle = document.createElement('span');
+        trackTitle.className = 'post-track-title';
+        trackTitle.title = mood.track.title || '';
+
+        const trackTitleText = document.createElement('span');
+        trackTitleText.className = 'post-track-title-text';
+        trackTitleText.textContent = mood.track.title || 'Untitled';
+        trackTitle.appendChild(trackTitleText);
+
+        applyTrackTitleMarquee(trackTitle);
+
+        const trackArtist = document.createElement('span');
+        trackArtist.className = 'post-track-artist';
+        trackArtist.textContent = mood.track.artist || 'Artiste inconnu';
+
+        trackInfo.appendChild(trackTitle);
+        trackInfo.appendChild(trackArtist);
 
         const trackPlayBtn = document.createElement('button');
         trackPlayBtn.type = 'button';
@@ -1905,15 +2017,16 @@ function _buildViewer() {
     document.body.appendChild(ov);
 
     // Animer l'entrée
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => ov.classList.add('sv-open'));
-    });
+    // Simple RAF au lieu de double RAF pour éviter le jank
+    requestAnimationFrame(() => ov.classList.add('sv-open'));
 
-    // Progress bar animation
+    // Progress bar animation (sans double RAF pour éviter jank)
     const fill = ov.querySelector('.sv-bar--active');
     if (fill) {
+        fill.style.width = '0%';
         fill.style.transition = 'width 5s linear';
-        requestAnimationFrame(() => { requestAnimationFrame(() => { fill.style.width = '100%'; }); });
+        void fill.offsetWidth; // Force reflow
+        fill.style.width = '100%';
     }
     _storyTimer = setTimeout(() => _storyGo(1), 5000);
 
@@ -2633,10 +2746,18 @@ export async function logout() {
     if (banOverlay) banOverlay.classList.add('hidden');
 }
 
+let _banUpdateTimer = null;
+
 function showBanScreen(banData) {
     const banOverlay = document.getElementById('ban-overlay');
     const banReason = document.getElementById('ban-reason');
     const banUntil = document.getElementById('ban-until');
+
+    // Nettoyer tout timer précédent
+    if (_banUpdateTimer) {
+        clearInterval(_banUpdateTimer);
+        _banUpdateTimer = null;
+    }
 
     if (banReason) {
         banReason.textContent = banData.reason || 'Votre compte a été banni pour violation des règles.';
@@ -2665,8 +2786,9 @@ function showBanScreen(banData) {
     }
 
     updateTimeRemaining();
+    // Intervalle plus lent (5s au lieu de 1s) et stocker la référence pour cleanup
     if (!banData.permanent && banData.until) {
-        setInterval(updateTimeRemaining, 1000);
+        _banUpdateTimer = setInterval(updateTimeRemaining, 5000);
     }
 
     if (banOverlay) {
@@ -5158,7 +5280,9 @@ async function initMessages() {
 
     // SSE pour messages temps réel
     try {
+        if (window.__oifeelSSE.messages) return;
         const es = new EventSource(`${API}stream`, { withCredentials: true });
+        window.__oifeelSSE.messages = es;
         es.addEventListener('new_message', async (e) => {
             try {
                 const data = JSON.parse(e.data);
@@ -5196,11 +5320,17 @@ async function initMessages() {
     injectMessagingUI();
 }
 
-document.addEventListener('userLoggedIn', initMessages);
-document.addEventListener('DOMContentLoaded', () => setTimeout(initMessages, 500));
+if (!window._messagesListenersAdded) {
+    window._messagesListenersAdded = true;
+    document.addEventListener('userLoggedIn', initMessages, { once: false });
+    document.addEventListener('DOMContentLoaded', () => setTimeout(initMessages, 500), { once: true });
+}
 
 // ─── UI injection ─────────────────────────────────────────────
 function injectMessagingUI() {
+    if (window._messagesUIInjected) return;
+    window._messagesUIInjected = true;
+
     const container = document.getElementById('messagesdiv') || document.getElementById('profileTab');
     const messagesSection = document.getElementById('messages-section');
     if (container && messagesSection) container.appendChild(messagesSection);
@@ -5214,16 +5344,33 @@ function injectMessagingUI() {
     }
 
     createUserSearchModal();
-    // createStickerPicker();
-    // injectStickerButton();
     loadConversations();
 
-    document.getElementById('send-message-btn')?.addEventListener('click', sendMessage);
-    document.getElementById('message-input')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
-    });
-    document.getElementById('back-to-list')?.addEventListener('click', closeThread);
-    document.getElementById('new-conversation-btn')?.addEventListener('click', openUserSearch);
+    const sendBtn = document.getElementById('send-message-btn');
+    if (sendBtn && !sendBtn.__listenerAdded) {
+        sendBtn.__listenerAdded = true;
+        sendBtn.addEventListener('click', sendMessage);
+    }
+
+    const msgInput = document.getElementById('message-input');
+    if (msgInput && !msgInput.__listenerAdded) {
+        msgInput.__listenerAdded = true;
+        msgInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    }
+
+    const backBtn = document.getElementById('back-to-list');
+    if (backBtn && !backBtn.__listenerAdded) {
+        backBtn.__listenerAdded = true;
+        backBtn.addEventListener('click', closeThread);
+    }
+
+    const newConvBtn = document.getElementById('new-conversation-btn');
+    if (newConvBtn && !newConvBtn.__listenerAdded) {
+        newConvBtn.__listenerAdded = true;
+        newConvBtn.addEventListener('click', openUserSearch);
+    }
 }
 
 // ─── User search ──────────────────────────────────────────────

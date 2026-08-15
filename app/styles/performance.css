@@ -1,0 +1,91 @@
+/* ===== OPTIMISATIONS PERFORMANCE & MOBILE ===== */
+
+/* Désactiver les animations coûteuses sur bas débit / slow 3g */
+@media (prefers-reduced-motion: reduce) {
+  .post-track-cover {
+    animation: none;
+  }
+  .post-track-title.is-marquee .post-track-title-text {
+    animation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Mobile optimizations (max-width: 768px) */
+@media (max-width: 768px) {
+  /* Désactiver blur coûteux sur mobile */
+  .post-track,
+  .story-header-bar {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  /* Ralentir/simplifier animations sur petits écrans */
+  .post-track-cover {
+    animation: rotateSimple 30s linear infinite;
+  }
+
+  @keyframes rotateSimple {
+    0% { rotate: 0; }
+    100% { rotate: 360deg; }
+  }
+
+  /* Réduire la fréquence de mise à jour du marquee */
+  .post-track-title.is-marquee .post-track-title-text {
+    animation: track-marquee-slow var(--marquee-duration) linear infinite;
+  }
+
+  @keyframes track-marquee-slow {
+    0% { transform: translateX(calc(1 * var(--marquee-distance, 25px))); }
+    50% { transform: translateX(calc(-1 * var(--marquee-distance, 25px))); }
+    100% { transform: translateX(calc(-1 * var(--marquee-distance, 25px))); }
+  }
+
+  /* Optimiser will-change (utiliser avec parcimonie) */
+  .post-track-title.is-marquee .post-track-title-text {
+    will-change: auto;
+  }
+}
+
+/* Très bas débit (slow-2g / 2g) */
+@media (max-width: 480px) {
+  /* Simplifier les animations complexes */
+  .post-track-cover {
+    animation: none;
+  }
+
+  /* Désactiver backdrop-filter sur très petits écrans */
+  .post-track,
+  .story-header-bar,
+  .overlay {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+  }
+
+  /* Désactiver marquee sur très petits écrans */
+  .post-track-title.is-marquee .post-track-title-text {
+    animation: none !important;
+    will-change: auto !important;
+  }
+
+  /* Simplifier les transitions */
+  * {
+    transition-duration: 0s !important;
+  }
+}
+
+/* Optimisations GPU */
+@supports (backdrop-filter: blur(1px)) {
+  /* Utiliser will-change seulement si GPU support */
+  .sv-overlay {
+    will-change: transform;
+  }
+}

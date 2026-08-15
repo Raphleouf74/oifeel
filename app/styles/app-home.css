@@ -540,7 +540,7 @@ body.dark .sv-bubble__face {
 .post-track {
   position: absolute;
   top: 25px;
-  left: 10px;
+  left: 25px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -558,7 +558,7 @@ body.dark .sv-bubble__face {
 
 .post-track-cover {
   position: absolute;
-  left: 6px;
+  left: 4px;
   top:4px;
   width: 55px;
   height: 55px;
@@ -578,16 +578,43 @@ body.dark .sv-bubble__face {
   display: flex;
   flex-direction: column;
   line-height: 1.2;
+  transform: translateX(5px);
 }
 
 .post-track-title {
+  display: block;
+  width: 145px;
   font-size: 1.2rem;
   font-weight: 700;
   color: #fff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 160px;
+  align-self: center;
+  
+}
+
+.post-track-title-text {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.post-track-title.is-marquee {
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+.post-track-title.is-marquee .post-track-title-text {
+  display: inline-block;
+  white-space: nowrap;
+  animation: track-marquee var(--marquee-duration) linear infinite;
+  will-change: transform;
+}
+
+@keyframes track-marquee {
+  0% { transform: translateX(calc( 1 * var(--marquee-distance, 25px))); }
+  75% { transform: translateX(calc(-1 * var(--marquee-distance, 25px))); }
+  100% { transform: translateX(calc(-2 * var(--marquee-distance, 25px))); }
 }
 
 .post-track-artist {
