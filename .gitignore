@@ -1,3 +1,4 @@
 # fichiers temporaires / cookies
 *.tmp
 **/cookies.txt
+.hintrc

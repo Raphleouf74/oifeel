@@ -559,7 +559,7 @@ body.dark .sv-bubble__face {
 .post-track-cover {
   position: absolute;
   left: 4px;
-  top:4px;
+  top: 4px;
   width: 55px;
   height: 55px;
   border-radius: 50%;
@@ -569,8 +569,12 @@ body.dark .sv-bubble__face {
 }
 
 @keyframes rotate {
-  0% {rotate: 0;}
-  100% {rotate: 360deg;}
+  0% {
+    rotate: 0;
+  }
+  100% {
+    rotate: 360deg;
+  }
 }
 
 .post-track-info {
@@ -591,12 +595,18 @@ body.dark .sv-bubble__face {
   overflow: hidden;
   text-overflow: ellipsis;
   align-self: center;
-  
+  position: relative;
+}
+
+.post-track-title-scroll {
+  display: inline-flex;
+  white-space: nowrap;
 }
 
 .post-track-title-text {
   display: inline-block;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .post-track-title.is-marquee {
@@ -604,17 +614,18 @@ body.dark .sv-bubble__face {
   text-overflow: clip;
 }
 
+/* Espace entre le titre et sa répétition, uniquement quand ça défile. */
 .post-track-title.is-marquee .post-track-title-text {
-  display: inline-block;
-  white-space: nowrap;
-  animation: track-marquee var(--marquee-duration) linear infinite;
-  will-change: transform;
+  padding-right: 40px;
 }
 
-@keyframes track-marquee {
-  0% { transform: translateX(calc( 1 * var(--marquee-distance, 25px))); }
-  75% { transform: translateX(calc(-1 * var(--marquee-distance, 25px))); }
-  100% { transform: translateX(calc(-2 * var(--marquee-distance, 25px))); }
+/* L'animation elle-même (défilement + pause) est pilotée en JS via la
+   Web Animations API (voir applyTrackTitleMarquee dans app.js), pour
+   pouvoir calculer une pause dynamique et un slide continu (titre
+   dupliqué) selon la longueur du titre. */
+.post-track-title.is-marquee .post-track-title-scroll {
+  will-change: transform;
+}
 }
 
 .post-track-artist {
@@ -639,11 +650,11 @@ body.dark .sv-bubble__face {
   align-items: center;
   justify-content: center;
   position: absolute;
-  right:10px;
+  right: 10px;
   transition: transform 0.15s ease;
 }
 
-.post-track-play:hover svg{
+.post-track-play:hover svg {
   transform: scale(1.08) translateX(5px);
 }
 
@@ -1483,7 +1494,7 @@ body.dark .post-actions button:hover {
   background: rgba(0, 0, 0, 0.3);
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
-  
+
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
 }
 
@@ -1504,7 +1515,7 @@ body.dark .post-actions button:hover {
 }
 
 #permalink-track .permalink-track-title {
-  font-size:1.2rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: #fff;
   white-space: nowrap;
@@ -1657,7 +1668,22 @@ body.dark .post-actions button:hover {
 
   box-shadow: 0 25px 80px rgba(0, 0, 0, 0.45);
 }
+#permalink-error-panel button {
+  padding: 0px 16px;
+  border-radius: 15px;
+  height: 50px;
+  width: 80%;
+  font-size: 1.5rem;
+  transition: all 0.2s ease-in-out;
+  background-image: linear-gradient(135deg,#667eeace,#764ba2d8);
+  color: white;
+  border: none;
+}
 
+#permalink-error-panel button:hover {
+  background-color: rgba(55,55,255,0.7);
+  scale: 1.05;
+}
 #permalink-panel::-webkit-scrollbar {
   width: 8px;
 }

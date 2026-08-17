@@ -693,16 +693,78 @@ function _stopFeedTrack() {
     }
 }
 
-function applyTrackTitleMarquee(titleEl) {
-    const update = () => {
-        const shouldMarquee = titleEl.scrollWidth > titleEl.clientWidth + 1;
-        titleEl.classList.toggle('is-marquee', shouldMarquee);
+// Vitesse de défilement (px/s) pendant la phase de scroll.
+const TRACK_MARQUEE_SPEED = 40;
+// Pause (ms) quand le titre est revenu à sa position alignée normale.
+const TRACK_MARQUEE_PAUSE = 2000;
+// Durée mini de scroll (ms), pour ne pas défiler trop vite sur les titres
+// qui débordent à peine.
+const TRACK_MARQUEE_MIN_SCROLL = 4000;
+// Espace (px) entre la fin du titre et sa répétition (nécessaire pour un
+// glissement continu sans à-coup, voir plus bas).
+const TRACK_MARQUEE_GAP = 40;
 
-        if (shouldMarquee) {
-            const distance = Math.max(titleEl.scrollWidth - titleEl.clientWidth, 0);
-            titleEl.style.setProperty('--marquee-distance', `${distance}px`);
-            titleEl.style.setProperty('--marquee-duration', `${Math.max(Math.min(3 + distance /50))}s`);
+function applyTrackTitleMarquee(titleEl, scrollEl, textEl) {
+    let anim = null;
+    let clone = null;
+
+    const teardown = () => {
+        if (anim) {
+            anim.cancel();
+            anim = null;
         }
+        if (clone) {
+            clone.remove();
+            clone = null;
+        }
+    };
+
+    const update = () => {
+        teardown();
+
+        const shouldMarquee = textEl.scrollWidth > titleEl.clientWidth + 1;
+        titleEl.classList.toggle('is-marquee', shouldMarquee);
+        if (!shouldMarquee) return;
+
+        // Sur bas débit / mouvement réduit / très petit écran : titre
+        // simplement tronqué, sans animation.
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const isTinyScreen = window.matchMedia('(max-width: 480px)').matches;
+        if (reduceMotion || isTinyScreen || (window._connection && window._connection.slow)) return;
+
+        if (typeof scrollEl.animate !== 'function') return; // pas de support Web Animations API
+
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+        const textWidth = textEl.scrollWidth;
+        const shift = textWidth + TRACK_MARQUEE_GAP;
+
+        // On duplique le titre à la suite (avec un espace) : quand le
+        // défilement atteint translateX(-shift), le clone se trouve
+        // exactement là où était le texte original au départ — donc le
+        // redémarrage de la boucle est invisible, le "slide" est continu.
+        clone = textEl.cloneNode(true);
+        clone.classList.add('post-track-title-text-clone');
+        clone.setAttribute('aria-hidden', 'true');
+        scrollEl.appendChild(clone);
+
+        const scrollDuration = Math.max((shift / TRACK_MARQUEE_SPEED) * 1000 * (isMobile ? 1.5 : 1), TRACK_MARQUEE_MIN_SCROLL);
+        const totalDuration = TRACK_MARQUEE_PAUSE + scrollDuration;
+        const pauseFraction = TRACK_MARQUEE_PAUSE / totalDuration;
+
+        // Cycle : titre aligné + pause (0 → pauseFraction), puis glissement
+        // linéaire continu de droite à gauche (→ 1). Grâce au clone, l'état
+        // final est visuellement identique à l'état initial : la boucle
+        // repart donc alignée, prête pour la pause suivante — comme sur un
+        // vrai lecteur.
+        anim = scrollEl.animate([
+            { transform: 'translateX(0)', offset: 0 },
+            { transform: 'translateX(0)', offset: pauseFraction },
+            { transform: `translateX(-${shift}px)`, offset: 1 }
+        ], {
+            duration: totalDuration,
+            iterations: Infinity,
+            easing: 'linear'
+        });
     };
 
     requestAnimationFrame(update);
@@ -785,12 +847,17 @@ function displayMood(mood) {
         trackTitle.className = 'post-track-title';
         trackTitle.title = mood.track.title || '';
 
+        const trackTitleScroll = document.createElement('span');
+        trackTitleScroll.className = 'post-track-title-scroll';
+
         const trackTitleText = document.createElement('span');
         trackTitleText.className = 'post-track-title-text';
         trackTitleText.textContent = mood.track.title || 'Untitled';
-        trackTitle.appendChild(trackTitleText);
 
-        applyTrackTitleMarquee(trackTitle);
+        trackTitleScroll.appendChild(trackTitleText);
+        trackTitle.appendChild(trackTitleScroll);
+
+        applyTrackTitleMarquee(trackTitle, trackTitleScroll, trackTitleText);
 
         const trackArtist = document.createElement('span');
         trackArtist.className = 'post-track-artist';
@@ -1710,7 +1777,7 @@ if (submitBtn) {
                 });
 
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                else {console.log(newMood)}
+                else { console.log(newMood) }
 
                 const savedMood = await response.json();
                 showFeedback("success", "fb_post_shared"); // au lieu d'un texte brut
@@ -6104,7 +6171,6 @@ function showPermalinkError(postId) {
 
     const closeBtn = document.createElement('button');
     closeBtn.textContent = 'Fermer';
-    closeBtn.style.cssText = btnStyle('linear-gradient(135deg,#667eea,#764ba2)', '#fff');
     closeBtn.addEventListener('click', () => closeModal(overlay));
     overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(overlay); });
 

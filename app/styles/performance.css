@@ -5,9 +5,9 @@
   .post-track-cover {
     animation: none;
   }
-  .post-track-title.is-marquee .post-track-title-text {
-    animation: none;
-  }
+  /* Le marquee du titre est géré en JS (Web Animations API) et vérifie
+     déjà prefers-reduced-motion lui-même — voir applyTrackTitleMarquee
+     dans app.js. */
   *,
   *::before,
   *::after {
@@ -41,27 +41,9 @@
     }
   }
 
-  /* Réduire la fréquence de mise à jour du marquee */
-  .post-track-title.is-marquee .post-track-title-text {
-    animation: track-marquee-slow var(--marquee-duration) linear infinite;
-  }
-
-  @keyframes track-marquee-slow {
-    0% {
-      transform: translateX(calc(1 * var(--marquee-distance, 25px)));
-    }
-    50% {
-      transform: translateX(calc(-1 * var(--marquee-distance, 25px)));
-    }
-    100% {
-      transform: translateX(calc(-1 * var(--marquee-distance, 25px)));
-    }
-  }
-
-  /* Optimiser will-change (utiliser avec parcimonie) */
-  .post-track-title.is-marquee .post-track-title-text {
-    will-change: auto;
-  }
+  /* Ralentissement du marquee sur mobile et désactivation sur très
+     petits écrans / bas débit : géré directement en JS, voir
+     applyTrackTitleMarquee dans app.js (vérifie matchMedia + window._connection.slow). */
 }
 
 /* Très bas débit (slow-2g / 2g) */
@@ -80,11 +62,7 @@
     background: rgba(0, 0, 0, 0.6) !important;
   }
 
-  /* Désactiver marquee sur très petits écrans */
-  .post-track-title.is-marquee .post-track-title-text {
-    animation: none !important;
-    will-change: auto !important;
-  }
+  /* Marquee déjà désactivé en JS sur les écrans ≤480px, voir app.js */
 
   /* Simplifier les transitions */
   * {
