@@ -587,17 +587,7 @@ section::-webkit-scrollbar-track {
   }
 }
 
-@keyframes v2FadeOut {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
 
-  to {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-}
 
 @keyframes v2FadeIn {
   from {
@@ -620,6 +610,17 @@ section::-webkit-scrollbar-track {
   to {
     opacity: 0;
     transform: translateY(-8px);
+  }
+}
+@keyframes v2FadeOut50 {
+  from {
+    opacity: 1;
+    transform: translateY(0) translateX(-50%);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-8px) translateX(-50%);
   }
 }
 

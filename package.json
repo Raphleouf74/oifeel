@@ -3,6 +3,7 @@
     "build": "echo 'Static site — no build step required'"
   },
   "dependencies": {
+    "morphicons": "^1.7.0",
     "otplib": "^13.4.1",
     "qrcode": "^1.5.4"
   }

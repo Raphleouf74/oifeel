@@ -781,6 +781,7 @@ function displayMood(mood) {
     const moodcard = document.createElement("div");
     moodcard.className = "post";
     moodcard.dataset.id = mood.id;
+    moodcard.style.setProperty('--mood-color', colorToRgba(mood.color, 0.4));
     wall.prepend(moodcard);
     if (mood.id == "1") {
         moodcard.classList.add('WelcomeMood');
@@ -975,6 +976,7 @@ function displayMood(mood) {
     likeBtn.className = "likebtn";
 
     const likeIcon = document.createElement("span");
+    likeIcon.classList.add('icon');
     likeIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart-icon lucide-heart"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"/></svg>`;
 
     const likeCount = document.createElement("span");
@@ -982,7 +984,6 @@ function displayMood(mood) {
     likeCount.textContent = mood.likes || 0;
     // Adapter la couleur du bouton like au fond du post
     const isDarkBg = getBrightness(mood.color || "#ffffff") < 128;
-    likeBtn.classList.add(isDarkBg ? "likebtn-clair" : "likebtn-sombre");
     likeBtn.appendChild(likeIcon);
     likeBtn.appendChild(likeCount);
 
@@ -1063,7 +1064,7 @@ function displayMood(mood) {
         e.stopPropagation();
         openReportModal(mood.id);
     });
-    dateP.textContent = "créé le " + createdDate;
+    dateP.textContent = createdDate;
     buttons.appendChild(dateP);
     buttons.appendChild(actionBar);
 
@@ -1183,13 +1184,13 @@ async function submitReport() {
             errorEl.textContent = data.error || 'Une erreur est survenue.';
             errorEl.style.display = 'block';
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Envoyer le signalement';
+            submitBtn.textContent = 'envoyer le signalement';
         }
     } catch (err) {
-        errorEl.textContent = 'Erreur réseau. Réessaie dans quelques secondes.';
+        errorEl.textContent = 'erreur réseau. réessaie dans quelques secondes.';
         errorEl.style.display = 'block';
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Envoyer le signalement';
+        submitBtn.textContent = 'envoyer le signalement';
     }
 }
 
@@ -1476,6 +1477,19 @@ function getBrightness(hexColor) {
     return (r * 299 + g * 587 + b * 114) / 1000;
 }
 
+function colorToRgba(color, alpha) {
+    const hex = (color || '#ffffff').replace('#', '');
+    const normalized = hex.length === 3
+        ? hex.split('').map((part) => part + part).join('')
+        : hex;
+    const red = parseInt(normalized.substring(0, 2), 16);
+    const green = parseInt(normalized.substring(2, 4), 16);
+    const blue = parseInt(normalized.substring(4, 6), 16);
+
+    if ([red, green, blue].some(Number.isNaN)) return `rgba(255, 255, 255, ${alpha})`;
+    return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+}
+
 
 
 // Initialiser les valeurs au démarrage
@@ -1521,7 +1535,7 @@ function showFeedback(type, messageKey, vars = {}) {
 document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
         if (navigator.onLine) {
-            showFeedback("success", "connecté à internet, récupération des données auprès du serveur...");
+            return;
         } else {
 
             const offlineMood = {
@@ -4852,13 +4866,14 @@ function _injectMoodOfDay() {
     banner.className = 'mood-today';
     banner.style.setProperty('--mood-color', mood.color);
     banner.innerHTML = `
+        
         <div class="mood-today__emoji">${mood.emoji}</div>
         <div class="mood-today__content">
             <p class="mood-today__date">${today}</p>
             <p class="mood-today__text">${mood.text}</p>
         </div>
         <button class="mood-today__share" title="partager mon mood">partage un post!</button>
-        <button class="mood-today__close"  title="fermer" aria-label="fermer" style="color: white; background: rgba(255, 0, 0, 0.31); width: 40px; height: 40px; border-radius: 5px; display: flex; align-items: center; justify-content: center;">✕</button>
+        <button class="mood-today__close"  title="fermer" aria-label="fermer" style="color: white; background: rgba(255, 0, 0, 0.31);  display: flex; align-items: center; justify-content: center;">✕</button>
     `;
 
     wall.insertAdjacentElement('beforebegin', banner);
@@ -4877,7 +4892,7 @@ function _injectMoodOfDay() {
 
     // Bouton fermer
     banner.querySelector('.mood-today__close').addEventListener('click', () => {
-        banner.style.animation = 'v2FadeOut 0.3s ease forwards';
+        banner.style.animation = 'v2FadeOut50 0.3s ease forwards';
         setTimeout(() => banner.remove(), 300);
     });
 
@@ -4945,7 +4960,7 @@ async function _showViewCount(postEl, postId) {
 
     const viewsEl = document.createElement('span');
     viewsEl.className = 'views';
-    viewsEl.textContent = ' · … vues';
+    viewsEl.textContent = '… vues';
     dateP.appendChild(viewsEl);
 
     try {
@@ -4953,10 +4968,10 @@ async function _showViewCount(postEl, postId) {
         if (res.ok) {
             const data = await res.json();
             const views = data.views || data.viewCount || 1;
-            viewsEl.textContent = ` · ${views} vues`;
+            viewsEl.textContent = `${views} vues`;
         }
     } catch {
-        viewsEl.textContent = ' · 1 vue';
+        viewsEl.textContent = '1 vue';
     }
 }
 
@@ -5053,11 +5068,6 @@ export function attachV2ToPost(postEl, postId) {
     if (!postEl || !postId) return;
     // Petit délai pour laisser le DOM se stabiliser
     requestAnimationFrame(() => {
-        attachReactions(postEl, postId);
-        // Couleur du post lue directement depuis le DOM (déjà posée par
-        // displayMood via content.style.background = mood.color), pour
-        // teinter dynamiquement la zone commentaires sans avoir à faire
-        // remonter mood.color à travers tous les appelants d'attachV2ToPost.
         const postColor = postEl.querySelector('.post-content')?.style.background || null;
         attachComments(postEl, postId, postColor);
     });
@@ -5864,7 +5874,7 @@ function extractMoodFromEl(postEl, postId) {
     const text = postEl.querySelector('.post-text')?.textContent || '';
     const bg = postEl.querySelector('.post-content')?.style.background || '';
     const likeCount = postEl.querySelector('.like-count')?.textContent || '0';
-    const dateText = postEl.querySelector('.postdate')?.textContent?.replace('créé le ', '') || '';
+    const dateText = postEl.querySelector('.postdate')?.textContent?.replace('') || '';
     const stickerSrc = postEl.querySelector('.post-sticker')?.src || null;
     const isEphemeral = postEl.classList.contains('ephemeral');
 
@@ -6225,180 +6235,6 @@ export async function updateProfile(id, patch) {
     return res.json();
 }
 
-// reaction
-export const REACTIONS = [
-    { type: 'heart', emoji: '❤️', label: "j'aime" },
-    { type: 'haha', emoji: '😂', label: 'Haha' },
-    { type: 'wow', emoji: '😮', label: 'Wow' },
-    { type: 'sad', emoji: '😢', label: 'Triste' },
-    { type: 'fire', emoji: '🔥', label: 'Feu' },
-    { type: 'clap', emoji: '👏', label: 'Bravo' },
-
-
-];
-
-// ─── Point d'entrée ──────────────────────────────────────────
-export function attachReactions(postEl, postId) {
-    const likeBtn = postEl.querySelector('.likebtn');
-    if (!likeBtn || postEl.dataset.reactionsAttached) return;
-    postEl.dataset.reactionsAttached = 'true';
-
-    // Wrapper autour du bouton like
-    const wrapper = document.createElement('div');
-    wrapper.className = 'rwrapper';
-    likeBtn.parentNode.insertBefore(wrapper, likeBtn);
-    wrapper.appendChild(likeBtn);
-
-    // Popup réactions
-    const popup = document.createElement('div');
-    popup.className = 'rpopup';
-    popup.setAttribute('role', 'tooltip');
-    popup.innerHTML = REACTIONS.map(r =>
-        `<button class="rbtn" data-type="${r.type}" title="${r.label}" aria-label="${r.label}">
-            <span class="remoji">${r.emoji}</span>
-            <span class="rlabel">${r.label}</span>
-         </button>`
-    ).join('');
-    wrapper.appendChild(popup);
-
-    // Barre de compteurs sous le like
-    const bar = document.createElement('div');
-    bar.className = 'rbar';
-    bar.dataset.pid = postId;
-    likeBtn.insertAdjacentElement('afterend', bar);
-
-    // Charger les réactions existantes
-    _loadReactions(postId, bar);
-
-    // ─── Affichage popup ────────────────────────────────────
-    let hideTimer;
-    const show = () => { clearTimeout(hideTimer); popup.classList.add('rvisible'); };
-    const hide = (delay = 280) => { hideTimer = setTimeout(() => popup.classList.remove('rvisible'), delay); };
-
-    wrapper.addEventListener('mouseenter', show);
-    wrapper.addEventListener('mouseleave', () => hide());
-    popup.addEventListener('mouseenter', show);
-    popup.addEventListener('mouseleave', () => hide());
-
-    // Long press mobile
-    let pressTimer;
-    likeBtn.addEventListener('touchstart', (e) => {
-        pressTimer = setTimeout(() => { e.preventDefault(); show(); }, 400);
-    }, { passive: false });
-    likeBtn.addEventListener('touchend', () => clearTimeout(pressTimer));
-
-    // Tap rapide = reaction "heart" par défaut (comportement like classique)
-    likeBtn.addEventListener('click', (e) => {
-        if (popup.classList.contains('rvisible')) return;
-        _handleReaction(postId, 'heart', bar, postEl);
-    });
-
-    // Clic sur une réaction
-    popup.querySelectorAll('.rbtn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            hide(0);
-            _handleReaction(postId, btn.dataset.type, bar, postEl);
-        });
-    });
-
-    // Restaurer réaction locale
-    const myReaction = _getMyReaction(postId);
-    if (myReaction) _applyReactionToBtn(likeBtn, myReaction);
-}
-
-// ─── Toggle réaction ─────────────────────────────────────────
-async function _handleReaction(postId, type, bar, postEl) {
-    const likeBtn = postEl.querySelector('.likebtn');
-    const current = _getMyReaction(postId);
-    const removing = current === type;
-
-    // Mise à jour locale optimiste
-    if (removing) {
-        _setMyReaction(postId, null);
-        _resetBtn(likeBtn);
-        _adjustLocalCount(postId, type, -1);
-    } else {
-        if (current) _adjustLocalCount(postId, current, -1);
-        _setMyReaction(postId, type);
-        _applyReactionToBtn(likeBtn, type);
-        _adjustLocalCount(postId, type, +1);
-
-        // Animation pop
-        likeBtn.classList.add('rpop');
-        setTimeout(() => likeBtn.classList.remove('rpop'), 400);
-    }
-
-    // Mettre à jour la barre localement
-    _renderBar(bar, _getLocalCounts(postId));
-
-    // Appel API (gracieux)
-    try {
-        const url = removing
-            ? `${API}posts/${postId}/unreact`
-            : `${API}posts/${postId}/react`;
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ type })
-        });
-        if (res.ok) {
-            const data = await res.json();
-            if (data.reactions) _renderBar(bar, data.reactions);
-        }
-    } catch (_) { /* API indisponible — localStorage suffit */ }
-}
-
-// ─── Chargement depuis API ───────────────────────────────────
-async function _loadReactions(postId, bar) {
-    try {
-        const res = await fetch(`${API}posts/${postId}/reactions`);
-        if (res.ok) {
-            const data = await res.json();
-            if (data.reactions && Object.keys(data.reactions).length > 0) {
-                _setLocalCounts(postId, data.reactions);
-                _renderBar(bar, data.reactions);
-                return;
-            }
-        }
-    } catch (_) { }
-    // Fallback localStorage
-    const local = _getLocalCounts(postId);
-    if (Object.keys(local).length) _renderBar(bar, local);
-}
-
-// ─── Rendu barre de compteurs ────────────────────────────────
-function _renderBar(bar, reactions) {
-    bar.innerHTML = '';
-    const entries = REACTIONS.filter(r => (reactions[r.type] || 0) > 0);
-    if (!entries.length) return;
-
-    entries.forEach(r => {
-        const chip = document.createElement('button');
-        chip.className = 'rchip';
-        chip.dataset.type = r.type;
-        chip.innerHTML = `${r.emoji}<span>${reactions[r.type]}</span>`;
-        bar.appendChild(chip);
-    });
-}
-
-// ─── Visuel bouton like ──────────────────────────────────────
-function _applyReactionToBtn(btn, type) {
-    const r = REACTIONS.find(x => x.type === type);
-    if (!r) return;
-    btn.classList.add('liked', `ractive-${type}`);
-
-    const svg = btn.querySelector('svg');
-    if (svg) {
-        if (!btn.dataset.svgBak) btn.dataset.svgBak = svg.outerHTML;
-        const span = document.createElement('span');
-        span.className = 'ractive-emoji';
-        span.textContent = r.emoji;
-        svg.replaceWith(span);
-    }
-}
-
 function _resetBtn(btn) {
     btn.classList.remove('liked', ...REACTIONS.map(r => `ractive-${r.type}`));
     const span = btn.querySelector('.ractive-emoji');
@@ -6409,18 +6245,6 @@ function _resetBtn(btn) {
     }
 }
 
-// ─── Persistance locale ──────────────────────────────────────
-function _getMyReaction(pid) {
-    try { return JSON.parse(localStorage.getItem('my_reactions') || '{}')[pid] || null; }
-    catch { return null; }
-}
-function _setMyReaction(pid, type) {
-    try {
-        const d = JSON.parse(localStorage.getItem('my_reactions') || '{}');
-        if (type) d[pid] = type; else delete d[pid];
-        localStorage.setItem('my_reactions', JSON.stringify(d));
-    } catch { }
-}
 function _getLocalCounts(pid) {
     try { return JSON.parse(localStorage.getItem(`rc_${pid}`) || '{}'); }
     catch { return {}; }
@@ -6906,8 +6730,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return status;
         } catch (e) {
             statusText.textContent = 'connecte-toi pour gérer le 2FA';
-            return null;
             manageBtn.classList.add('disabled');
+            return null;
+
         }
     }
     refreshStatus();

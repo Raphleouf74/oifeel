@@ -24,6 +24,7 @@
     "jsonwebtoken": "^9.0.2",
     "minimist": "^1.2.8",
     "mongoose": "^8.23.0",
+    "morphicons": "^1.7.0",
     "nodemailer": "^9.0.5",
     "otplib": "^13.4.1",
     "python": "^0.0.4",

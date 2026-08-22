@@ -683,12 +683,13 @@
 .report-modal-panel {
   width: min(600px, calc(100vw - 32px));
   max-width: 620px;
-  border-radius: 5px;
+  border-radius: 25px;
   background: radial-gradient(
     circle at top left,
-    rgba(255, 255, 255, 0.95),
-    rgba(245, 245, 245, 0.96)
+    rgba(105, 25, 25, 0.95),
+    rgba(25, 25, 25, 0.96)
   );
+  color: #fff;
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -720,21 +721,16 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  color: #111827;
+  color: #fff;
   margin: 0;
 }
 
-.report-modal-title svg {
-  height: 28px;
-  width: 28px;
-  color: #6366f1;
-}
 
 .report-modal-close {
   position: relative;
   top: 0;
   right: 0;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 20, 20);
   border: 1px solid rgba(148, 163, 184, 0.3);
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
   border-radius: 5px;
@@ -751,7 +747,7 @@
 
 .report-modal-close:hover {
   transform: scale(1.05);
-  background: #f8fafc;
+  background: rgba(255, 20, 20, 0.5);
 }
 
 .report-modal-body {
@@ -767,18 +763,21 @@
 .report-label {
   font-size: 0.95rem;
   font-weight: 700;
-  color: #1f2937;
+  color: #fff;
 }
 
 .report-label span {
   font-weight: 400;
-  color: #6b7280;
+  color: #fff;
   font-size: 0.85rem;
 }
 
 .report-select-wrap,
 .report-textarea {
-  width: 100%;
+  padding: 15px;
+  width: 95%;
+  border-radius: 25px;
+
 }
 
 .report-select {
@@ -804,10 +803,10 @@
   min-height: 160px;
   resize: vertical;
   border: 1px solid rgba(148, 163, 184, 0.45);
-  border-radius: 5px;
+  border-radius: 25px;
   background: #ffffff;
   color: #111827;
-  padding: 16px;
+  padding: 15px;
   font-size: 0.95rem;
   line-height: 1.6;
   outline: none;
@@ -1016,7 +1015,8 @@ a.download-apk-btn:hover {
 
 .views {
   font-size: 1.5rem;
-  color: #aaa;
+  color: #000;
+  font-weight: 900;
 }
 
 .profile-header {
@@ -1128,6 +1128,7 @@ a.download-apk-btn:hover {
 .profile-posts,
 .posts-section {
   margin-top: 24px;
+  width: 100%;
 }
 
 .profile-posts h3,

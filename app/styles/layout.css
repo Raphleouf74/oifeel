@@ -18,19 +18,12 @@ header img {
   transition: all 0.3s ease;
 }
 
-header img:hover {
-  transform: scale(1.15) translateY(5px) translateX(5px) ;
-}
 
 header img:active {
   transform: scale(0.95);
 }
 
 header.scrolled {
-  scale: 0.75;
-  top: 5px;
-  left: 0px;
-  transform: translateX(-15px) translateY(-25px);
   opacity: 0.7;
 }
 
@@ -385,16 +378,15 @@ header.scrolled {
 
 nav {
   position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 220px;
+  width: 20px;
+  top: 90px;
   opacity: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: stretch;
-  background: var(--menu-bg);
+  background: rgba(50,50,50,0.5);
+  color: #000;
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-right: 1px solid var(--border);
@@ -402,14 +394,19 @@ nav {
   z-index: 2000;
   gap: 8px;
   padding: 1rem;
+  border-radius: 15px;
   transition: all 0.2s ease-in-out;
-  transform: translateX(-250px);
+  transform: translateX(-30px) ;
   opacity: 0;
+  height: 100px;
+  overflow: hidden;
 }
 
 nav.shown {
-  transform: translateX(0);
+  transform: translateX(5px) ;
   opacity: 1;
+  height: 340px;
+  width: 220px;
 }
 
 nav a#create {

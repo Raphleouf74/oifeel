@@ -4,84 +4,150 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <title>cgu — oifeel.</title>
+        <link rel="icon" href="/app/assets/logo/app_logo_dark.png" type="image/png">
         <link rel="stylesheet" href="./styles.css">
     </head>
     <body>
         <div class="container" role="main">
-            <div class="header">
+            <div class="page-header">
+                <img src="/app/assets/logo/app_logo_dark.png" alt="oifeel. Logo">
                 <div>
-                    <div class="h-title">conditions générales d'utilisation — oifeel.</div>
-                    <div class="h-sub">dernière mise à jour : mardi 02 juin 2026</div>
+                    <div class="h-title">conditions générales d'utilisation</div>
+                    <div class="h-sub">oifeel. — dernière mise à jour : mardi 02 juin 2026</div>
                 </div>
             </div>
-            <section>
-                <p>
-                    en utilisant oifeel. (le «
-                    service »), tu accepte les présentes conditions générales d'utilisation.
-                si tu n'acceptes pas, n'utilise pas le service.
-                </p>
-                <h2>1. description du service</h2>
-                <p>oifeel. est une plateforme sociale permettant de publier, partager et interagir avec du contenu.</p>
-                <h2>2. comptes utilisateurs</h2>
-                <p>
-                    la création d'un compte est facultative.
-                    <b>tu est responsable</b>
-                    de la confidentialité de tes
-                identifiants
-                    <b>et de toute activité réalisée via ton compte</b>
-                    .
-                </p>
-                <h2>3. Contenu des utilisateurs</h2>
-                <p>
-                    tu conserve la propriété du contenu que tu publies. en publiant, tu accorde à oifeel. une
-                licence mondiale, non exclusive, gratuite permettant l'hébergement et l'affichage nécessaires au
-                fonctionnement du Service.
-                </p>
-                <h2>4. récupération de données</h2>
-                <p>
-                    lors de la création du compte, une adresse e-mail peut être entrée au choix de l'utilisatuer. ce dernier peut choisir s'il souhaite ou non recevoir des infos concernant oifeel. par e-mail.
-                    <br>
-                    lors de la publication d'un post,
-                    <b>l'adresse ip est récuperés</b>
-                    à des fins de sécurité et de protection uniquement.
-                    <b>
-                        les adresses ip enregistrées sont supprimées au bout de 30 jours si aucune action ne doivent être prise sur cette adresse.
-                        <br>
-                    </b>
-                    si une infractgion est detectée: l'adresse ip est récupérée et
-                    <b>affiché sur le panel visible uniquement pas les dministrateurs</b> si une multitude d'infractions sont réalisés par une seule ip, cette dernière peut être bannie entièrement du site. toute autre tentative de contournement de cette règle entrainera des actions plus sèvères.
-                    <br>
-                    bien évidemment si des actions en justice doivent aboutir, l'adresse ip sera conservée jusqu'à ordre de la justice.
-                </p>
-                <h2>5. conduite interdite</h2>
-                <p>
-                    il est interdit de publier du contenu illégal, violent, haineux, pornographique ou violant les droits de
-                tiers. tout comportement abusif peut entraîner des sanctions (suspension, suppression, interdiction).
-                </p>
-                <h2>6. propriété intellectuelle</h2>
-                <p>
-                    le contenu, la marque et le code de oifeel. sont protégés. toute reproduction non autorisée est
-                interdite.
-                </p>
-                <h2>7. résiliation</h2>
-                <p>
-                    oifeel. peut suspendre ou supprimer des comptes et du contenu qui violent ces conditions ou la loi
-                applicable.
-                </p>
-                <h2>8. limitation de responsabilité</h2>
-                <p>
-                    dans la mesure permise par la loi, oifeel. n'est pas responsable des dommages indirects, pertes de
-                données ou profits perdus liés à l'utilisation du service.
-                </p>
-                <h2>9. modifications</h2>
-                <p>
-                    ces conditions peuvent être modifiées. les modifications seront publiées ; la poursuite d'utilisation
-                vaut acceptation.
-                </p>
-                <a href="../index.html">
-                    <button>retour au menu</button>
+            <div class="controls">
+                <button id="downloadBtn" class="ghost">télécharger (~5 Ko)</button>
+            </div>
+            <div class="card">
+                <nav class="toc">
+                    <div class="toc-title">sommaire</div>
+                    <ol>
+                        <li>
+                            <a href="#description">description du service</a>
+                        </li>
+                        <li>
+                            <a href="#comptes">comptes utilisateurs</a>
+                        </li>
+                        <li>
+                            <a href="#contenu">contenu des utilisateurs</a>
+                        </li>
+                        <li>
+                            <a href="#donnees">récupération de données</a>
+                        </li>
+                        <li>
+                            <a href="#conduite">conduite interdite</a>
+                        </li>
+                        <li>
+                            <a href="#propriete">propriété intellectuelle</a>
+                        </li>
+                        <li>
+                            <a href="#resiliation">résiliation</a>
+                        </li>
+                        <li>
+                            <a href="#responsabilite">limitation de responsabilité</a>
+                        </li>
+                        <li>
+                            <a href="#modifications">modifications</a>
+                        </li>
+                    </ol>
+                </nav>
+                <section>
+                    <p>
+                        en utilisant oifeel. (le « service »), tu acceptes les présentes conditions générales
+                    d'utilisation. si tu n'acceptes pas, n'utilise pas le service.
+                    </p>
+                    <h2 id="description">
+                        <span class="num">1.</span>description du service
+                    </h2>
+                    <p>oifeel. est une plateforme sociale permettant de publier, partager et interagir avec du contenu.</p>
+                    <h2 id="comptes">
+                        <span class="num">2.</span>comptes utilisateurs
+                    </h2>
+                    <p>la création d'un compte est facultative.
+                        <b>tu es responsable</b>
+                        de la confidentialité de tes
+                    identifiants
+                        <b>et de toute activité réalisée via ton compte</b>.
+                    </p>
+                    <h2 id="contenu">
+                        <span class="num">3.</span>contenu des utilisateurs
+                    </h2>
+                    <p>
+                        tu conserves la propriété du contenu que tu publies. en publiant, tu accordes à oifeel. une
+                    licence mondiale, non exclusive et gratuite permettant l'hébergement et l'affichage nécessaires
+                    au fonctionnement du service.
+                    </p>
+                    <h2 id="donnees">
+                        <span class="num">4.</span>récupération de données
+                    </h2>
+                    <p>
+                        lors de la création du compte, une adresse e-mail peut être renseignée au choix de
+                    l'utilisateur. celui-ci peut choisir s'il souhaite ou non recevoir des informations concernant
+                    oifeel. par e-mail.
+                    </p>
+                    <p>lors de la publication d'un post,
+                        <b>l'adresse IP est récupérée</b>
+                        à des fins de sécurité et de
+                    protection uniquement.
+                        <b>les adresses IP enregistrées sont supprimées au bout de 30 jours</b>
+                        si aucune action ne doit être prise sur cette adresse.
+                    </p>
+                    <p>si une infraction est détectée, l'adresse IP est conservée et
+                        <b>
+                            affichée sur le panel visible
+                    uniquement par les administrateurs
+                        </b>
+                        . si une multitude d'infractions sont réalisées depuis une
+                    même adresse IP, celle-ci peut être bannie entièrement du site. toute tentative de contournement
+                    de cette règle entraînera des actions plus sévères.
+                    </p>
+                    <div class="note">
+                        si des poursuites judiciaires doivent aboutir, l'adresse IP concernée sera
+                    conservée jusqu'à décision de justice.
+                    </div>
+                    <h2 id="conduite">
+                        <span class="num">5.</span>conduite interdite
+                    </h2>
+                    <p>
+                        il est interdit de publier du contenu illégal, violent, haineux, pornographique ou violant les
+                    droits de tiers. tout comportement abusif peut entraîner des sanctions (suspension, suppression,
+                    interdiction).
+                    </p>
+                    <h2 id="propriete">
+                        <span class="num">6.</span>propriété intellectuelle
+                    </h2>
+                    <p>
+                        le contenu, la marque et le code de oifeel. sont protégés. toute reproduction non autorisée est
+                    interdite.
+                    </p>
+                    <h2 id="resiliation">
+                        <span class="num">7.</span>résiliation
+                    </h2>
+                    <p>
+                        oifeel. peut suspendre ou supprimer des comptes et du contenu qui violent ces conditions ou la
+                    loi applicable.
+                    </p>
+                    <h2 id="responsabilite">
+                        <span class="num">8.</span>limitation de responsabilité
+                    </h2>
+                    <p>
+                        dans la mesure permise par la loi, oifeel. n'est pas responsable des dommages indirects, pertes
+                    de données ou profits perdus liés à l'utilisation du service.
+                    </p>
+                    <h2 id="modifications">
+                        <span class="num">9.</span>modifications
+                    </h2>
+                    <p>
+                        ces conditions peuvent être modifiées. les modifications seront publiées ; la poursuite
+                    d'utilisation du service vaut acceptation.
+                    </p>
+                </section>
+                <a class="back-link" href="../index.html">
+                    <button class="ghost">retour au menu</button>
                 </a>
-            </section>
+            </div>
+            <div class="footer">oifeel. &copy; 2025-2026.</div>
         </div>
         <script src="./legal.js"></script>
     </body>
