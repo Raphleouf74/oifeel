@@ -33,7 +33,17 @@ oifeel. est un réseau social axé sur l'humeur du moment : un feed d'"états" �
     - [🎨 landing page publique](#-landing-page-publique)
   - [stack technique](#stack-technique)
   - [internationalisation](#internationalisation)
-  - [centre d'aide \& documentation intégrée](#centre-daide--documentation-intégrée)
+  - [aide](#aide)
+      - [publications](#publications)
+      - [stories](#stories)
+      - [messages ephemeres](#messages-éphèmères)
+      - [messagerie](#messagerie)
+      - [génération par IA](#génération-par-ia)
+      - [notifications](#notifications)
+      - [profil](#profil)
+      - [parametres](#parametres)
+      - [confidentialité](#confidentialite)
+      - [sécurité du compte](#securité-du-compte)
   - [sécurité](#sécurité)
   - [licence](#licence)
 
@@ -126,23 +136,40 @@ oifeel. est disponible en **5 langues** : 🇫🇷 français, 🇬🇧 english, 
 
 le fichier `manifest.json` référence chaque langue disponible (code, nom, drapeau, fichier associé). chaque fichier de langue est un dictionnaire clé → texte, chargé dynamiquement au runtime et mis en cache dans `window.__translations__`. ajouter une langue revient à créer un nouveau fichier `xx.json` sur le même modèle et à l'enregistrer dans le manifest.
 
-## centre d'aide & documentation intégrée
+## aide
 
-l'application embarque son propre système d'aide contextuelle (`help-system.js`, exposé via `window.oifeelhelp`), conçu pour être **non intrusif** et réutiliser les patterns déjà existants dans l'app (overlays, `localstorage`, système i18n) :
 
-| composant              | rôle                                                                                                                                                                                                          |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **quickhelpprompt**    | bandeau discret « besoin d'aide ? » affiché au bon moment                                                                                                                                                     |
-| **quickstartguide**    | guide rapide en 3-4 étapes (navigation, compte, feed, interactions) pour les nouveaux venus                                                                                                                   |
-| **advancedonboarding** | onboarding avancé, présenté juste après la création d'un compte (profil, abonnements, publications/stories, messagerie, notifications, fonctionnalités avancées)                                              |
-| **helpcenter**         | mini-documentation consultable dans l'app : recherche par mot-clé, articles classés par catégories (*fonctionnalités* / *compte*), avec liens vers des ressources externes (ex. politique de confidentialité) |
-| **helptooltip**        | petites bulles contextuelles `[?]` qui expliquent une fonctionnalité précise directement au survol                                                                                                            |
 
-ce module ne collecte aucune donnée personnelle supplémentaire : seuls quelques compteurs de comportement ux (clics répétés, ouvertures/fermetures répétées d'un panneau) vivent en mémoire le temps de la session, pour détecter automatiquement quand un utilisateur semble perdu et lui proposer de l'aide au bon moment.
+## publications
+publie un texte, une image ou une humeur sur ton fil. tout le monde peut réagir et commenter.
+            
+            
+## stories
+les stories sont visibles 24h puis disparaissent automatiquement. utilise le sélecteur en haut du fil pour les voir.
+            
+## messages éphèmères
+ces publications restent disponibles pendant une durée que tu choisis, avant de disparaître automatiquement pour tout le monde.
 
-les articles du centre d'aide couvrent notamment : publications, stories, messagerie, notifications, profil, paramètres, confidentialité, sécurité (2fa), génération ia et posts éphémères — le tout traduit dans les 5 langues de l'app via les mêmes fichiers `lang/*.json` (clés `help_*`).
+## messagerie
+discute en privé avec d’autres membres depuis l’onglet messages
 
-> 💡 c'est cette documentation embarquée qui sert de base à la section [fonctionnalités](#fonctionnalités) de ce readme.
+## génération par ia
+crée une proposition de contenu à partir de ton idée, dans l’écran de création (options avancées). limité à quelques générations par semaine.
+
+## notifications
+retrouve les likes, commentaires, nouveaux abonnés et réponses dans l’onglet notifications.
+
+## profil
+personnalise ton avatar, ta bio, ta couleur d’accent et ta police depuis l’onglet « plus ».
+ 
+## parametres
+gère la langue, l’affichage des posts IA et la personnalisation de ton compte.
+
+## confidentialite
+consulte la politique de confidentialité pour savoir quelles données sont utilisées. https://oifeel.netlify.app/app/legal/privacy_policy
+
+## securité du compte
+active la double authentification (A2F) et gère ton mot de passe depuis la gestion du compte.
 
 
 ## sécurité
