@@ -95,7 +95,7 @@
 #authModal {
   position: fixed;
   inset: 0;
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10000;
@@ -104,15 +104,12 @@
 }
 
 #authActions.auth-actions {
-  position: relative;
   width: 100%;
-  max-width: 820px;
+  max-width: 1000px;
   min-height: 480px;
   background: rgba(16, 16, 16, 0.97);
-  left: calc(50% - 410px);
-  top: calc(50% - 240px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 5px;
+  border-radius: 25px;
   overflow: hidden;
   box-shadow:
     0 32px 80px rgba(0, 0, 0, 0.6),
@@ -243,24 +240,8 @@
   opacity: 0.95;
   inset: 1px;
 }
-
-.auth-brand-name {
-  font-size: 2rem;
-  font-weight: 800;
-  color: white;
-  letter-spacing: -0.03em;
-  line-height: 1;
-  position: relative;
-  z-index: 1;
-  margin: 0;
-}
-
-.auth-brand-name span {
-  opacity: 0.7;
-}
-
 .auth-brand-tagline {
-  font-size: 0.9rem;
+  font-size: 1.35rem;
   color: rgba(255, 255, 255, 0.75);
   line-height: 1.5;
   position: relative;

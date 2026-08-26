@@ -693,6 +693,17 @@ function _stopFeedTrack() {
     }
 }
 
+async function _resolveTrackPreview(track) {
+    if (track?.trackId) {
+        const res = await fetch(`${API}music/preview/${encodeURIComponent(track.trackId)}`);
+        if (!res.ok) throw new Error(`Preview indisponible (${res.status})`);
+        const data = await res.json();
+        if (!data.preview) throw new Error('Preview indisponible');
+        return data.preview;
+    }
+    return track?.preview || null;
+}
+
 // Vitesse de défilement (px/s) pendant la phase de scroll.
 const TRACK_MARQUEE_SPEED = 40;
 // Pause (ms) quand le titre est revenu à sa position alignée normale.
@@ -832,7 +843,7 @@ function displayMood(mood) {
     content.appendChild(innerWrap);
 
     // Pilule musique (extrait 30s via Deezer)
-    if (mood.track && mood.track.preview) {
+    if (mood.track && (mood.track.preview || mood.track.trackId)) {
         const trackPill = document.createElement('div');
         trackPill.className = 'post-track';
 
@@ -870,21 +881,30 @@ function displayMood(mood) {
         const trackPlayBtn = document.createElement('button');
         trackPlayBtn.type = 'button';
         trackPlayBtn.className = 'post-track-play';
-        trackPlayBtn.dataset.preview = mood.track.preview;
+        trackPlayBtn.dataset.preview = mood.track.preview || '';
+        trackPlayBtn.dataset.trackId = mood.track.trackId || '';
         trackPlayBtn.setAttribute('aria-label', 'écouter l\'extrait');
         trackPlayBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
 
-        trackPlayBtn.addEventListener('click', (e) => {
+        trackPlayBtn.addEventListener('click', async (e) => {
             e.stopPropagation();
             const wasPlaying = trackPlayBtn.classList.contains('playing');
             _stopFeedTrack();
             if (!wasPlaying) {
-                _feedTrackAudio = new Audio(mood.track.preview);
-                _feedTrackAudio.play().catch(() => { });
-                _feedTrackAudio.addEventListener('ended', _stopFeedTrack);
                 trackPlayBtn.classList.add('playing');
                 trackPlayBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>`;
                 _feedTrackPlayingBtn = trackPlayBtn;
+                try {
+                    const preview = await _resolveTrackPreview(mood.track);
+                    if (!preview) throw new Error('Preview indisponible');
+                    _feedTrackAudio = new Audio(preview);
+                    _feedTrackAudio.addEventListener('ended', _stopFeedTrack);
+                    await _feedTrackAudio.play();
+                } catch (err) {
+                    console.warn('Lecture de l\'extrait impossible:', err);
+                    _stopFeedTrack();
+                    showFeedback('error', 'fb_music_unavailable');
+                }
             }
         });
 
@@ -2437,8 +2457,15 @@ function _renderMusicResults(results) {
             const isPlaying = playBtn.classList.contains('playing');
             _stopMusicPreview();
             if (!isPlaying) {
-                _musicPreviewAudio = new Audio(track.preview);
-                _musicPreviewAudio.play().catch(() => { });
+                _musicPreviewAudio = new Audio();
+                _resolveTrackPreview(track).then(preview => {
+                    if (!_musicPreviewAudio || !preview) return;
+                    _musicPreviewAudio.src = preview;
+                    return _musicPreviewAudio.play();
+                }).catch(() => {
+                    _stopMusicPreview();
+                    showFeedback('error', 'fb_music_unavailable');
+                });
                 _musicPreviewAudio.addEventListener('ended', () => playBtn.classList.remove('playing'));
                 playBtn.classList.add('playing');
             }
@@ -2606,20 +2633,15 @@ function gradients() {
 
 
 
-// only for desktop : cacher la nav quand le curseur n'est pas proche
-//check if the cursor is less than 10% of the left of the screen or on the nav
-if (window.innerWidth > 768) {
-    const nav = document.getElementById('nav');
-    const logo = document.querySelector('header img');
 
-    logo.addEventListener('click', () => {
-        nav.classList.toggle('shown');
-    });
-    nav.addEventListener('click', () => {
-        nav.classList.toggle('shown');
-    });
+const logo = document.querySelector('header');
 
-};
+logo.addEventListener('click', () => {
+    nav.classList.toggle('shown');
+});
+nav.addEventListener('click', () => {
+    nav.classList.toggle('shown');
+});
 
 
 //auth.js
@@ -2968,7 +2990,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isRegister = register;
         authTitle.textContent = register ? "inscription" : 'connexion';
         if (authModalForm) authModalForm.classList.add('shown');
-        if (authModal) authModal.style.display = 'block';
+        if (authModal) authModal.style.display = 'flex';
         hideOtpStep();
         // focus username
         setTimeout(() => usernameInput && usernameInput.focus(), 100);
@@ -2991,6 +3013,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isRegister) {
                 const user = await registerUser(usernameInput.value, passwordInput.value);
                 finalizeLoggedInUI(user, usernameInput.value);
+                // Création volontaire d'un compte : proposer l'onboarding
+                // avancé (toujours "passable", jamais bloquant).
+                window.OifeelHelp?.onAccountCreated?.();
             } else {
                 const result = await loginUser(usernameInput.value, passwordInput.value);
                 if (result && result.requires2FA) {
@@ -4968,7 +4993,7 @@ async function _showViewCount(postEl, postId) {
         if (res.ok) {
             const data = await res.json();
             const views = data.views || data.viewCount || 1;
-            viewsEl.textContent = `${views} vues`;
+            viewsEl.textContent = `  ${views} vues`;
         }
     } catch {
         viewsEl.textContent = '1 vue';
@@ -5874,7 +5899,7 @@ function extractMoodFromEl(postEl, postId) {
     const text = postEl.querySelector('.post-text')?.textContent || '';
     const bg = postEl.querySelector('.post-content')?.style.background || '';
     const likeCount = postEl.querySelector('.like-count')?.textContent || '0';
-    const dateText = postEl.querySelector('.postdate')?.textContent?.replace('') || '';
+    const dateText = postEl.querySelector('.postdate')?.textContent || '';
     const stickerSrc = postEl.querySelector('.post-sticker')?.src || null;
     const isEphemeral = postEl.classList.contains('ephemeral');
 
@@ -5885,7 +5910,8 @@ function extractMoodFromEl(postEl, postId) {
         title: trackEl.querySelector('.post-track-title')?.textContent || '',
         artist: trackEl.querySelector('.post-track-artist')?.textContent || '',
         cover: trackEl.querySelector('.post-track-cover')?.src || null,
-        preview: trackEl.querySelector('.post-track-play')?.dataset.preview || null
+        preview: trackEl.querySelector('.post-track-play')?.dataset.preview || null,
+        trackId: trackEl.querySelector('.post-track-play')?.dataset.trackId || null
     } : null;
 
     // Même logique pour la signature de compte (police + accent) : on la relit
@@ -6000,13 +6026,22 @@ function renderModal(mood, postId, postEl) {
         playBtn.setAttribute('aria-label', 'écouter l\'extrait');
         playBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
 
-        playBtn.addEventListener('click', (e) => {
+        playBtn.addEventListener('click', async (e) => {
             e.stopPropagation();
             const wasPlaying = playBtn.classList.contains('playing');
             _stopFeedTrack();
             if (!wasPlaying) {
-                _feedTrackAudio = new Audio(mood.track.preview);
-                _feedTrackAudio.play().catch(() => { });
+                try {
+                    const preview = await _resolveTrackPreview(mood.track);
+                    if (!preview) throw new Error('Preview indisponible');
+                    _feedTrackAudio = new Audio(preview);
+                    await _feedTrackAudio.play();
+                } catch (err) {
+                    console.warn('Lecture de l\'extrait impossible:', err);
+                    _stopFeedTrack();
+                    showFeedback('error', 'fb_music_unavailable');
+                    return;
+                }
                 _feedTrackAudio.addEventListener('ended', () => {
                     playBtn.classList.remove('playing');
                     playBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;

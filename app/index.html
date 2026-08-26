@@ -18,6 +18,7 @@
         <link rel="stylesheet" href="/app/styles/app-messages.css">
         <link rel="stylesheet" href="/app/styles/app-more.css">
         <link rel="stylesheet" href="/app/styles/comments.css">
+        <link rel="stylesheet" href="/app/styles/help-system.css">
         <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
     </head>
     <body>
@@ -168,7 +169,7 @@
             </svg>
             <span id="userName">non connecté</span>
             <div id="profilemenu">
-                <button onclick="document.getElementById('authModal').style.display = 'block'" data-i18n="login_register_btn">
+                <button onclick="document.getElementById('authModal').style.display = 'flex'" data-i18n="login_register_btn">
                     inscription / connexion
                 </button>
                 <button
@@ -184,7 +185,7 @@
                 </p>
             </div>
         </div>
-        <div id="authModal">
+        <div id="authModal" style="display: none;">
             <div id="authActions" class="auth-actions">
                 <!-- Fond décoratif -->
                 <div class="auth-bg-orb auth-bg-orb--1"></div>
@@ -223,9 +224,6 @@
                         <div class="auth-logo-wrap">
                             <img src="/app/assets/logo/app_logo_dark.png" alt="oifeel. Logo" class="auth-logo">
                         </div>
-                        <h2 class="auth-brand-name">
-                            <span>oifeel.</span>
-                        </h2>
                         <p class="auth-brand-tagline" data-i18n="login-message">
                             partage ton humeur avec le monde entier.
                         </p>
@@ -1739,6 +1737,61 @@
                     </div>
                 </div>
             </div>
+            <div class="more-section" id="more-help">
+                <h2 class="more-section-title" data-i18n="more_help_title">aide</h2>
+                <div id="MoreHelpSettings">
+                    <a href="#" id="openHelpCenterBtn">
+                        <div class="oh-menu-icon">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="white"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                                <line
+                                    x1="12"
+                                    y1="17"
+                                    x2="12.01"
+                                    y2="17"
+                                />
+                            </svg>
+                        </div>
+                        <button>
+                            <p data-i18n="help_center_menu_title">aide</p>
+                            <small data-i18n="help_center_menu_sub">questions fréquentes et documentation</small>
+                        </button>
+                    </a>
+                    <a href="#" id="replayOnboardingBtn">
+                        <div class="oh-menu-icon">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="white"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                                <path d="M3 3v5h5"/>
+                            </svg>
+                        </div>
+                        <button>
+                            <p data-i18n="replay_onboarding_title">découvrir l'application</p>
+                            <small data-i18n="replay_onboarding_sub">revoir le guide de démarrage</small>
+                        </button>
+                    </a>
+                </div>
+            </div>
             <div class="more-section" id="more-legal">
                 <h2 class="more-section-title" data-i18n="more_legal_title">légal & support</h2>
                 <div id="MoreAccSettings">
@@ -1843,7 +1896,6 @@
             <div class="report-modal-panel">
                 <div class="report-modal-header">
                     <div class="report-modal-title">
-                        
                         <p data-i18n="report_post">signaler un post</p>
                     </div>
                     <button class="report-modal-close" onclick="window.closeReportModal()" aria-label="fermer">
@@ -1949,6 +2001,131 @@
                 </divfollow>
             </div>
         </div>
+        <!-- ===== SYSTÈME D'AIDE CONTEXTUELLE ===== -->
+        <!-- Bandeau discret "besoin d'aide ?" — jamais au milieu de l'écran -->
+        <div
+            id="helpPrompt"
+            class="help-prompt hidden"
+            role="status"
+            aria-live="polite"
+        >
+            <div class="help-prompt-text">
+                <strong data-i18n="help_prompt_title">besoin d'aide ?</strong>
+                <span data-i18n="help_prompt_sub">découvre rapidement comment fonctionne l'application.</span>
+            </div>
+            <div class="help-prompt-actions">
+                <button
+                    type="button"
+                    id="helpPromptShow"
+                    class="help-prompt-btn"
+                    data-i18n="help_prompt_cta"
+                >voir le guide</button>
+                <button
+                    type="button"
+                    id="helpPromptClose"
+                    class="help-prompt-close"
+                    aria-label="fermer l'aide"
+                >×</button>
+            </div>
+        </div>
+        <!-- Guide rapide — pour tout le monde, connecté ou non -->
+        <div
+            id="quickGuideOverlay"
+            class="oh-overlay hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="quickGuideTitle"
+        >
+            <div class="oh-panel oh-panel--guide">
+                <span id="quickGuideTitle" class="sr-only" data-i18n="quick_guide_title">guide rapide</span>
+                <button
+                    type="button"
+                    class="oh-close"
+                    id="quickGuideClose"
+                    aria-label="fermer le guide rapide"
+                >×</button>
+                <div id="quickGuideSteps" class="oh-steps"></div>
+                <div class="oh-footer">
+                    <button
+                        type="button"
+                        id="quickGuideSkip"
+                        class="oh-btn oh-btn--ghost"
+                        data-i18n="guide_skip"
+                    >passer</button>
+                    <div class="oh-dots" id="quickGuideDots"></div>
+                    <button
+                        type="button"
+                        id="quickGuideNext"
+                        class="oh-btn oh-btn--primary"
+                        data-i18n="guide_next"
+                    >suivant</button>
+                </div>
+            </div>
+        </div>
+        <!-- Onboarding avancé — après création volontaire d'un compte -->
+        <div
+            id="advOnbOverlay"
+            class="oh-overlay hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="advOnbTitle"
+        >
+            <div class="oh-panel oh-panel--guide">
+                <span id="advOnbTitle" class="sr-only" data-i18n="advanced_onboarding_title">découvrir l'application</span>
+                <button
+                    type="button"
+                    class="oh-close"
+                    id="advOnbClose"
+                    aria-label="fermer la découverte de l'application"
+                >×</button>
+                <div id="advOnbSteps" class="oh-steps"></div>
+                <div class="oh-footer">
+                    <button
+                        type="button"
+                        id="advOnbSkip"
+                        class="oh-btn oh-btn--ghost"
+                        data-i18n="onboarding_skip"
+                    >passer</button>
+                    <div class="oh-dots" id="advOnbDots"></div>
+                    <button
+                        type="button"
+                        id="advOnbNext"
+                        class="oh-btn oh-btn--primary"
+                        data-i18n="guide_next"
+                    >suivant</button>
+                </div>
+            </div>
+        </div>
+        <!-- Centre d'aide — documentation courte, recherchable -->
+        <div
+            id="helpCenterOverlay"
+            class="oh-overlay hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="helpCenterTitle"
+        >
+            <div class="oh-panel oh-panel--center">
+                <div class="oh-center-header">
+                    <h2 id="helpCenterTitle" data-i18n="help_center_title">aide</h2>
+                    <button
+                        type="button"
+                        class="oh-close"
+                        id="helpCenterClose"
+                        aria-label="fermer l'aide"
+                    >×</button>
+                </div>
+                <div class="oh-center-search">
+                    <input
+                        type="search"
+                        id="helpCenterSearch"
+                        placeholder="rechercher dans l'aide"
+                        aria-label="rechercher dans l'aide"
+                    >
+                </div>
+                <div class="oh-center-body" id="helpCenterBody"></div>
+            </div>
+        </div>
     </body>
     <script type="module" src="/app/scripts/app.js"></script>
+    <script type="module" src="/app/scripts/help-system.js"></script>
 </html>

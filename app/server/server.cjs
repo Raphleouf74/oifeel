@@ -80,6 +80,7 @@ const postSchema = new mongoose.Schema({
       title: { type: String, default: null },
       artist: { type: String, default: null },
       cover: { type: String, default: null },
+      trackId: { type: String, default: null },
       preview: { type: String, default: null },
       link: { type: String, default: null }
     },
@@ -697,6 +698,7 @@ function sanitizeTrack(track) {
     title: sanitizeText(String(track.title || "").slice(0, 120)),
     artist: sanitizeText(String(track.artist || "").slice(0, 120)),
     cover: typeof track.cover === "string" ? track.cover.slice(0, 500) : null,
+    trackId: track.trackId ? String(track.trackId).slice(0, 30) : null,
     preview: preview.slice(0, 500),
     link: typeof track.link === "string" ? track.link.slice(0, 500) : null
   };
@@ -917,6 +919,7 @@ app.get('/api/music/search', async (req, res) => {
       .filter(t => t.preview) // uniquement les morceaux avec un extrait 30s exploitable
       .slice(0, 12)
       .map(t => ({
+        trackId: String(t.id),
         title: t.title,
         artist: t.artist?.name || '',
         cover: t.album?.cover_medium || t.album?.cover || null,
@@ -928,6 +931,23 @@ app.get('/api/music/search', async (req, res) => {
   } catch (err) {
     console.error('❌ Erreur recherche musique:', err);
     res.status(500).json({ error: "Erreur serveur lors de la recherche musicale." });
+  }
+});
+
+app.get('/api/music/preview/:trackId', async (req, res) => {
+  try {
+    const trackId = String(req.params.trackId || '').match(/^\d+$/)?.[0];
+    if (!trackId) return res.status(400).json({ error: 'Identifiant de morceau invalide.' });
+
+    const deezerRes = await fetch(`https://api.deezer.com/track/${trackId}`);
+    if (!deezerRes.ok) return res.status(502).json({ error: 'Extrait musical indisponible.' });
+
+    const track = await deezerRes.json();
+    if (!track?.preview) return res.status(404).json({ error: 'Aucun extrait disponible.' });
+    res.json({ preview: track.preview });
+  } catch (err) {
+    console.error('❌ Erreur résolution preview Deezer:', err);
+    res.status(502).json({ error: 'Extrait musical indisponible.' });
   }
 });
 
