@@ -34,6 +34,7 @@ oifeel. est un réseau social axé sur l'humeur du moment : un feed d'"états" �
   - [stack technique](#stack-technique)
   - [internationalisation](#internationalisation)
   - [aide](#aide)
+<<<<<<< HEAD
   - [publications](#publications)
   - [stories](#stories)
   - [messages éphèmères](#messages-éphèmères)
@@ -44,6 +45,18 @@ oifeel. est un réseau social axé sur l'humeur du moment : un feed d'"états" �
   - [parametres](#parametres)
   - [confidentialite](#confidentialite)
   - [securité du compte](#securité-du-compte)
+=======
+      - [publications](#publications)
+      - [stories](#stories)
+      - [messages ephemeres](#messages-éphèmères)
+      - [messagerie](#messagerie)
+      - [génération par IA](#génération-par-ia)
+      - [notifications](#notifications)
+      - [profil](#profil)
+      - [parametres](#parametres)
+      - [confidentialité](#confidentialite)
+      - [sécurité du compte](#securité-du-compte)
+>>>>>>> 54896a2b86e0929b79fad1538782e763a9192cae
   - [sécurité](#sécurité)
   - [licence](#licence)
 
