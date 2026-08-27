@@ -3804,7 +3804,7 @@ app.post('/api/bot/mood', requireBotSecret, async (req, res) => {
 
     const cleanText = sanitizeText(String(text).slice(0, 280));
     const newPost = {
-      text: `${cleanText} + "\n - via discord `,
+      text: `${cleanText} \n- via discord `,
       emoji: '💬',
       color: "#000",
       textColor: "#fff",
