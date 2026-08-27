@@ -6874,3 +6874,166 @@ document.addEventListener('DOMContentLoaded', () => {
 document.getElementById('googleAuthBtn')?.addEventListener('click', () => {
     window.location.href = API + 'auth/google';
 });
+(function () {
+
+    const btn = document.getElementById("link-discord-btn");
+    const overlay = document.getElementById("discord-link-modal");
+    const closeBtn = document.getElementById("discord-link-close");
+    const retryBtn = document.getElementById("discord-link-retry");
+    const copyBtn = document.getElementById("discord-link-copy");
+
+    const stateLoading = document.getElementById("discord-link-loading");
+    const stateSuccess = document.getElementById("discord-link-success");
+    const stateError = document.getElementById("discord-link-error");
+    const errorMsg = document.getElementById("discord-link-error-msg");
+
+    const codeEl = document.getElementById("discord-link-code");
+    const codeInlineEl = document.getElementById("discord-link-code-inline");
+    const countdownEl = document.getElementById("discord-link-countdown");
+
+    const linkedBadge = document.getElementById("discord-linked-badge");
+    const unlinkBtn = document.getElementById("discord-unlink-btn");
+
+    overlay.style.display = 'none';
+    let countdownInterval = null;
+    let statusPollInterval = null;
+
+    function showState(state) {
+        stateLoading.hidden = state !== "loading";
+        stateSuccess.hidden = state !== "success";
+        stateError.hidden = state !== "error";
+    }
+
+    // Bascule visuellement entre "bouton pour lier" et "badge compte lié"
+    function renderLinked(linked) {
+        btn.hidden = linked;
+        linkedBadge.hidden = !linked;
+    }
+
+    async function checkDiscordStatus() {
+        try {
+            const res = await fetch(`${API}social/discord-status`, { credentials: "include" });
+            if (!res.ok) return; // pas connecté ou erreur : on laisse l'état par défaut (bouton)
+            const data = await res.json();
+            renderLinked(!!data.linked);
+        } catch (err) {
+            console.error("Erreur vérification statut Discord:", err);
+        }
+    }
+
+    function startCountdown(seconds) {
+        clearInterval(countdownInterval);
+        let remaining = seconds;
+        const tick = () => {
+            const m = Math.floor(remaining / 60).toString().padStart(2, "0");
+            const s = (remaining % 60).toString().padStart(2, "0");
+            countdownEl.textContent = `${m}:${s}`;
+            if (remaining <= 0) {
+                clearInterval(countdownInterval);
+                errorMsg.textContent = "Le code a expiré, génère-en un nouveau.";
+                showState("error");
+                return;
+            }
+            remaining -= 1;
+        };
+        tick();
+        countdownInterval = setInterval(tick, 1000);
+    }
+
+    // Pendant que le modal est ouvert avec un code affiché, on vérifie toutes les
+    // 3s si la commande /lier a été validée côté Discord, pour fermer le modal
+    // automatiquement sans que l'utilisateur ait à revenir cliquer quoi que ce soit.
+    function startStatusPolling() {
+        clearInterval(statusPollInterval);
+        statusPollInterval = setInterval(async () => {
+            try {
+                const res = await fetch(`${API}social/discord-status`, { credentials: "include" });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.linked) {
+                    clearInterval(statusPollInterval);
+                    clearInterval(countdownInterval);
+                    renderLinked(true);
+                    closeModal();
+                }
+            } catch (err) {
+                console.error("Erreur polling statut Discord:", err);
+            }
+        }, 3000);
+    }
+
+    async function generateCode() {
+        showState("loading");
+        try {
+            const res = await fetch(`${API}social/link-code`, {
+                method: "POST",
+                credentials: "include", // envoie le cookie de session
+                headers: { "Content-Type": "application/json" }
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                errorMsg.textContent = res.status === 401
+                    ? "Tu dois être connecté(e) pour lier ton compte Discord."
+                    : (data.error || "Impossible de générer le code.");
+                showState("error");
+                return;
+            }
+
+            codeEl.textContent = data.code;
+            codeInlineEl.textContent = data.code;
+            showState("success");
+            startCountdown(data.expiresIn || 600);
+            startStatusPolling();
+        } catch (err) {
+            console.error("Erreur génération code Discord:", err);
+            errorMsg.textContent = "Erreur réseau, réessaie.";
+            showState("error");
+        }
+    }
+
+    function openModal() {
+        overlay.style.display = 'flex';
+        generateCode();
+    }
+
+    function closeModal() {
+        overlay.style.display = 'none';
+        clearInterval(countdownInterval);
+        clearInterval(statusPollInterval);
+    }
+
+    btn.addEventListener("click", openModal);
+    closeBtn.addEventListener("click", closeModal);
+    retryBtn.addEventListener("click", generateCode);
+    overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) closeModal();
+    });
+
+    copyBtn.addEventListener("click", async () => {
+        try {
+            await navigator.clipboard.writeText(codeEl.textContent);
+            copyBtn.textContent = "✅";
+            setTimeout(() => (copyBtn.textContent = "📋"), 1500);
+        } catch (err) {
+            console.error("Copie impossible:", err);
+        }
+    });
+
+    unlinkBtn.addEventListener("click", async () => {
+        if (!confirm("Délier ton compte Discord ? Tu pourras le relier à tout moment.")) return;
+        try {
+            const res = await fetch(`${API}social/discord-link`, {
+                method: "DELETE",
+                credentials: "include"
+            });
+            if (res.ok) renderLinked(false);
+        } catch (err) {
+            console.error("Erreur délier Discord:", err);
+        }
+    });
+
+    // Vérification initiale au chargement de la page (le bouton reste affiché
+    // par défaut tant qu'on n'a pas la réponse, pour éviter un flash de contenu)
+    checkDiscordStatus();
+})();

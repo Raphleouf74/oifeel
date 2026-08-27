@@ -603,6 +603,7 @@
                     <button class="account-tab" data-tab="a2f">A2F</button>
                     <button class="account-tab" data-tab="contenu">contenu</button>
                     <button class="account-tab" data-tab="donnees">mes données</button>
+                    <button class="account-tab" data-tab="socials">connexions sociales</button>
                 </div>
                 <!-- Corps -->
                 <div class="account-body">
@@ -928,277 +929,272 @@
                             <div class="account-msg" id="deleteMsg"></div>
                         </div>
                     </div>
+                    <div class="account-section" id="account-tab-socials">
+                        <p class="account-section-title">connexions sociales</p>
+                        <button id="link-discord-btn" class="discord-link-btn">
+                            🔗 Lier mon compte Discord
+                        </button>
+                        <div id="discord-linked-badge" class="discord-linked-badge" hidden>
+                            <span>✅ Compte lié !</span>
+                            <button id="discord-unlink-btn" class="discord-unlink-link" type="button">délier</button>
+                        </div>
+                    </div>
                 </div>
-                <!-- /account-body -->
             </div>
-            <!-- /account-panel-wrap -->
+            <!-- /account-body -->
         </div>
-        <!-- /accountOverlay -->
-        <nav id="nav" role="navigation">
-            <a class="link active" id="home">
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="40"
-                    height="40"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.25"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="link-icon"
-                >
-                    <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/>
-                    <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                </svg>
-                <p class="link-title" data-i18n="nav_home">accueil</p>
-            </a>
-            <a class="link" id="messages">
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="36"
-                    height="36"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.25"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="link-icon"
-                >
-                    <path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/>
-                </svg>
-                <p class="link-title" data-i18n="nav_messages">messages</p>
-            </a>
-            <a class="link" id="create">
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="36"
-                    height="36"
-                    viewBox="0 0 24 24"
-                    fill="#150668"
-                    stroke="white"
-                    stroke-width="2.25"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="link-icon"
-                >
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M8 12h8"/>
-                    <path d="M12 8v8"/>
-                </svg>
-                <p class="link-title" data-i18n="nav_create">créer</p>
-            </a>
-            <a class="link" id="inbox">
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="36"
-                    height="36"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.25"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="link-icon"
-                >
-                    <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
-                    <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
-                </svg>
-                <p class="link-title" data-i18n="nav_inbox">notifications</p>
-            </a>
-            <a class="link" id="more">
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="link-icon"
-                >
-                    <path d="M5 12h14"/>
-                    <path d="M12 5v14"/>
-                </svg>
-                <p class="link-title" data-i18n="nav_profile">plus</p>
-            </a>
-        </nav>
-        <section id="home" class="tab active">
-            <!-- Barre de sélection Posts / Stories -->
-            <div
-                id="feed-selector"
-                class="sort-bar"
-                role="tablist"
-                aria-label="Sélection du feed"
-            >
-                <span class="feed-selector__indicator"></span>
-                <button class="sort-btn" data-feed="posts" data-i18n="home_posts">posts</button>
-                <button class="sort-btn" data-feed="stories" data-i18n="home_stories">stories</button>
+        <!-- /account-panel-wrap -->
+    </div>
+    <!-- Modal (caché par défaut) -->
+    <div id="discord-link-modal" class="discord-link-overlay" hidden>
+        <div class="discord-link-modal">
+            <button id="discord-link-close" class="discord-link-close" aria-label="Fermer">✕</button>
+            <div id="discord-link-loading" class="discord-link-state">
+                <p>Génération du code…</p>
             </div>
-            <!-- Container Stories -->
-            <div id="stories-container" class="feed-container hidden">
-                <div class="stories">
-                    <h2 data-i18n="home_stories">stories</h2>
-                    <div class="stories-list">
-                        <div class="story add-story" id="addStoryBtn" title="ajouter une story">
+            <div id="discord-link-success" class="discord-link-state" hidden>
+                <h3>Lie ton compte Discord</h3>
+                <p>Dans le serveur Discord, tape la commande :</p>
+                <div class="discord-link-code-row">
+                    <code id="discord-link-code">------</code>
+                    <button id="discord-link-copy" title="Copier">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="lucide lucide-copy-icon lucide-copy"
+                        >
+                            <rect
+                                width="14"
+                                height="14"
+                                x="8"
+                                y="8"
+                                rx="2"
+                                ry="2"
+                            />
+                            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                        </svg>
+                    </button>
+                </div>
+                <p class="discord-link-hint">
+                    <code>
+                        /lier code:
+                        <span id="discord-link-code-inline">------</span>
+                    </code>
+                </p>
+                <p class="discord-link-timer">
+                    Ce code expire dans
+                    <span id="discord-link-countdown">10:00</span>
+                </p>
+            </div>
+            <div id="discord-link-error" class="discord-link-state" hidden>
+                <p id="discord-link-error-msg">Une erreur est survenue.</p>
+                <button id="discord-link-retry" class="discord-link-btn">Réessayer</button>
+            </div>
+        </div>
+    </div>
+    <!-- /accountOverlay -->
+    <nav id="nav" role="navigation">
+        <a class="link active" id="home">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="40"
+                height="40"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.25"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="link-icon"
+            >
+                <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/>
+                <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            </svg>
+            <p class="link-title" data-i18n="nav_home">accueil</p>
+        </a>
+        <a class="link" id="messages">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="36"
+                height="36"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.25"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="link-icon"
+            >
+                <path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/>
+            </svg>
+            <p class="link-title" data-i18n="nav_messages">messages</p>
+        </a>
+        <a class="link" id="create">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="36"
+                height="36"
+                viewBox="0 0 24 24"
+                fill="#150668"
+                stroke="white"
+                stroke-width="2.25"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="link-icon"
+            >
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M8 12h8"/>
+                <path d="M12 8v8"/>
+            </svg>
+            <p class="link-title" data-i18n="nav_create">créer</p>
+        </a>
+        <a class="link" id="inbox">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="36"
+                height="36"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.25"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="link-icon"
+            >
+                <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+                <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+            </svg>
+            <p class="link-title" data-i18n="nav_inbox">notifications</p>
+        </a>
+        <a class="link" id="more">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="link-icon"
+            >
+                <path d="M5 12h14"/>
+                <path d="M12 5v14"/>
+            </svg>
+            <p class="link-title" data-i18n="nav_profile">plus</p>
+        </a>
+    </nav>
+    <section id="home" class="tab active">
+        <!-- Barre de sélection Posts / Stories -->
+        <div
+            id="feed-selector"
+            class="sort-bar"
+            role="tablist"
+            aria-label="Sélection du feed"
+        >
+            <span class="feed-selector__indicator"></span>
+            <button class="sort-btn" data-feed="posts" data-i18n="home_posts">posts</button>
+            <button class="sort-btn" data-feed="stories" data-i18n="home_stories">stories</button>
+        </div>
+        <!-- Container Stories -->
+        <div id="stories-container" class="feed-container hidden">
+            <div class="stories">
+                <h2 data-i18n="home_stories">stories</h2>
+                <div class="stories-list">
+                    <div class="story add-story" id="addStoryBtn" title="ajouter une story">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="22"
+                            height="22"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path d="M5 12h14"/>
+                            <path d="M12 5v14"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Container Posts -->
+        <div id="posts-container" class="feed-container">
+            <div class="posts-section">
+                <h2 data-i18n="home_recent_posts">posts récents</h2>
+                <div id="moodWall"></div>
+            </div>
+        </div>
+    </section>
+    <section id="create" class="tab hidden">
+        <div class="create-container">
+            <!-- Titre -->
+            <div class="create-header">
+                <h1 data-i18n="create_title">partage ton ressenti</h1>
+            </div>
+            <!-- Zone de saisie -->
+            <div class="create-input-group">
+                <textarea
+                    id="moodInput"
+                    class="create-textarea"
+                    maxlength="200"
+                    resize="none"
+                    rows="6"
+                    placeholder="ce que tu ressens en ce moment... personne ne juge ici 🤝"
+                ></textarea>
+                <div class="create-char-count">
+                    <span id="charCount">0</span>
+                    <span>/200</span>
+                </div>
+            </div>
+            <!-- Barre d'outils -->
+            <div class="create-toolbar">
+                <!-- Emoji picker button -->
+                <div class="create-emoji-group">
+                    <input
+                        type="text"
+                        class="moodEmoji"
+                        id="chosenEmojiPreview"
+                        readonly
+                    >
+                    <label
+                        for="chosenEmojiPreview"
+                        class="create-tool-btn"
+                        id="emojiToolBtn"
+                        title="ajouter un emoji"
+                    >
+                        choisis un emoji
+                        <div id="deleteCurrentEmoji" class="emoji-preview">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                width="22"
-                                height="22"
+                                width="24"
+                                height="24"
                                 viewBox="0 0 24 24"
                                 fill="none"
                                 stroke="currentColor"
                                 stroke-width="2"
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
+                                class="lucide lucide-trash-icon lucide-trash"
                             >
-                                <path d="M5 12h14"/>
-                                <path d="M12 5v14"/>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                                <path d="M3 6h18"/>
+                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                             </svg>
                         </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Container Posts -->
-            <div id="posts-container" class="feed-container">
-                <div class="posts-section">
-                    <h2 data-i18n="home_recent_posts">posts récents</h2>
-                    <div id="moodWall"></div>
-                </div>
-            </div>
-        </section>
-        <section id="create" class="tab hidden">
-            <div class="create-container">
-                <!-- Titre -->
-                <div class="create-header">
-                    <h1 data-i18n="create_title">partage ton ressenti</h1>
-                </div>
-                <!-- Zone de saisie -->
-                <div class="create-input-group">
-                    <textarea
-                        id="moodInput"
-                        class="create-textarea"
-                        maxlength="200"
-                        resize="none"
-                        rows="6"
-                        placeholder="ce que tu ressens en ce moment... personne ne juge ici 🤝"
-                    ></textarea>
-                    <div class="create-char-count">
-                        <span id="charCount">0</span>
-                        <span>/200</span>
-                    </div>
-                </div>
-                <!-- Barre d'outils -->
-                <div class="create-toolbar">
-                    <!-- Emoji picker button -->
-                    <div class="create-emoji-group">
-                        <input
-                            type="text"
-                            class="moodEmoji"
-                            id="chosenEmojiPreview"
-                            readonly
-                        >
-                        <label
-                            for="chosenEmojiPreview"
-                            class="create-tool-btn"
-                            id="emojiToolBtn"
-                            title="ajouter un emoji"
-                        >
-                            choisis un emoji
-                            <div id="deleteCurrentEmoji" class="emoji-preview">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    class="lucide lucide-trash-icon lucide-trash"
-                                >
-                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
-                                    <path d="M3 6h18"/>
-                                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                                </svg>
-                            </div>
-                        </label>
-                        <!-- Music picker button -->
-                        <button type="button" class="create-tool-btn create-advanced-tool" id="musicToolBtn">
-                            <svg
-                                width="20"
-                                height="20"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                viewBox="0 0 24 24"
-                            >
-                                <path d="M9 18V5l12-2v13"/>
-                                <circle cx="6" cy="18" r="3"/>
-                                <circle cx="18" cy="16" r="3"/>
-                            </svg>
-                            <span>musique</span>
-                        </button>
-                    </div>
-                    <!-- Color presets -->
-                    <div class="create-color-group">
-                        <div class="create-color-picker create-color-picker--full">
-                            <label data-i18n="create_bg">fond</label>
-                            <div class="color-input-wrapper">
-                                <button
-                                    type="button"
-                                    class="color-picker-trigger"
-                                    id="colorPickerTrigger"
-                                    title="choisir une couleur ou un gradient"
-                                >
-                                    <div id="colorPreviewBox" class="color-preview-box"></div>
-                                </button>
-                                <div class="hex-input-wrapper">
-                                    <span>#</span>
-                                    <input
-                                        type="text"
-                                        id="moodColorHex"
-                                        maxlength="6"
-                                        placeholder="ffffff"
-                                        class="hex-input"
-                                    >
-                                </div>
-                            </div>
-                        </div>
-                        <div class="create-color-picker">
-                            <label data-i18n="create_color">texte</label>
-                            <div class="color-input-wrapper">
-                                <input
-                                    type="color"
-                                    id="textColor"
-                                    value="#000000"
-                                    class="color-input"
-                                >
-                                <div class="hex-input-wrapper">
-                                    <span>#</span>
-                                    <input
-                                        type="text"
-                                        id="textColorHex"
-                                        maxlength="6"
-                                        placeholder="000000"
-                                        class="hex-input"
-                                    >
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <button
-                        type="button"
-                        class="create-tool-btn"
-                        id="moreOptionsBtn"
-                        aria-expanded="false"
-                        aria-controls="advancedOptions"
-                        title="afficher les options avancées"
-                    >
+                    </label>
+                    <!-- Music picker button -->
+                    <button type="button" class="create-tool-btn create-advanced-tool" id="musicToolBtn">
                         <svg
                             width="20"
                             height="20"
@@ -1207,270 +1203,340 @@
                             stroke-width="2"
                             viewBox="0 0 24 24"
                         >
-                            <line
-                                x1="4"
-                                x2="20"
-                                y1="6"
-                                y2="6"
-                            />
-                            <line
-                                x1="4"
-                                x2="20"
-                                y1="12"
-                                y2="12"
-                            />
-                            <line
-                                x1="4"
-                                x2="20"
-                                y1="18"
-                                y2="18"
-                            />
-                            <circle
-                                cx="14"
-                                cy="6"
-                                r="2"
-                                fill="currentColor"
-                            />
-                            <circle
-                                cx="10"
-                                cy="12"
-                                r="2"
-                                fill="currentColor"
-                            />
-                            <circle
-                                cx="16"
-                                cy="18"
-                                r="2"
-                                fill="currentColor"
-                            />
+                            <path d="M9 18V5l12-2v13"/>
+                            <circle cx="6" cy="18" r="3"/>
+                            <circle cx="18" cy="16" r="3"/>
                         </svg>
-                        <span data-i18n="create_more_options">options avancées</span>
+                        <span>musique</span>
                     </button>
                 </div>
-                <!-- Modal couleurs/gradients -->
-                <div id="colorPickerModal" class="create-picker-overlay hidden">
-                    <div class="create-picker-panel color-picker-panel">
-                        <div class="create-picker-header">
-                            <span data-i18n="create_bg">fond du post</span>
+                <!-- Color presets -->
+                <div class="create-color-group">
+                    <div class="create-color-picker create-color-picker--full">
+                        <label data-i18n="create_bg">fond</label>
+                        <div class="color-input-wrapper">
                             <button
                                 type="button"
-                                class="create-picker-close"
-                                id="closeColorPicker"
-                                aria-label="fermer"
+                                class="color-picker-trigger"
+                                id="colorPickerTrigger"
+                                title="choisir une couleur ou un gradient"
                             >
-                                ×
+                                <div id="colorPreviewBox" class="color-preview-box"></div>
                             </button>
-                        </div>
-                        <div class="color-picker-content">
-                            <!-- Tabs -->
-                            <div class="color-picker-tabs">
-                                <button type="button" class="color-picker-tab active" data-tab="gradients">
-                                    <span data-i18n="create_gradients">gradients</span>
-                                </button>
-                                <button type="button" class="color-picker-tab" data-tab="custom">
-                                    <span data-i18n="create_custom_color">couleur personnalisée</span>
-                                </button>
-                            </div>
-                            <!-- Gradients tab -->
-                            <div class="color-picker-tab-content active" id="gradients-tab">
-                                <div class="gradient-buttons-modal">
-                                    <button
-                                        type="button"
-                                        class="gradient-btn-modal"
-                                        data-gradient="default"
-                                        title="default"
-                                    ></button>
-                                    <button
-                                        type="button"
-                                        class="gradient-btn-modal"
-                                        data-gradient="aurora"
-                                        title="aurora"
-                                    ></button>
-                                    <button
-                                        type="button"
-                                        class="gradient-btn-modal"
-                                        data-gradient="venom"
-                                        title="venom"
-                                    ></button>
-                                    <button
-                                        type="button"
-                                        class="gradient-btn-modal"
-                                        data-gradient="inferno"
-                                        title="inferno"
-                                    ></button>
-                                    <button
-                                        type="button"
-                                        class="gradient-btn-modal"
-                                        data-gradient="twilight"
-                                        title="twilight"
-                                    ></button>
-                                    <button
-                                        type="button"
-                                        class="gradient-btn-modal"
-                                        data-gradient="sangrie"
-                                        title="sangrie"
-                                    ></button>
-                                    <button
-                                        type="button"
-                                        class="gradient-btn-modal"
-                                        data-gradient="ocean"
-                                        title="ocean"
-                                    ></button>
-                                    <button
-                                        type="button"
-                                        class="gradient-btn-modal"
-                                        data-gradient="sunset"
-                                        title="sunset"
-                                    ></button>
-                                    <button
-                                        type="button"
-                                        class="gradient-btn-modal"
-                                        data-gradient="forest"
-                                        title="forest"
-                                    ></button>
-                                    <button
-                                        type="button"
-                                        class="gradient-btn-modal"
-                                        data-gradient="candy"
-                                        title="candy"
-                                    ></button>
-                                    <button
-                                        type="button"
-                                        class="gradient-btn-modal"
-                                        data-gradient="sky"
-                                        title="sky"
-                                    ></button>
-                                    <button
-                                        type="button"
-                                        class="gradient-btn-modal"
-                                        data-gradient="summer"
-                                        title="summer"
-                                    ></button>
-                                    <button
-                                        type="button"
-                                        class="gradient-btn-modal"
-                                        data-gradient="winter"
-                                        title="winter"
-                                    ></button>
-                                    <button
-                                        type="button"
-                                        class="gradient-btn-modal"
-                                        data-gradient="spring"
-                                        title="spring"
-                                    ></button>
-                                    <button
-                                        type="button"
-                                        class="gradient-btn-modal"
-                                        data-gradient="autumn"
-                                        title="autumn"
-                                    ></button>
-                                </div>
-                            </div>
-                            <!-- Custom color tab -->
-                            <div class="color-picker-tab-content" id="custom-tab">
-                                <div class="custom-color-section">
-                                    <input
-                                        type="color"
-                                        id="moodColor"
-                                        value="#ffffff"
-                                        class="custom-color-input"
-                                    >
-                                    <label for="moodColor" data-i18n="create_custom_color_pick">choisis une couleur</label>
-                                    <div class="custom-color-preview" id="customColorPreview"></div>
-                                </div>
-                                <div class="custom-color-hex">
-                                    <label data-i18n="create_hex_color">code hex</label>
-                                    <input
-                                        type="text"
-                                        id="moodColorHexModal"
-                                        maxlength="6"
-                                        placeholder="ffffff"
-                                        class="hex-input"
-                                    >
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Emoji picker overlay (hidden by default) -->
-                <div id="emojiPickerOverlay" class="create-picker-overlay" style="display: none!important">
-                    <div class="create-picker-panel">
-                        <div class="create-picker-header">
-                            <span data-i18n="create_emoji_picker">choisis un emoji</span>
-                            <button type="button" class="create-picker-close-emoji" aria-label="fermer">
-                                ×
-                            </button>
-                        </div>
-                        <emoji-picker id="emojiPicker"></emoji-picker>
-                    </div>
-                </div>
-                <!-- Sticker picker overlay (hidden by default) -->
-                <div id="stickerPickerOverlay" class="create-picker-overlay" style="display: none!important">
-                    <div class="create-picker-panel">
-                        <div class="create-picker-header">
-                            <span>recherche un sticker</span>
-                            <button type="button" class="create-picker-close" aria-label="fermer">
-                                ×
-                            </button>
-                        </div>
-                        <div class="sticker-search">
-                            <input type="text" id="stickerSearchInput" placeholder="rechercher sur Tenor...">
-                            <button type="button" id="stickerSearchBtn">
-                                <svg
-                                    width="18"
-                                    height="18"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2.5"
-                                    viewBox="0 0 24 24"
+                            <div class="hex-input-wrapper">
+                                <span>#</span>
+                                <input
+                                    type="text"
+                                    id="moodColorHex"
+                                    maxlength="6"
+                                    placeholder="ffffff"
+                                    class="hex-input"
                                 >
-                                    <circle cx="11" cy="11" r="8"/>
-                                    <path d="m21 21-4.35-4.35"/>
-                                </svg>
-                            </button>
+                            </div>
                         </div>
-                        <div id="stickerResults" class="sticker-results"></div>
                     </div>
-                </div>
-                <!-- Music picker overlay (hidden by default) -->
-                <div id="musicPickerOverlay" class="create-picker-overlay" style="display: none!important">
-                    <div class="create-picker-panel">
-                        <div class="create-picker-header">
-                            <span>ajoute un extrait musical</span>
-                            <button type="button" class="create-picker-close-music" aria-label="fermer">
-                                ×
-                            </button>
-                        </div>
-                        <div class="sticker-search">
-                            <input type="text" id="musicSearchInput" placeholder="titre, artiste...">
-                            <button type="button" id="musicSearchBtn">
-                                <svg
-                                    width="18"
-                                    height="18"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2.5"
-                                    viewBox="0 0 24 24"
+                    <div class="create-color-picker">
+                        <label data-i18n="create_color">texte</label>
+                        <div class="color-input-wrapper">
+                            <input
+                                type="color"
+                                id="textColor"
+                                value="#000000"
+                                class="color-input"
+                            >
+                            <div class="hex-input-wrapper">
+                                <span>#</span>
+                                <input
+                                    type="text"
+                                    id="textColorHex"
+                                    maxlength="6"
+                                    placeholder="000000"
+                                    class="hex-input"
                                 >
-                                    <circle cx="11" cy="11" r="8"/>
-                                    <path d="m21 21-4.35-4.35"/>
-                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    class="create-tool-btn"
+                    id="moreOptionsBtn"
+                    aria-expanded="false"
+                    aria-controls="advancedOptions"
+                    title="afficher les options avancées"
+                >
+                    <svg
+                        width="20"
+                        height="20"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                    >
+                        <line
+                            x1="4"
+                            x2="20"
+                            y1="6"
+                            y2="6"
+                        />
+                        <line
+                            x1="4"
+                            x2="20"
+                            y1="12"
+                            y2="12"
+                        />
+                        <line
+                            x1="4"
+                            x2="20"
+                            y1="18"
+                            y2="18"
+                        />
+                        <circle
+                            cx="14"
+                            cy="6"
+                            r="2"
+                            fill="currentColor"
+                        />
+                        <circle
+                            cx="10"
+                            cy="12"
+                            r="2"
+                            fill="currentColor"
+                        />
+                        <circle
+                            cx="16"
+                            cy="18"
+                            r="2"
+                            fill="currentColor"
+                        />
+                    </svg>
+                    <span data-i18n="create_more_options">options avancées</span>
+                </button>
+            </div>
+            <!-- Modal couleurs/gradients -->
+            <div id="colorPickerModal" class="create-picker-overlay hidden">
+                <div class="create-picker-panel color-picker-panel">
+                    <div class="create-picker-header">
+                        <span data-i18n="create_bg">fond du post</span>
+                        <button
+                            type="button"
+                            class="create-picker-close"
+                            id="closeColorPicker"
+                            aria-label="fermer"
+                        >
+                            ×
+                        </button>
+                    </div>
+                    <div class="color-picker-content">
+                        <!-- Tabs -->
+                        <div class="color-picker-tabs">
+                            <button type="button" class="color-picker-tab active" data-tab="gradients">
+                                <span data-i18n="create_gradients">gradients</span>
+                            </button>
+                            <button type="button" class="color-picker-tab" data-tab="custom">
+                                <span data-i18n="create_custom_color">couleur personnalisée</span>
                             </button>
                         </div>
-                        <div id="musicResults" class="music-results"></div>
+                        <!-- Gradients tab -->
+                        <div class="color-picker-tab-content active" id="gradients-tab">
+                            <div class="gradient-buttons-modal">
+                                <button
+                                    type="button"
+                                    class="gradient-btn-modal"
+                                    data-gradient="default"
+                                    title="default"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gradient-btn-modal"
+                                    data-gradient="aurora"
+                                    title="aurora"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gradient-btn-modal"
+                                    data-gradient="venom"
+                                    title="venom"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gradient-btn-modal"
+                                    data-gradient="inferno"
+                                    title="inferno"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gradient-btn-modal"
+                                    data-gradient="twilight"
+                                    title="twilight"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gradient-btn-modal"
+                                    data-gradient="sangrie"
+                                    title="sangrie"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gradient-btn-modal"
+                                    data-gradient="ocean"
+                                    title="ocean"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gradient-btn-modal"
+                                    data-gradient="sunset"
+                                    title="sunset"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gradient-btn-modal"
+                                    data-gradient="forest"
+                                    title="forest"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gradient-btn-modal"
+                                    data-gradient="candy"
+                                    title="candy"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gradient-btn-modal"
+                                    data-gradient="sky"
+                                    title="sky"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gradient-btn-modal"
+                                    data-gradient="summer"
+                                    title="summer"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gradient-btn-modal"
+                                    data-gradient="winter"
+                                    title="winter"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gradient-btn-modal"
+                                    data-gradient="spring"
+                                    title="spring"
+                                ></button>
+                                <button
+                                    type="button"
+                                    class="gradient-btn-modal"
+                                    data-gradient="autumn"
+                                    title="autumn"
+                                ></button>
+                            </div>
+                        </div>
+                        <!-- Custom color tab -->
+                        <div class="color-picker-tab-content" id="custom-tab">
+                            <div class="custom-color-section">
+                                <input
+                                    type="color"
+                                    id="moodColor"
+                                    value="#ffffff"
+                                    class="custom-color-input"
+                                >
+                                <label for="moodColor" data-i18n="create_custom_color_pick">choisis une couleur</label>
+                                <div class="custom-color-preview" id="customColorPreview"></div>
+                            </div>
+                            <div class="custom-color-hex">
+                                <label data-i18n="create_hex_color">code hex</label>
+                                <input
+                                    type="text"
+                                    id="moodColorHexModal"
+                                    maxlength="6"
+                                    placeholder="ffffff"
+                                    class="hex-input"
+                                >
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <!-- Chosen track preview, shown in the toolbar once a track is picked -->
-                <div id="chosenTrackPreview" class="chosen-track-preview" hidden>
-                    <img id="chosenTrackCover" src="" alt="">
-                    <div class="chosen-track-info">
-                        <span id="chosenTrackTitle"></span>
-                        <span id="chosenTrackArtist"></span>
+            </div>
+            <!-- Emoji picker overlay (hidden by default) -->
+            <div id="emojiPickerOverlay" class="create-picker-overlay" style="display: none!important">
+                <div class="create-picker-panel">
+                    <div class="create-picker-header">
+                        <span data-i18n="create_emoji_picker">choisis un emoji</span>
+                        <button type="button" class="create-picker-close-emoji" aria-label="fermer">
+                            ×
+                        </button>
                     </div>
-                    <button type="button" id="chosenTrackRemove" aria-label="retirer la musique">×</button>
+                    <emoji-picker id="emojiPicker"></emoji-picker>
                 </div>
-                <!-- Preview live -->
-                <!-- <div class="create-preview"> 
+            </div>
+            <!-- Sticker picker overlay (hidden by default) -->
+            <div id="stickerPickerOverlay" class="create-picker-overlay" style="display: none!important">
+                <div class="create-picker-panel">
+                    <div class="create-picker-header">
+                        <span>recherche un sticker</span>
+                        <button type="button" class="create-picker-close" aria-label="fermer">
+                            ×
+                        </button>
+                    </div>
+                    <div class="sticker-search">
+                        <input type="text" id="stickerSearchInput" placeholder="rechercher sur Tenor...">
+                        <button type="button" id="stickerSearchBtn">
+                            <svg
+                                width="18"
+                                height="18"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="m21 21-4.35-4.35"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="stickerResults" class="sticker-results"></div>
+                </div>
+            </div>
+            <!-- Music picker overlay (hidden by default) -->
+            <div id="musicPickerOverlay" class="create-picker-overlay" style="display: none!important">
+                <div class="create-picker-panel">
+                    <div class="create-picker-header">
+                        <span>ajoute un extrait musical</span>
+                        <button type="button" class="create-picker-close-music" aria-label="fermer">
+                            ×
+                        </button>
+                    </div>
+                    <div class="sticker-search">
+                        <input type="text" id="musicSearchInput" placeholder="titre, artiste...">
+                        <button type="button" id="musicSearchBtn">
+                            <svg
+                                width="18"
+                                height="18"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="m21 21-4.35-4.35"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="musicResults" class="music-results"></div>
+                </div>
+            </div>
+            <!-- Chosen track preview, shown in the toolbar once a track is picked -->
+            <div id="chosenTrackPreview" class="chosen-track-preview" hidden>
+                <img id="chosenTrackCover" src="" alt="">
+                <div class="chosen-track-info">
+                    <span id="chosenTrackTitle"></span>
+                    <span id="chosenTrackArtist"></span>
+                </div>
+                <button type="button" id="chosenTrackRemove" aria-label="retirer la musique">×</button>
+            </div>
+            <!-- Preview live -->
+            <!-- <div class="create-preview"> 
                     <div class="create-preview-label" data-i18n="create_preview">
                         aperçu
                     </div>
@@ -1482,660 +1548,661 @@
                         <div id="previewSticker" class="create-preview-sticker" style="display: none"></div>
                     </div>
                 </div>-->
-                <div id="advancedOptions" hidden>
-                    <div id="container">
-                        <button
-                            type="button"
-                            class="create-tool-btn ai-generate-btn create-advanced-tool"
-                            id="ai-generate"
-                            title="générer un texte avec l'IA (3 fois par semaine max)"
-                        >
-                            <svg
-                                width="20"
-                                height="20"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                viewBox="0 0 24 24"
-                            >
-                                <path d="m12 3-1.5 4.5L6 9l4.5 1.5L12 15l1.5-4.5L18 9l-4.5-1.5z"/>
-                                <path d="M19 16l.7 2.1L22 19l-2.3.9L19 22l-.7-2.1L16 19l2.3-.9z"/>
-                                <path d="M5 16l.5 1.5L7 18l-1.5.5L5 20l-.5-1.5L3 18l1.5-.5z"/>
-                            </svg>
-                            <span data-i18n="create_ai_generate">générer votre post avec l'ia</span>
-                        </button>
-                        <!-- Options avancées -->
-                        <div class="create-advanced">
-                            <!-- Story toggle -->
-                            <label class="create-toggle">
-                                <input type="checkbox" id="storyModeToggle">
-                                <span class="create-toggle-slider"></span>
-                                <span class="create-toggle-label">
-                                    <svg
-                                        width="16"
-                                        height="16"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <circle cx="12" cy="12" r="10"/>
-                                        <path d="M12 6v6l4 2"/>
-                                    </svg>
-                                    <span data-i18n="create_story">story 24h</span>
-                                </span>
-                            </label>
-                            <!-- Ephemeral toggle -->
-                            <label class="create-toggle">
-                                <input type="checkbox" id="ephemeralToggle">
-                                <span class="create-toggle-slider"></span>
-                                <span class="create-toggle-label">
-                                    <svg
-                                        width="16"
-                                        height="16"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <polyline points="1 4 1 10 7 10"/>
-                                        <polyline points="23 20 23 14 17 14"/>
-                                        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
-                                    </svg>
-                                    <span data-i18n="create_ephemeral">message éphémère</span>
-                                </span>
-                            </label>
-                        </div>
-                        <!-- Duration picker (shown when ephemeral is on) -->
-                        <div id="durationPicker" class="create-duration">
-                            <div class="create-duration-inputs">
-                                <div class="create-duration-field">
-                                    <input
-                                        type="number"
-                                        id="durationDays"
-                                        min="0"
-                                        max="30"
-                                        placeholder="0"
-                                    >
-                                    <label data-i18n="days">jours</label>
-                                </div>
-                                <div class="create-duration-field">
-                                    <input
-                                        type="number"
-                                        id="durationHours"
-                                        min="0"
-                                        max="23"
-                                        placeholder="0"
-                                    >
-                                    <label data-i18n="hours">heures</label>
-                                </div>
-                                <div class="create-duration-field">
-                                    <input
-                                        type="number"
-                                        id="durationMinutes"
-                                        min="0"
-                                        max="59"
-                                        placeholder="0"
-                                    >
-                                    <label data-i18n="minutes">minutes</label>
-                                </div>
-                            </div>
-                            <div class="create-duration-preview">
-                                <span data-i18n="create_expire_at">expire le :</span>
-                                <strong id="msgdeletetime">—</strong>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <button type="button" id="create-submit-btn">
-                    <svg
-                        width="20"
-                        height="20"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2.5"
-                        viewBox="0 0 24 24"
+            <div id="advancedOptions" hidden>
+                <div id="container">
+                    <button
+                        type="button"
+                        class="create-tool-btn ai-generate-btn create-advanced-tool"
+                        id="ai-generate"
+                        title="générer un texte avec l'IA (3 fois par semaine max)"
                     >
-                        <path d="m22 2-7 20-4-9-9-4Z"/>
-                        <path d="M22 2 11 13"/>
-                    </svg>
-                    <span data-i18n="create_share">partager</span>
-                </button>
-            </div>
-        </section>
-        <section id="inbox" class="tab hidden">
-            <h1 data-i18n="inbox_title">boîte de récéption</h1>
-            <div id="inboxdiv">
-                <div class="_np-header">
-                    <div class="_np-actions">
-                        <button class="_np-read-btn" id="_np-read-all" data-i18n="inbox_read_all">tout lire</button>
-                    </div>
-                </div>
-                <div class="_np-list" id="_np-list"></div>
-            </div>
-        </section>
-        <section id="messages" class="tab hidden">
-            <div id="messagesdiv">
-                <div id="messages-section" class="messages-container">
-                    <div class="messages-sidebar">
-                        <div class="messages-sidebar-header">
-                            <h2 data-i18n="messages_title">messages</h2>
-                            <button id="new-conversation-btn" class="btn-icon" title="nouvelle conversation">
-                                +
-                            </button>
-                        </div>
-                        <div id="conversations-list"></div>
-                    </div>
-                    <div class="messages-main">
-                        <div id="messages-empty">
-                            <p data-i18n="messages_empty">sélectionne une conversation</p>
-                        </div>
-                        <div id="messages-thread" style="display: none">
-                            <div class="messages-header">
-                                <button id="back-to-list">←</button>
-                                <h3 id="current-chat-name"></h3>
-                            </div>
-                            <div id="messages-body"></div>
-                            <p data-i18n="message_warning" class="message-warning">
-                                seuls les 50 derniers messages sont sauvegardés.
-                            </p>
-                            <div class="messages-input-wrap">
-                                <input type="text" id="message-input" placeholder="Écris un message...">
-                                <button id="send-message-btn" data-i18n="send_message_btn">envoyer</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <section id="more" class="tab hidden">
-            <div class="more-section" id="more-profile">
-                <h2 class="more-section-title" data-i18n="more_profile_title">profil</h2>
-                <div id="accountinfo">
-                    <span id="profileAvatar" class="profile-avatar">👤</span>
-                    <span id="userNameProfile">username</span>
-                    <p id="profileBio" class="profile-bio" hidden></p>
-                    <p data-i18n="profile_user_id">
-                        identifiant utilisateur:
-                        <span id="userId">connecte-toi</span>
-                    </p>
-                </div>
-                <div id="socialStats">
-                    <div class="stat-block">
-                        <strong id="statPosts">0</strong>
-                        <span data-i18n="stat_posts">posts</span>
-                    </div>
-                    <div class="stat-block">
-                        <strong id="statFollowers">0</strong>
-                        <span data-i18n="stat_followers">abonnés</span>
-                    </div>
-                    <div class="stat-block">
-                        <strong id="statFollowing">0</strong>
-                        <span data-i18n="stat_following">abonnements</span>
-                    </div>
-                </div>
-                <div id="userPostsSection">
-                    <h2 data-i18n="more_posts_title">historique des posts</h2>
-                    <div id="userPostsWall">
-                        <i data-i18n="more_posts_empty">connecte-toi pour voir tes posts ici.</i>
-                    </div>
-                </div>
-            </div>
-            <div class="more-section" id="more-settings">
-                <h2 class="more-section-title" data-i18n="more_settings_title">réglages</h2>
-                <div class="setting-row" id="languagePreferenceRow">
-                    <div class="setting-row-label">
-                        <p data-i18n="settings_language">langue</p>
-                        <small data-i18n="settings_language_sub">choisis la langue de l’interface</small>
-                    </div>
-                    <select id="languageSelect" title="langue">
-                        <option value="" data-i18n="language_loading">chargement…</option>
-                    </select>
-                </div>
-                <button onclick="openAccountModal();" data-i18n="more_profile_title_btn">plus de paramètres de profil</button>
-                <div class="setting-row" id="aiPostsPreferenceRow">
-                    <div class="setting-row-label">
-                        <p data-i18n="settings_ai_posts_title">posts générés par IA</p>
-                        <small data-i18n="settings_ai_posts_sub">choisis comment ils apparaissent dans ton fil</small>
-                    </div>
-                    <select id="aiPostsPreferenceSelect" title="préférences ia">
-                        <option value="allow" data-i18n="ai_pref_allow">afficher</option>
-                        <option value="avoid" data-i18n="ai_pref_avoid">afficher mais flouter le contenu</option>
-                        <option value="block" data-i18n="ai_pref_block">masquer</option>
-                    </select>
-                </div>
-                <div class="setting-row setting-row-stacked" id="themePersonalizationRow">
-                    <div class="setting-row-label">
-                        <p data-i18n="settings_theme_title">personnalisation du compte</p>
-                        <small data-i18n="settings_theme_sub">
-                            visible sur ton profil et tes posts (sauf ceux publiés en anonyme)
-                        </small>
-                    </div>
-                    <div id="themeControls">
-                        <div class="theme-control">
-                            <label for="themeAccentColor" data-i18n="settings_theme_color">couleur d'accent</label>
-                            <input type="color" id="themeAccentColor" value="#5f95b9">
-                        </div>
-                        <div class="theme-control">
-                            <label for="themeFontSelect" data-i18n="settings_theme_font">police</label>
-                            <select id="themeFontSelect" title="police du compte">
-                                <option value="default" class="font-default">classique</option>
-                                <option value="elegant" class="font-elegant">élégante</option>
-                                <option value="hand" class="font-hand">manuscrite</option>
-                                <option value="round" class="font-round">ronde</option>
-                                <option value="mono" class="font-mono">mono</option>
-                                <option value="display" class="font-display">affiche</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div id="themePreview">
-                        <div id="themePreviewCard">
-                            <span id="themePreviewEmoji">✨</span>
-                            <span id="themePreviewText">aperçu de ton style sur oifeel.</span>
-                        </div>
-                        <small id="themeSaveStatus"></small>
-                    </div>
-                </div>
-            </div>
-            <div class="more-section" id="more-help">
-                <h2 class="more-section-title" data-i18n="more_help_title">aide</h2>
-                <div id="MoreHelpSettings">
-                    <a href="#" id="openHelpCenterBtn">
-                        <div class="oh-menu-icon">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="white"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                            >
-                                <circle cx="12" cy="12" r="10"/>
-                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                                <line
-                                    x1="12"
-                                    y1="17"
-                                    x2="12.01"
-                                    y2="17"
-                                />
-                            </svg>
-                        </div>
-                        <button>
-                            <p data-i18n="help_center_menu_title">aide</p>
-                            <small data-i18n="help_center_menu_sub">questions fréquentes et documentation</small>
-                        </button>
-                    </a>
-                    <a href="#" id="replayOnboardingBtn">
-                        <div class="oh-menu-icon">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="white"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                            >
-                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                                <path d="M3 3v5h5"/>
-                            </svg>
-                        </div>
-                        <button>
-                            <p data-i18n="replay_onboarding_title">découvrir l'application</p>
-                            <small data-i18n="replay_onboarding_sub">revoir le guide de démarrage</small>
-                        </button>
-                    </a>
-                </div>
-            </div>
-            <div class="more-section" id="more-legal">
-                <h2 class="more-section-title" data-i18n="more_legal_title">plus</h2>
-                <div id="MoreAccSettings">
-                    <a
-                        href="https://ko-fi.com/oifeel/tip"
-                        target="_blank"
-                        class="donate-btn"
-                        rel="noopener"
-                    >
-                        <div id="image">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="white"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                class="lucide lucide-hand-coins-icon lucide-hand-coins"
-                            >
-                                <path d="M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17"/>
-                                <path d="m7 21 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/>
-                                <path d="m2 16 6 6"/>
-                                <circle cx="16" cy="9" r="2.9"/>
-                                <circle cx="6" cy="5" r="3"/>
-                            </svg>
-                        </div>
-                        <button data-i18n="donate">fais un don</button>
-                    </a>
-                    <a href="Legal/TERMS_OF_SERVICE.html">
-                        <div id="image">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="white"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                class="lucide lucide-receipt-text-icon lucide-receipt-text"
-                            >
-                                <path d="M13 16H8"/>
-                                <path d="M14 8H8"/>
-                                <path d="M16 12H8"/>
-                                <path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/>
-                            </svg>
-                        </div>
-                        <button>
-                            <p data-i18n="CGU_title">conditions générales du service</p>
-                        </button>
-                    </a>
-                    <a href="Legal/PRIVACY_POLICY.html">
-                        <div id="image">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="white"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                class="lucide lucide-handshake-icon lucide-handshake"
-                            >
-                                <path d="m11 17 2 2a1 1 0 1 0 3-3"/>
-                                <path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/>
-                                <path d="m21 3 1 11h-2"/>
-                                <path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/>
-                                <path d="M3 4h8"/>
-                            </svg>
-                        </div>
-                        <button>
-                            <p data-i18n="policy_title">politique de confidentialité</p>
-                        </button>
-                    </a>
-                    <a href="https://discord.gg/xvVnNAGNtP" class="dc">
-                        <div id="image">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
-                                <path d="M524.5 133.8C524.3 133.5 524.1 133.2 523.7 133.1C485.6 115.6 445.3 103.1 404 96C403.6 95.9 403.2 96 402.9 96.1C402.6 96.2 402.3 96.5 402.1 96.9C396.6 106.8 391.6 117.1 387.2 127.5C342.6 120.7 297.3 120.7 252.8 127.5C248.3 117 243.3 106.8 237.7 96.9C237.5 96.6 237.2 96.3 236.9 96.1C236.6 95.9 236.2 95.9 235.8 95.9C194.5 103 154.2 115.5 116.1 133C115.8 133.1 115.5 133.4 115.3 133.7C39.1 247.5 18.2 358.6 28.4 468.2C28.4 468.5 28.5 468.7 28.6 469C28.7 469.3 28.9 469.4 29.1 469.6C73.5 502.5 123.1 527.6 175.9 543.8C176.3 543.9 176.7 543.9 177 543.8C177.3 543.7 177.7 543.4 177.9 543.1C189.2 527.7 199.3 511.3 207.9 494.3C208 494.1 208.1 493.8 208.1 493.5C208.1 493.2 208.1 493 208 492.7C207.9 492.4 207.8 492.2 207.6 492.1C207.4 492 207.2 491.8 206.9 491.7C191.1 485.6 175.7 478.3 161 469.8C160.7 469.6 160.5 469.4 160.3 469.2C160.1 469 160 468.6 160 468.3C160 468 160 467.7 160.2 467.4C160.4 467.1 160.5 466.9 160.8 466.7C163.9 464.4 167 462 169.9 459.6C170.2 459.4 170.5 459.2 170.8 459.2C171.1 459.2 171.5 459.2 171.8 459.3C268 503.2 372.2 503.2 467.3 459.3C467.6 459.2 468 459.1 468.3 459.1C468.6 459.1 469 459.3 469.2 459.5C472.1 461.9 475.2 464.4 478.3 466.7C478.5 466.9 478.7 467.1 478.9 467.4C479.1 467.7 479.1 468 479.1 468.3C479.1 468.6 479 468.9 478.8 469.2C478.6 469.5 478.4 469.7 478.2 469.8C463.5 478.4 448.2 485.7 432.3 491.6C432.1 491.7 431.8 491.8 431.6 492C431.4 492.2 431.3 492.4 431.2 492.7C431.1 493 431.1 493.2 431.1 493.5C431.1 493.8 431.2 494 431.3 494.3C440.1 511.3 450.1 527.6 461.3 543.1C461.5 543.4 461.9 543.7 462.2 543.8C462.5 543.9 463 543.9 463.3 543.8C516.2 527.6 565.9 502.5 610.4 469.6C610.6 469.4 610.8 469.2 610.9 469C611 468.8 611.1 468.5 611.1 468.2C623.4 341.4 590.6 231.3 524.2 133.7zM222.5 401.5C193.5 401.5 169.7 374.9 169.7 342.3C169.7 309.7 193.1 283.1 222.5 283.1C252.2 283.1 275.8 309.9 275.3 342.3C275.3 375 251.9 401.5 222.5 401.5zM417.9 401.5C388.9 401.5 365.1 374.9 365.1 342.3C365.1 309.7 388.5 283.1 417.9 283.1C447.6 283.1 471.2 309.9 470.7 342.3C470.7 375 447.5 401.5 417.9 401.5z"></path>
-                            </svg>
-                        </div>
-                        <button>
-                            <p data-i18n="discord_title">rejoins notre serveur discord!</p>
-                        </button>
-                    </a>
-                    <a
-                        href="https://github.com/Raphleouf74/oifeel"
-                        target="_blank"
-                        rel="noopener"
-                    >
-                        <div id="image">
-                            <img src="/app/assets/logo/images.png" alt="github logo" height="45px" width="45px">
-                        </div>
-                        <button data-i18n="project_contribute">contribue au projet sur github</button>
-                    </a>
-                </div>
-            </div>
-            <footer>
-                <p data-i18n="copyright">
-                    <b>oifeel. &copy; 2025-2026.</b>
-                    toute reproduction partielle ou totale est strictement interdite.
-                </p>
-            </footer>
-        </section>
-        <!-- ===== REPORT MODAL ===== -->
-        <div id="reportModalOverlay" class="report-modal-overlay hidden" onclick="if (event.target === this) window.closeReportModal();">
-            <div class="report-modal-panel">
-                <div class="report-modal-header">
-                    <div class="report-modal-title">
-                        <p data-i18n="report_post">signaler un post</p>
-                    </div>
-                    <button class="report-modal-close" onclick="window.closeReportModal()" aria-label="fermer">
                         <svg
-                            xmlns="http://www.w3.org/2000/svg"
                             width="20"
                             height="20"
-                            viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
-                            stroke-width="2.5"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                        >
+                            <path d="m12 3-1.5 4.5L6 9l4.5 1.5L12 15l1.5-4.5L18 9l-4.5-1.5z"/>
+                            <path d="M19 16l.7 2.1L22 19l-2.3.9L19 22l-.7-2.1L16 19l2.3-.9z"/>
+                            <path d="M5 16l.5 1.5L7 18l-1.5.5L5 20l-.5-1.5L3 18l1.5-.5z"/>
+                        </svg>
+                        <span data-i18n="create_ai_generate">générer votre post avec l'ia</span>
+                    </button>
+                    <!-- Options avancées -->
+                    <div class="create-advanced">
+                        <!-- Story toggle -->
+                        <label class="create-toggle">
+                            <input type="checkbox" id="storyModeToggle">
+                            <span class="create-toggle-slider"></span>
+                            <span class="create-toggle-label">
+                                <svg
+                                    width="16"
+                                    height="16"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                                <span data-i18n="create_story">story 24h</span>
+                            </span>
+                        </label>
+                        <!-- Ephemeral toggle -->
+                        <label class="create-toggle">
+                            <input type="checkbox" id="ephemeralToggle">
+                            <span class="create-toggle-slider"></span>
+                            <span class="create-toggle-label">
+                                <svg
+                                    width="16"
+                                    height="16"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <polyline points="1 4 1 10 7 10"/>
+                                    <polyline points="23 20 23 14 17 14"/>
+                                    <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+                                </svg>
+                                <span data-i18n="create_ephemeral">message éphémère</span>
+                            </span>
+                        </label>
+                    </div>
+                    <!-- Duration picker (shown when ephemeral is on) -->
+                    <div id="durationPicker" class="create-duration">
+                        <div class="create-duration-inputs">
+                            <div class="create-duration-field">
+                                <input
+                                    type="number"
+                                    id="durationDays"
+                                    min="0"
+                                    max="30"
+                                    placeholder="0"
+                                >
+                                <label data-i18n="days">jours</label>
+                            </div>
+                            <div class="create-duration-field">
+                                <input
+                                    type="number"
+                                    id="durationHours"
+                                    min="0"
+                                    max="23"
+                                    placeholder="0"
+                                >
+                                <label data-i18n="hours">heures</label>
+                            </div>
+                            <div class="create-duration-field">
+                                <input
+                                    type="number"
+                                    id="durationMinutes"
+                                    min="0"
+                                    max="59"
+                                    placeholder="0"
+                                >
+                                <label data-i18n="minutes">minutes</label>
+                            </div>
+                        </div>
+                        <div class="create-duration-preview">
+                            <span data-i18n="create_expire_at">expire le :</span>
+                            <strong id="msgdeletetime">—</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" id="create-submit-btn">
+                <svg
+                    width="20"
+                    height="20"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    viewBox="0 0 24 24"
+                >
+                    <path d="m22 2-7 20-4-9-9-4Z"/>
+                    <path d="M22 2 11 13"/>
+                </svg>
+                <span data-i18n="create_share">partager</span>
+            </button>
+        </div>
+    </section>
+    <section id="inbox" class="tab hidden">
+        <h1 data-i18n="inbox_title">boîte de récéption</h1>
+        <div id="inboxdiv">
+            <div class="_np-header">
+                <div class="_np-actions">
+                    <button class="_np-read-btn" id="_np-read-all" data-i18n="inbox_read_all">tout lire</button>
+                </div>
+            </div>
+            <div class="_np-list" id="_np-list"></div>
+        </div>
+    </section>
+    <section id="messages" class="tab hidden">
+        <div id="messagesdiv">
+            <div id="messages-section" class="messages-container">
+                <div class="messages-sidebar">
+                    <div class="messages-sidebar-header">
+                        <h2 data-i18n="messages_title">messages</h2>
+                        <button id="new-conversation-btn" class="btn-icon" title="nouvelle conversation">
+                            +
+                        </button>
+                    </div>
+                    <div id="conversations-list"></div>
+                </div>
+                <div class="messages-main">
+                    <div id="messages-empty">
+                        <p data-i18n="messages_empty">sélectionne une conversation</p>
+                    </div>
+                    <div id="messages-thread" style="display: none">
+                        <div class="messages-header">
+                            <button id="back-to-list">←</button>
+                            <h3 id="current-chat-name"></h3>
+                        </div>
+                        <div id="messages-body"></div>
+                        <p data-i18n="message_warning" class="message-warning">
+                            seuls les 50 derniers messages sont sauvegardés.
+                        </p>
+                        <div class="messages-input-wrap">
+                            <input type="text" id="message-input" placeholder="Écris un message...">
+                            <button id="send-message-btn" data-i18n="send_message_btn">envoyer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="more" class="tab hidden">
+        <div class="more-section" id="more-profile">
+            <h2 class="more-section-title" data-i18n="more_profile_title">profil</h2>
+            <div id="accountinfo">
+                <span id="profileAvatar" class="profile-avatar">👤</span>
+                <span id="userNameProfile">username</span>
+                <p id="profileBio" class="profile-bio" hidden></p>
+                <p data-i18n="profile_user_id">
+                    identifiant utilisateur:
+                    <span id="userId">connecte-toi</span>
+                </p>
+            </div>
+            <div id="socialStats">
+                <div class="stat-block">
+                    <strong id="statPosts">0</strong>
+                    <span data-i18n="stat_posts">posts</span>
+                </div>
+                <div class="stat-block">
+                    <strong id="statFollowers">0</strong>
+                    <span data-i18n="stat_followers">abonnés</span>
+                </div>
+                <div class="stat-block">
+                    <strong id="statFollowing">0</strong>
+                    <span data-i18n="stat_following">abonnements</span>
+                </div>
+            </div>
+            <div id="userPostsSection">
+                <h2 data-i18n="more_posts_title">historique des posts</h2>
+                <div id="userPostsWall">
+                    <i data-i18n="more_posts_empty">connecte-toi pour voir tes posts ici.</i>
+                </div>
+            </div>
+        </div>
+        <div class="more-section" id="more-settings">
+            <h2 class="more-section-title" data-i18n="more_settings_title">réglages</h2>
+            <div class="setting-row" id="languagePreferenceRow">
+                <div class="setting-row-label">
+                    <p data-i18n="settings_language">langue</p>
+                    <small data-i18n="settings_language_sub">choisis la langue de l’interface</small>
+                </div>
+                <select id="languageSelect" title="langue">
+                    <option value="" data-i18n="language_loading">chargement…</option>
+                </select>
+            </div>
+            <button onclick="openAccountModal();" data-i18n="more_profile_title_btn">plus de paramètres de profil</button>
+            <div class="setting-row" id="aiPostsPreferenceRow">
+                <div class="setting-row-label">
+                    <p data-i18n="settings_ai_posts_title">posts générés par IA</p>
+                    <small data-i18n="settings_ai_posts_sub">choisis comment ils apparaissent dans ton fil</small>
+                </div>
+                <select id="aiPostsPreferenceSelect" title="préférences ia">
+                    <option value="allow" data-i18n="ai_pref_allow">afficher</option>
+                    <option value="avoid" data-i18n="ai_pref_avoid">afficher mais flouter le contenu</option>
+                    <option value="block" data-i18n="ai_pref_block">masquer</option>
+                </select>
+            </div>
+            <div class="setting-row setting-row-stacked" id="themePersonalizationRow">
+                <div class="setting-row-label">
+                    <p data-i18n="settings_theme_title">personnalisation du compte</p>
+                    <small data-i18n="settings_theme_sub">
+                        visible sur ton profil et tes posts (sauf ceux publiés en anonyme)
+                    </small>
+                </div>
+                <div id="themeControls">
+                    <div class="theme-control">
+                        <label for="themeAccentColor" data-i18n="settings_theme_color">couleur d'accent</label>
+                        <input type="color" id="themeAccentColor" value="#5f95b9">
+                    </div>
+                    <div class="theme-control">
+                        <label for="themeFontSelect" data-i18n="settings_theme_font">police</label>
+                        <select id="themeFontSelect" title="police du compte">
+                            <option value="default" class="font-default">classique</option>
+                            <option value="elegant" class="font-elegant">élégante</option>
+                            <option value="hand" class="font-hand">manuscrite</option>
+                            <option value="round" class="font-round">ronde</option>
+                            <option value="mono" class="font-mono">mono</option>
+                            <option value="display" class="font-display">affiche</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="themePreview">
+                    <div id="themePreviewCard">
+                        <span id="themePreviewEmoji">✨</span>
+                        <span id="themePreviewText">aperçu de ton style sur oifeel.</span>
+                    </div>
+                    <small id="themeSaveStatus"></small>
+                </div>
+            </div>
+        </div>
+        <div class="more-section" id="more-help">
+            <h2 class="more-section-title" data-i18n="more_help_title">aide</h2>
+            <div id="MoreHelpSettings">
+                <a href="#" id="openHelpCenterBtn">
+                    <div class="oh-menu-icon">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="white"
+                            stroke-width="2"
                             stroke-linecap="round"
                             stroke-linejoin="round"
                         >
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
                             <line
-                                x1="18"
-                                y1="6"
-                                x2="6"
-                                y2="18"
-                            />
-                            <line
-                                x1="6"
-                                y1="6"
-                                x2="18"
-                                y2="18"
+                                x1="12"
+                                y1="17"
+                                x2="12.01"
+                                y2="17"
                             />
                         </svg>
-                    </button>
-                </div>
-                <divfollow class="report-modal-body">
-                    <div class="report-field">
-                        <label class="report-label" for="reportCategory" data-i18n="report_category">catégorie du signalement</label>
-                        <div class="report-select-wrap">
-                            <select id="reportCategory" class="report-select">
-                                <option
-                                    value=""
-                                    disabled
-                                    selected
-                                    data-i18n="report_category_placeholder"
-                                >
-                                    choisis une catégorie…
-                                </option>
-                                <option value="contenu haineux" data-i18n="report_hateful_content">
-                                    🚫 contenu haineux ou discriminatoire
-                                </option>
-                                <option value="harcèlement" data-i18n="report_harassment">
-                                    😠 harcèlement ou intimidation
-                                </option>
-                                <option value="Spam" data-i18n="report_spam">
-                                    📢 spam ou contenu répétitif
-                                </option>
-                                <option value="contenu inapproprié" data-i18n="report_inappropriate_content">
-                                    🔞 contenu inapproprié ou choquant
-                                </option>
-                                <option value="désinformation" data-i18n="report_disinformation">
-                                    ❌ fausse information / désinformation
-                                </option>
-                                <option value="atteinte à la vie privée" data-i18n="report_privacy_violation">
-                                    🔒 atteinte à la vie privée
-                                </option>
-                                <option value="autre" data-i18n="report_other">💬 autre</option>
-                            </select>
-                        </div>
                     </div>
-                    <div class="report-field">
-                        <label class="report-label" for="reportDetail">
-                            <p data-i18n="report_detail">décris le problème</p>
-                            <span id="reportCharCount" class="report-charcount">0 / 500</span>
-                        </label>
-                        <textarea
-                            id="reportDetail"
-                            class="report-textarea"
-                            placeholder="explique pourquoi ce post pose problème…"
-                            maxlength="500"
-                            oninput="
+                    <button>
+                        <p data-i18n="help_center_menu_title">aide</p>
+                        <small data-i18n="help_center_menu_sub">questions fréquentes et documentation</small>
+                    </button>
+                </a>
+                <a href="#" id="replayOnboardingBtn">
+                    <div class="oh-menu-icon">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="white"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                            <path d="M3 3v5h5"/>
+                        </svg>
+                    </div>
+                    <button>
+                        <p data-i18n="replay_onboarding_title">découvrir l'application</p>
+                        <small data-i18n="replay_onboarding_sub">revoir le guide de démarrage</small>
+                    </button>
+                </a>
+            </div>
+        </div>
+        <div class="more-section" id="more-legal">
+            <h2 class="more-section-title" data-i18n="more_legal_title">plus</h2>
+            <div id="MoreAccSettings">
+                <a
+                    href="https://ko-fi.com/oifeel/tip"
+                    target="_blank"
+                    class="donate-btn"
+                    rel="noopener"
+                >
+                    <div id="image">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="white"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="lucide lucide-hand-coins-icon lucide-hand-coins"
+                        >
+                            <path d="M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17"/>
+                            <path d="m7 21 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/>
+                            <path d="m2 16 6 6"/>
+                            <circle cx="16" cy="9" r="2.9"/>
+                            <circle cx="6" cy="5" r="3"/>
+                        </svg>
+                    </div>
+                    <button data-i18n="donate">fais un don</button>
+                </a>
+                <a href="Legal/TERMS_OF_SERVICE.html">
+                    <div id="image">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="white"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="lucide lucide-receipt-text-icon lucide-receipt-text"
+                        >
+                            <path d="M13 16H8"/>
+                            <path d="M14 8H8"/>
+                            <path d="M16 12H8"/>
+                            <path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/>
+                        </svg>
+                    </div>
+                    <button>
+                        <p data-i18n="CGU_title">conditions générales du service</p>
+                    </button>
+                </a>
+                <a href="Legal/PRIVACY_POLICY.html">
+                    <div id="image">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="white"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="lucide lucide-handshake-icon lucide-handshake"
+                        >
+                            <path d="m11 17 2 2a1 1 0 1 0 3-3"/>
+                            <path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/>
+                            <path d="m21 3 1 11h-2"/>
+                            <path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/>
+                            <path d="M3 4h8"/>
+                        </svg>
+                    </div>
+                    <button>
+                        <p data-i18n="policy_title">politique de confidentialité</p>
+                    </button>
+                </a>
+                <a href="https://discord.gg/xvVnNAGNtP" class="dc">
+                    <div id="image">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                            <path d="M524.5 133.8C524.3 133.5 524.1 133.2 523.7 133.1C485.6 115.6 445.3 103.1 404 96C403.6 95.9 403.2 96 402.9 96.1C402.6 96.2 402.3 96.5 402.1 96.9C396.6 106.8 391.6 117.1 387.2 127.5C342.6 120.7 297.3 120.7 252.8 127.5C248.3 117 243.3 106.8 237.7 96.9C237.5 96.6 237.2 96.3 236.9 96.1C236.6 95.9 236.2 95.9 235.8 95.9C194.5 103 154.2 115.5 116.1 133C115.8 133.1 115.5 133.4 115.3 133.7C39.1 247.5 18.2 358.6 28.4 468.2C28.4 468.5 28.5 468.7 28.6 469C28.7 469.3 28.9 469.4 29.1 469.6C73.5 502.5 123.1 527.6 175.9 543.8C176.3 543.9 176.7 543.9 177 543.8C177.3 543.7 177.7 543.4 177.9 543.1C189.2 527.7 199.3 511.3 207.9 494.3C208 494.1 208.1 493.8 208.1 493.5C208.1 493.2 208.1 493 208 492.7C207.9 492.4 207.8 492.2 207.6 492.1C207.4 492 207.2 491.8 206.9 491.7C191.1 485.6 175.7 478.3 161 469.8C160.7 469.6 160.5 469.4 160.3 469.2C160.1 469 160 468.6 160 468.3C160 468 160 467.7 160.2 467.4C160.4 467.1 160.5 466.9 160.8 466.7C163.9 464.4 167 462 169.9 459.6C170.2 459.4 170.5 459.2 170.8 459.2C171.1 459.2 171.5 459.2 171.8 459.3C268 503.2 372.2 503.2 467.3 459.3C467.6 459.2 468 459.1 468.3 459.1C468.6 459.1 469 459.3 469.2 459.5C472.1 461.9 475.2 464.4 478.3 466.7C478.5 466.9 478.7 467.1 478.9 467.4C479.1 467.7 479.1 468 479.1 468.3C479.1 468.6 479 468.9 478.8 469.2C478.6 469.5 478.4 469.7 478.2 469.8C463.5 478.4 448.2 485.7 432.3 491.6C432.1 491.7 431.8 491.8 431.6 492C431.4 492.2 431.3 492.4 431.2 492.7C431.1 493 431.1 493.2 431.1 493.5C431.1 493.8 431.2 494 431.3 494.3C440.1 511.3 450.1 527.6 461.3 543.1C461.5 543.4 461.9 543.7 462.2 543.8C462.5 543.9 463 543.9 463.3 543.8C516.2 527.6 565.9 502.5 610.4 469.6C610.6 469.4 610.8 469.2 610.9 469C611 468.8 611.1 468.5 611.1 468.2C623.4 341.4 590.6 231.3 524.2 133.7zM222.5 401.5C193.5 401.5 169.7 374.9 169.7 342.3C169.7 309.7 193.1 283.1 222.5 283.1C252.2 283.1 275.8 309.9 275.3 342.3C275.3 375 251.9 401.5 222.5 401.5zM417.9 401.5C388.9 401.5 365.1 374.9 365.1 342.3C365.1 309.7 388.5 283.1 417.9 283.1C447.6 283.1 471.2 309.9 470.7 342.3C470.7 375 447.5 401.5 417.9 401.5z"></path>
+                        </svg>
+                    </div>
+                    <button>
+                        <p data-i18n="discord_title">rejoins notre serveur discord!</p>
+                    </button>
+                </a>
+                <a href="https://github.com/Raphleouf74/oifeel" target="_blank" rel="noopener">
+                    <div id="image">
+                        <img
+                            src="/app/assets/logo/images.png"
+                            alt="github logo"
+                            height="45px"
+                            width="45px"
+                        >
+                    </div>
+                    <button data-i18n="project_contribute">contribue au projet sur github</button>
+                </a>
+            </div>
+        </div>
+        <footer>
+            <p data-i18n="copyright">
+                <b>oifeel. &copy; 2025-2026.</b>
+                toute reproduction partielle ou totale est strictement interdite.
+            </p>
+        </footer>
+    </section>
+    <!-- ===== REPORT MODAL ===== -->
+    <div id="reportModalOverlay" class="report-modal-overlay hidden" onclick="if (event.target === this) window.closeReportModal();">
+        <div class="report-modal-panel">
+            <div class="report-modal-header">
+                <div class="report-modal-title">
+                    <p data-i18n="report_post">signaler un post</p>
+                </div>
+                <button class="report-modal-close" onclick="window.closeReportModal()" aria-label="fermer">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <line
+                            x1="18"
+                            y1="6"
+                            x2="6"
+                            y2="18"
+                        />
+                        <line
+                            x1="6"
+                            y1="6"
+                            x2="18"
+                            y2="18"
+                        />
+                    </svg>
+                </button>
+            </div>
+            <divfollow class="report-modal-body">
+                <div class="report-field">
+                    <label class="report-label" for="reportCategory" data-i18n="report_category">catégorie du signalement</label>
+                    <div class="report-select-wrap">
+                        <select id="reportCategory" class="report-select">
+                            <option
+                                value=""
+                                disabled
+                                selected
+                                data-i18n="report_category_placeholder"
+                            >
+                                choisis une catégorie…
+                            </option>
+                            <option value="contenu haineux" data-i18n="report_hateful_content">
+                                🚫 contenu haineux ou discriminatoire
+                            </option>
+                            <option value="harcèlement" data-i18n="report_harassment">
+                                😠 harcèlement ou intimidation
+                            </option>
+                            <option value="Spam" data-i18n="report_spam">
+                                📢 spam ou contenu répétitif
+                            </option>
+                            <option value="contenu inapproprié" data-i18n="report_inappropriate_content">
+                                🔞 contenu inapproprié ou choquant
+                            </option>
+                            <option value="désinformation" data-i18n="report_disinformation">
+                                ❌ fausse information / désinformation
+                            </option>
+                            <option value="atteinte à la vie privée" data-i18n="report_privacy_violation">
+                                🔒 atteinte à la vie privée
+                            </option>
+                            <option value="autre" data-i18n="report_other">💬 autre</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="report-field">
+                    <label class="report-label" for="reportDetail">
+                        <p data-i18n="report_detail">décris le problème</p>
+                        <span id="reportCharCount" class="report-charcount">0 / 500</span>
+                    </label>
+                    <textarea
+                        id="reportDetail"
+                        class="report-textarea"
+                        placeholder="explique pourquoi ce post pose problème…"
+                        maxlength="500"
+                        oninput="
                 document.getElementById('reportCharCount').textContent =
                   this.value.length + ' / 500'
               "
-                        ></textarea>
-                    </div>
-                    <div id="reportError" class="report-msg report-msg--error" style="display: none"></div>
-                    <div
-                        id="reportSuccess"
-                        class="report-msg report-msg--success"
-                        style="display: none"
-                        data-i18n="report_success"
+                    ></textarea>
+                </div>
+                <div id="reportError" class="report-msg report-msg--error" style="display: none"></div>
+                <div
+                    id="reportSuccess"
+                    class="report-msg report-msg--success"
+                    style="display: none"
+                    data-i18n="report_success"
+                >
+                    ✅ ton signalement a bien été envoyé. merci!
+                </div>
+                <div class="report-footer">
+                    <button class="report-cancel-btn" onclick="window.closeReportModal()" data-i18n="report_cancel">
+                        annuler
+                    </button>
+                    <button
+                        id="reportSubmitBtn"
+                        class="report-submit-btn"
+                        onclick="window.submitReport()"
+                        data-i18n="report_submit"
                     >
-                        ✅ ton signalement a bien été envoyé. merci!
-                    </div>
-                    <div class="report-footer">
-                        <button class="report-cancel-btn" onclick="window.closeReportModal()" data-i18n="report_cancel">
-                            annuler
-                        </button>
-                        <button
-                            id="reportSubmitBtn"
-                            class="report-submit-btn"
-                            onclick="window.submitReport()"
-                            data-i18n="report_submit"
-                        >
-                            envoyer le signalement
-                        </button>
-                    </div>
-                </divfollow>
+                        envoyer le signalement
+                    </button>
+                </div>
+            </divfollow>
+        </div>
+    </div>
+    <!-- ===== SYSTÈME D'AIDE CONTEXTUELLE ===== -->
+    <!-- Bandeau discret "besoin d'aide ?" — jamais au milieu de l'écran -->
+    <div
+        id="helpPrompt"
+        class="help-prompt hidden"
+        role="status"
+        aria-live="polite"
+    >
+        <div class="help-prompt-text">
+            <strong data-i18n="help_prompt_title">besoin d'aide ?</strong>
+            <span data-i18n="help_prompt_sub">découvre rapidement comment fonctionne l'application.</span>
+        </div>
+        <div class="help-prompt-actions">
+            <button
+                type="button"
+                id="helpPromptShow"
+                class="help-prompt-btn"
+                data-i18n="help_prompt_cta"
+            >voir le guide</button>
+            <button
+                type="button"
+                id="helpPromptClose"
+                class="help-prompt-close"
+                aria-label="fermer l'aide"
+            >×</button>
+        </div>
+    </div>
+    <!-- Guide rapide — pour tout le monde, connecté ou non -->
+    <div
+        id="quickGuideOverlay"
+        class="oh-overlay hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="quickGuideTitle"
+    >
+        <div class="oh-panel oh-panel--guide">
+            <span id="quickGuideTitle" class="sr-only" data-i18n="quick_guide_title">guide rapide</span>
+            <button
+                type="button"
+                class="oh-close"
+                id="quickGuideClose"
+                aria-label="fermer le guide rapide"
+            >×</button>
+            <div id="quickGuideSteps" class="oh-steps"></div>
+            <div class="oh-footer">
+                <button
+                    type="button"
+                    id="quickGuideSkip"
+                    class="oh-btn oh-btn--ghost"
+                    data-i18n="guide_skip"
+                >passer</button>
+                <div class="oh-dots" id="quickGuideDots"></div>
+                <button
+                    type="button"
+                    id="quickGuideNext"
+                    class="oh-btn oh-btn--primary"
+                    data-i18n="guide_next"
+                >suivant</button>
             </div>
         </div>
-        <!-- ===== SYSTÈME D'AIDE CONTEXTUELLE ===== -->
-        <!-- Bandeau discret "besoin d'aide ?" — jamais au milieu de l'écran -->
-        <div
-            id="helpPrompt"
-            class="help-prompt hidden"
-            role="status"
-            aria-live="polite"
-        >
-            <div class="help-prompt-text">
-                <strong data-i18n="help_prompt_title">besoin d'aide ?</strong>
-                <span data-i18n="help_prompt_sub">découvre rapidement comment fonctionne l'application.</span>
+    </div>
+    <!-- Onboarding avancé — après création volontaire d'un compte -->
+    <div
+        id="advOnbOverlay"
+        class="oh-overlay hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="advOnbTitle"
+    >
+        <div class="oh-panel oh-panel--guide">
+            <span id="advOnbTitle" class="sr-only" data-i18n="advanced_onboarding_title">découvrir l'application</span>
+            <button
+                type="button"
+                class="oh-close"
+                id="advOnbClose"
+                aria-label="fermer la découverte de l'application"
+            >×</button>
+            <div id="advOnbSteps" class="oh-steps"></div>
+            <div class="oh-footer">
+                <button
+                    type="button"
+                    id="advOnbSkip"
+                    class="oh-btn oh-btn--ghost"
+                    data-i18n="onboarding_skip"
+                >passer</button>
+                <div class="oh-dots" id="advOnbDots"></div>
+                <button
+                    type="button"
+                    id="advOnbNext"
+                    class="oh-btn oh-btn--primary"
+                    data-i18n="guide_next"
+                >suivant</button>
             </div>
-            <div class="help-prompt-actions">
+        </div>
+    </div>
+    <!-- Centre d'aide — documentation courte, recherchable -->
+    <div
+        id="helpCenterOverlay"
+        class="oh-overlay hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="helpCenterTitle"
+    >
+        <div class="oh-panel oh-panel--center">
+            <div class="oh-center-header">
+                <h2 id="helpCenterTitle" data-i18n="help_center_title">aide</h2>
                 <button
                     type="button"
-                    id="helpPromptShow"
-                    class="help-prompt-btn"
-                    data-i18n="help_prompt_cta"
-                >voir le guide</button>
-                <button
-                    type="button"
-                    id="helpPromptClose"
-                    class="help-prompt-close"
+                    class="oh-close"
+                    id="helpCenterClose"
                     aria-label="fermer l'aide"
                 >×</button>
             </div>
-        </div>
-        <!-- Guide rapide — pour tout le monde, connecté ou non -->
-        <div
-            id="quickGuideOverlay"
-            class="oh-overlay hidden"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="quickGuideTitle"
-        >
-            <div class="oh-panel oh-panel--guide">
-                <span id="quickGuideTitle" class="sr-only" data-i18n="quick_guide_title">guide rapide</span>
-                <button
-                    type="button"
-                    class="oh-close"
-                    id="quickGuideClose"
-                    aria-label="fermer le guide rapide"
-                >×</button>
-                <div id="quickGuideSteps" class="oh-steps"></div>
-                <div class="oh-footer">
-                    <button
-                        type="button"
-                        id="quickGuideSkip"
-                        class="oh-btn oh-btn--ghost"
-                        data-i18n="guide_skip"
-                    >passer</button>
-                    <div class="oh-dots" id="quickGuideDots"></div>
-                    <button
-                        type="button"
-                        id="quickGuideNext"
-                        class="oh-btn oh-btn--primary"
-                        data-i18n="guide_next"
-                    >suivant</button>
-                </div>
+            <div class="oh-center-search">
+                <input
+                    type="search"
+                    id="helpCenterSearch"
+                    placeholder="rechercher dans l'aide"
+                    aria-label="rechercher dans l'aide"
+                >
             </div>
+            <div class="oh-center-body" id="helpCenterBody"></div>
         </div>
-        <!-- Onboarding avancé — après création volontaire d'un compte -->
-        <div
-            id="advOnbOverlay"
-            class="oh-overlay hidden"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="advOnbTitle"
-        >
-            <div class="oh-panel oh-panel--guide">
-                <span id="advOnbTitle" class="sr-only" data-i18n="advanced_onboarding_title">découvrir l'application</span>
-                <button
-                    type="button"
-                    class="oh-close"
-                    id="advOnbClose"
-                    aria-label="fermer la découverte de l'application"
-                >×</button>
-                <div id="advOnbSteps" class="oh-steps"></div>
-                <div class="oh-footer">
-                    <button
-                        type="button"
-                        id="advOnbSkip"
-                        class="oh-btn oh-btn--ghost"
-                        data-i18n="onboarding_skip"
-                    >passer</button>
-                    <div class="oh-dots" id="advOnbDots"></div>
-                    <button
-                        type="button"
-                        id="advOnbNext"
-                        class="oh-btn oh-btn--primary"
-                        data-i18n="guide_next"
-                    >suivant</button>
-                </div>
-            </div>
-        </div>
-        <!-- Centre d'aide — documentation courte, recherchable -->
-        <div
-            id="helpCenterOverlay"
-            class="oh-overlay hidden"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="helpCenterTitle"
-        >
-            <div class="oh-panel oh-panel--center">
-                <div class="oh-center-header">
-                    <h2 id="helpCenterTitle" data-i18n="help_center_title">aide</h2>
-                    <button
-                        type="button"
-                        class="oh-close"
-                        id="helpCenterClose"
-                        aria-label="fermer l'aide"
-                    >×</button>
-                </div>
-                <div class="oh-center-search">
-                    <input
-                        type="search"
-                        id="helpCenterSearch"
-                        placeholder="rechercher dans l'aide"
-                        aria-label="rechercher dans l'aide"
-                    >
-                </div>
-                <div class="oh-center-body" id="helpCenterBody"></div>
-            </div>
-        </div>
-    </body>
-    <script type="module" src="/app/scripts/app.js"></script>
-    <script type="module" src="/app/scripts/help-system.js"></script>
+    </div>
+</body>
+<script type="module" src="/app/scripts/app.js"></script>
+<script type="module" src="/app/scripts/help-system.js"></script>
 </html>

@@ -1336,6 +1336,36 @@ app.post('/api/social/link-code', requireAuth, async (req, res) => {
   }
 });
 
+// ── GET /api/social/discord-status — le compte de la session courante a-t-il
+// un Discord lié ? Utilisé par le front pour afficher "Compte lié !" à la
+// place du bouton, et par le modal pour détecter la confirmation en direct.
+app.get('/api/social/discord-status', requireAuth, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const link = await DiscordLinkModel.findOne({ userId }).lean();
+    res.json({
+      linked: !!link,
+      discordId: link?._id || null,
+      linkedAt: link?.linkedAt || null
+    });
+  } catch (err) {
+    console.error('❌ Erreur /api/social/discord-status:', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// ── DELETE /api/social/discord-link — délier le compte Discord ──
+app.delete('/api/social/discord-link', requireAuth, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    await DiscordLinkModel.deleteOne({ userId });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('❌ Erreur suppression lien Discord:', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 app.post('/api/social/follow/:userId', requireAuth, async (req, res) => {
   try {
     const { userId } = req.params;
@@ -3774,10 +3804,10 @@ app.post('/api/bot/mood', requireBotSecret, async (req, res) => {
 
     const cleanText = sanitizeText(String(text).slice(0, 280));
     const newPost = {
-      text: cleanText,
+      text: `${cleanText} + "\n - via discord `,
       emoji: '💬',
-      color: null,
-      textColor: null,
+      color: "#000",
+      textColor: "#fff",
       stickerUrl: null,
       track: null,
       anonymous: false,
@@ -3792,7 +3822,7 @@ app.post('/api/bot/mood', requireBotSecret, async (req, res) => {
       ephemeral: false,
       expiresAt: null,
       createdAt: new Date().toISOString(),
-      ip: null,
+      ip: "discord",
       ipLoggedAt: null
     };
 
