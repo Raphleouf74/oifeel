@@ -27,16 +27,17 @@
   right: 12px;
   bottom: calc(96px + env(safe-area-inset-bottom, 0px));
   z-index: 4500;
-  max-width: 420px;
+  max-width: 650px;
+  height: 75px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   gap: 12px;
   background: var(--bg-3, #1a1a1a);
   border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
-  border-radius: var(--radius, 8px);
+  border-radius: 25px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  padding: 12px 14px;
+  padding: 10px 25px;
   color: var(--text, #fff);
   opacity: 0;
   transform: translateY(12px);
@@ -63,12 +64,12 @@
 }
 
 .help-prompt-text strong {
-  font-size: 0.88rem;
+  font-size: 1.5rem;
   font-weight: 700;
 }
 
 .help-prompt-text span {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--muted, #aaa);
   line-height: 1.3;
 }
@@ -84,11 +85,12 @@
   background: var(--accent, #5f95b9);
   color: #fff;
   border: none;
-  border-radius: 999px;
-  padding: 8px 14px;
-  font-size: 0.78rem;
+  border-radius: 20px;
+  padding: 13px;
+  font-size: 1.25rem;
   font-weight: 600;
   cursor: pointer;
+  width: 200px;
   white-space: nowrap;
   min-height: 36px;
 }
@@ -98,16 +100,16 @@
 }
 
 .help-prompt-close {
-  background: none;
+  background-color: #f7050560;
   border: none;
-  color: var(--muted, #aaa);
-  font-size: 1.1rem;
+  color: var(--muted, #f70505);
+  font-size: 2rem;
   line-height: 1;
   cursor: pointer;
-  width: 32px;
-  height: 32px;
+  width: 100px;
+  height: 50px;
   min-width: 32px;
-  border-radius: 50%;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -147,6 +149,16 @@
   display: none;
 }
 
+#helpCenterOverlay.hidden .oh-panel {
+  opacity: 0;
+  transition: all 0.2s ease-in-out;
+  transform: translateY(-25px);
+}
+
+#helpCenterOverlay.open .oh-panel {
+  opacity: 1;
+  transform: translateY(0);
+}
 .oh-overlay.open {
   opacity: 1;
   pointer-events: auto;
@@ -155,21 +167,22 @@
 
 .oh-panel {
   position: relative;
-  width: 100%;
-  max-width: 380px;
-  max-height: 85vh;
+  opacity: 1;
+  width: 90%;
+  max-width: 650px;
+  max-height: 90vh;
   overflow-y: auto;
   background: var(--bg-3, #1a1a1a);
   border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
   border-radius: 16px;
   padding: 28px 22px 20px;
+  transition: all 0.2s ease-in-out; 
   color: var(--text, #fff);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
 }
 
 .oh-panel--center {
-  max-width: 480px;
-  padding: 0;
+  max-width: 650px;
 }
 
 .oh-close {
@@ -313,7 +326,7 @@
 
 .oh-center-body {
   padding: 0 20px 24px;
-  max-height: 55vh;
+  height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
   --oh-slide-dir: 1;
@@ -383,6 +396,7 @@
 .oh-hc-item:focus-visible {
   background: rgba(255, 255, 255, 0.09);
   border-color: var(--border, rgba(255, 255, 255, 0.1));
+  transform: translateX(3px);
 }
 
 .oh-hc-empty {

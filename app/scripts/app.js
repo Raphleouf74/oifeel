@@ -2960,7 +2960,6 @@ document.addEventListener('DOMContentLoaded', () => {
         saveProfileLocal({ displayName: uname, id: user.id });
         hideModal();
         document.dispatchEvent(new CustomEvent('userLoggedIn'));
-        location.reload(); // reload to refresh UI and fetch user data
     }
 
     function showOtpStep(method) {

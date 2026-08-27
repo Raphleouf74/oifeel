@@ -192,6 +192,18 @@ userSchema.index({ displayName: 'text' });
 
 const UserModel = mongoose.models.User || mongoose.model('User', userSchema);
 
+// ============================================================
+// DISCORD LINK SCHEMA — lie un compte Discord à un compte oifeel.
+// _id = ID Discord (string, unique). userId = _id du User oifeel.
+// ============================================================
+const discordLinkSchema = new mongoose.Schema({
+  _id: { type: String, required: true }, // Discord user ID
+  userId: { type: String, required: true, index: true }, // oifeel. user ID
+  linkedAt: { type: Date, default: Date.now }
+}, { _id: false });
+
+const DiscordLinkModel = mongoose.models.DiscordLink || mongoose.model('DiscordLink', discordLinkSchema);
+
 // Routes externes (users) — chargé ICI, seulement après l'enregistrement du
 // schéma User complet ci-dessus. routes/users.cjs charge lui-même
 // models/User.cjs, qui contient un schéma minimal et fait
@@ -693,7 +705,7 @@ async function attachAuthorThemes(postsArr) {
 function sanitizeTrack(track) {
   if (!track || typeof track !== "object") return null;
   const preview = typeof track.preview === "string" ? track.preview : null;
-  if (!preview) return null ; // sans extrait audio, pas d'intérêt à garder le morceau
+  if (!preview) return null; // sans extrait audio, pas d'intérêt à garder le morceau
   return {
     title: sanitizeText(String(track.title || "").slice(0, 120)),
     artist: sanitizeText(String(track.artist || "").slice(0, 120)),
@@ -1302,6 +1314,28 @@ app.put("/api/social/profile", requireAuth, async (req, res) => {
 });
 
 // POST /api/social/follow/:userId
+// ── POST /api/social/link-code — Génère un code à 6 chiffres pour lier le
+// compte Discord (à appeler depuis l'app, bouton "Lier Discord" dans les
+// réglages). Le code expire après 10 minutes et n'est utilisable qu'une fois.
+// ──────────────────────────────────────────────────────────────────────────
+const pendingDiscordLinks = new Map(); // code -> { userId, expiresAt }
+
+app.post('/api/social/link-code', requireAuth, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    // Un seul code actif par utilisateur : on invalide un éventuel code précédent
+    for (const [code, data] of pendingDiscordLinks) {
+      if (data.userId === userId) pendingDiscordLinks.delete(code);
+    }
+    const code = String(Math.floor(100000 + Math.random() * 900000)); // 6 chiffres
+    pendingDiscordLinks.set(code, { userId, expiresAt: Date.now() + 10 * 60 * 1000 });
+    res.json({ code, expiresIn: 600 });
+  } catch (err) {
+    console.error('❌ Erreur génération code Discord:', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 app.post('/api/social/follow/:userId', requireAuth, async (req, res) => {
   try {
     const { userId } = req.params;
@@ -3569,6 +3603,235 @@ app.get("/api/post-of-the-day", async (req, res) => {
     res.json(sanitizePostForPublic(post));
   }
 });
+// ============================================================
+// ROUTES BOT DISCORD — toutes protégées par le header x-bot-secret
+// (jamais de mot de passe utilisateur transmis via Discord).
+// process.env.BOT_SECRET doit être défini côté Render ET dans le bot.
+// ============================================================
+function requireBotSecret(req, res, next) {
+  if (!process.env.BOT_SECRET || req.headers['x-bot-secret'] !== process.env.BOT_SECRET) {
+    return res.status(403).json({ error: 'interdit' });
+  }
+  next();
+}
+
+// GET /api/bot/random-post — un post public au hasard
+app.get('/api/bot/random-post', requireBotSecret, async (req, res) => {
+  try {
+    if (!posts.length) return res.status(404).json({ error: 'Aucun post disponible' });
+    const post = posts[Math.floor(Math.random() * posts.length)];
+    const [withTheme] = await attachAuthorThemes([post]);
+    res.json(sanitizePostForPublic(withTheme));
+  } catch (err) {
+    console.error('❌ Erreur /api/bot/random-post:', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// GET /api/bot/profile/:pseudo — stats d'un compte oifeel. par pseudo
+app.get('/api/bot/profile/:pseudo', requireBotSecret, async (req, res) => {
+  try {
+    if (!mongoReady) return res.status(503).json({ error: 'DB non disponible' });
+    const user = await UserModel.findOne({
+      displayName: { $regex: new RegExp(`^${req.params.pseudo}$`, 'i') }
+    }).lean();
+    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+
+    res.json({
+      id: user._id,
+      displayName: user.displayName,
+      avatar: user.avatar,
+      bio: user.bio,
+      postsCount: user.postsCount || 0,
+      followersCount: user.followersCount || 0,
+      followingCount: user.followingCount || 0,
+      createdAt: user.createdAt
+    });
+  } catch (err) {
+    console.error('❌ Erreur /api/bot/profile:', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// GET /api/bot/last-post/:pseudo — dernier post d'un utilisateur
+app.get('/api/bot/last-post/:pseudo', requireBotSecret, async (req, res) => {
+  try {
+    if (!mongoReady) return res.status(503).json({ error: 'DB non disponible' });
+    const user = await UserModel.findOne({
+      displayName: { $regex: new RegExp(`^${req.params.pseudo}$`, 'i') }
+    }).lean();
+    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable' });
+
+    const post = posts
+      .filter(p => p.userId === user._id && !p.anonymous)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+
+    if (!post) return res.status(404).json({ error: 'Aucun post trouvé pour cet utilisateur' });
+    res.json(sanitizePostForPublic(post));
+  } catch (err) {
+    console.error('❌ Erreur /api/bot/last-post:', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// GET /api/bot/top-posts?period=day|week — classement des posts les plus likés
+app.get('/api/bot/top-posts', requireBotSecret, async (req, res) => {
+  try {
+    const period = req.query.period === 'day' ? 'day' : 'week';
+    const windowMs = period === 'day' ? 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
+    const since = Date.now() - windowMs;
+
+    const top = posts
+      .filter(p => new Date(p.createdAt).getTime() >= since)
+      .slice()
+      .sort((a, b) => (b.likes || 0) - (a.likes || 0))
+      .slice(0, 10)
+      .map(sanitizePostForPublic);
+
+    res.json({ period, posts: top });
+  } catch (err) {
+    console.error('❌ Erreur /api/bot/top-posts:', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// GET /api/bot/new-posts?since=<timestamp ms> — utilisé par le polling du
+// bot pour le pont "nouveau post -> salon Discord"
+app.get('/api/bot/new-posts', requireBotSecret, async (req, res) => {
+  try {
+    const since = parseInt(req.query.since || '0', 10);
+    const fresh = posts
+      .filter(p => new Date(p.createdAt).getTime() > since)
+      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+      .map(sanitizePostForPublic);
+    res.json({ posts: fresh, now: Date.now() });
+  } catch (err) {
+    console.error('❌ Erreur /api/bot/new-posts:', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// GET /api/bot/stats — stats globales pour /statsapp
+app.get('/api/bot/stats', requireBotSecret, async (req, res) => {
+  try {
+    const totalPosts = posts.length;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const postsToday = posts.filter(p => new Date(p.createdAt) >= today).length;
+
+    let totalUsers = 0, activeToday = 0;
+    if (mongoReady) {
+      totalUsers = await UserModel.countDocuments();
+      const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      activeToday = await UserModel.countDocuments({ lastLogin: { $gte: dayAgo } });
+    }
+
+    res.json({ totalUsers, totalPosts, postsToday, activeToday });
+  } catch (err) {
+    console.error('❌ Erreur /api/bot/stats:', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// POST /api/bot/link/confirm — { discordId, code } : confirme la liaison
+// Discord <-> compte oifeel. à partir du code généré par /api/social/link-code
+app.post('/api/bot/link/confirm', requireBotSecret, async (req, res) => {
+  try {
+    const { discordId, code } = req.body || {};
+    if (!discordId || !code) return res.status(400).json({ error: 'discordId et code requis' });
+
+    const pending = pendingDiscordLinks.get(String(code));
+    if (!pending || pending.expiresAt < Date.now()) {
+      return res.status(400).json({ error: 'Code invalide ou expiré' });
+    }
+
+    await DiscordLinkModel.findByIdAndUpdate(
+      String(discordId),
+      { _id: String(discordId), userId: pending.userId, linkedAt: new Date() },
+      { upsert: true }
+    );
+    pendingDiscordLinks.delete(String(code));
+
+    const user = await UserModel.findById(pending.userId).lean();
+    res.json({ success: true, displayName: user?.displayName || null });
+  } catch (err) {
+    console.error('❌ Erreur /api/bot/link/confirm:', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// POST /api/bot/mood — { discordId, text } : publie un post depuis Discord,
+// uniquement si le compte Discord est lié à un compte oifeel.
+app.post('/api/bot/mood', requireBotSecret, async (req, res) => {
+  try {
+    const { discordId, text } = req.body || {};
+    if (!discordId || !text) return res.status(400).json({ error: 'discordId et text requis' });
+
+    const link = await DiscordLinkModel.findById(String(discordId)).lean();
+    if (!link) return res.status(403).json({ error: 'Compte Discord non lié. Utilise /lier d\'abord.' });
+
+    const user = await UserModel.findById(link.userId).lean();
+    if (!user) return res.status(404).json({ error: 'Compte oifeel. introuvable' });
+
+    const cleanText = sanitizeText(String(text).slice(0, 280));
+    const newPost = {
+      text: cleanText,
+      emoji: '💬',
+      color: null,
+      textColor: null,
+      stickerUrl: null,
+      track: null,
+      anonymous: false,
+      id: Date.now().toString(),
+      userId: user._id,
+      userName: user.displayName,
+      likes: 0,
+      views: 0,
+      reactions: {},
+      pinned: false,
+      aiGenerated: false,
+      ephemeral: false,
+      expiresAt: null,
+      createdAt: new Date().toISOString(),
+      ip: null,
+      ipLoggedAt: null
+    };
+
+    posts.unshift(newPost);
+    await persistPost(newPost);
+    if (mongoReady) UserModel.findByIdAndUpdate(user._id, { $inc: { postsCount: 1 } }).catch(() => { });
+    try { sendSSE('new_post', sanitizePostForPublic(newPost)); } catch (e) { console.error('❌ Erreur SSE:', e); }
+
+    res.status(201).json(sanitizePostForPublic(newPost));
+  } catch (err) {
+    console.error('❌ Erreur /api/bot/mood:', err);
+    res.status(400).json({ error: 'Contenu invalide' });
+  }
+});
+
+// POST /api/bot/report — { postId, reason } : signalement depuis Discord
+app.post('/api/bot/report', requireBotSecret, async (req, res) => {
+  try {
+    const { postId, reason = '' } = req.body || {};
+    const targetPost = posts.find(p => p.id == postId);
+    if (!targetPost) return res.status(404).json({ error: 'Post non trouvé' });
+
+    const report = {
+      id: Date.now().toString(),
+      postId: String(postId),
+      reason: 'Signalé via Discord — ' + String(reason).slice(0, 950),
+      createdAt: new Date().toISOString()
+    };
+    reports.unshift(report);
+    await fsPromises.writeFile(reportsFile, JSON.stringify(reports, null, 2));
+    try { sendSSE('report', report); } catch (e) { console.error('❌ Erreur SSE:', e); }
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('❌ Erreur /api/bot/report:', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 // Debug routes
 function listRoutes() {
   const routes = [];

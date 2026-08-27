@@ -438,7 +438,8 @@
             { icon: '🖼️', titleKey: 'onboarding_slide_posts_title', title: 'publications & stories', textKey: 'onboarding_slide_posts_text', text: 'publie des posts qui restent, ou des stories qui disparaissent après 24h.' },
             { icon: '✉️', titleKey: 'onboarding_slide_messaging_title', title: 'la messagerie', textKey: 'onboarding_slide_messaging_text', text: 'discute en privé avec d’autres membres depuis l’onglet messages.' },
             { icon: '🔔', titleKey: 'onboarding_slide_notifications_title', title: 'les notifications', textKey: 'onboarding_slide_notifications_text', text: 'retrouve les likes, commentaires et nouveaux abonnés dans l’onglet notifications.' },
-            { icon: '✨', titleKey: 'onboarding_slide_advanced_title', title: 'fonctionnalités avancées', textKey: 'onboarding_slide_advanced_text', text: 'posts éphémères, génération de contenu par IA... repérables par une petite icône [?] qui explique chaque fonctionnalité.' }
+            { icon: '✨', titleKey: 'onboarding_slide_advanced_title', title: 'fonctionnalités avancées', textKey: 'onboarding_slide_advanced_text', text: 'posts éphémères, génération de contenu par IA... repérables par une petite icône [?] qui explique chaque fonctionnalité.' },
+            { icon: '⚠️', titleKey: 'onboarding_slide_required_reload_title', title: 'actualisation de la page nécéssaire', textKey: 'onboarding_slide_required_reload_text', text: 'pour permettre une expérience encore meilleure et pour une bonne synchronisation de vos données, le rechargement de la page est obligatoire. cliquez sur \'terminer\' pour continuer'}
         ];
 
         let index = 0;
@@ -497,6 +498,7 @@
                 slideSwap(document.getElementById('advOnbSteps'), render);
             } else {
                 close('completed');
+                window.location.reload();
             }
         }
 
@@ -602,6 +604,7 @@
             const overlay = document.getElementById('helpCenterOverlay');
             if (!overlay) return;
             overlay.classList.add('open');
+            overlay.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
             const search = document.getElementById('helpCenterSearch');
             if (search) {
@@ -620,6 +623,7 @@
             const overlay = document.getElementById('helpCenterOverlay');
             if (overlay) {
                 overlay.classList.remove('open');
+                overlay.classList.add('hidden');
                 document.body.style.overflow = '';
             }
         }
