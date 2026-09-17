@@ -664,6 +664,9 @@ body.loading {
 }
 
 @media (max-width: 769px) {
+  button:active, a:active, input:active, select:active, textarea:active, #accountheader:active, #moreOptionsBtn:active, .btn-icon:active {
+    transform: scale(0.95) !important;
+  }
   .maintenance-overlay {
     position: fixed;
     inset: 0;
@@ -868,10 +871,10 @@ body.loading {
     background: rgba(0, 0, 0, 0.06);
   }
   .btn-icon {
-    width: 36px;
-    height: 36px;
+    width: 80%;
+    height: 50px;
     border: none;
-    border-radius: 5px;
+    border-radius: 1cm;
     background: var(--accent);
     color: white;
     font-size: 1.5rem;
@@ -880,7 +883,11 @@ body.loading {
     transition: transform 0.15s;
   }
   .btn-icon:hover {
-    transform: scale(1.1);
+    transform: scale(1);
+    background: var(--accent);
+  }
+  .btn-icon:active {
+    transform: scale(0.95);
   }
   .empty {
     text-align: center;

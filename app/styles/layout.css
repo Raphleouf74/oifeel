@@ -850,11 +850,13 @@ body.focus-mode .tab.active {
     transition: all 0.3s ease-in-out;
     opacity: 1;
     gap: 5px;
+    -webkit-backdrop-filter: invert(.25);
+    backdrop-filter: invert(.25) blur(5px);
   }
   nav.scrolled {
     top: calc(100vh - 70px);
     height: 20px;
-    width: 50%;
+    width: 45%;
     background: rgba(0, 0, 0, 0.15);
   }
   

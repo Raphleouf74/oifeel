@@ -21,7 +21,7 @@
 }
 #nav:not(.nav-closed) .link svg {
   opacity: 1;
-  transition: opacity 0s ease-in-out;
+  transition: all 0.2s ease-in-out;
 }
 
 .link:hover {
@@ -887,8 +887,15 @@ body.dark .sv-bubble__face {
   }
 
   .post-track-cover {
-    width: 26px;
-    height: 26px;
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    animation: rotate 25s linear infinite;
   }
 
   .post-track-title,
@@ -2023,20 +2030,6 @@ body.dark .post-actions button:hover {
     border-radius: 5px;
     flex-wrap: none;
   }
-  .mood-today {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .mood-today__emoji {
-    font-size: 3.5rem;
-  }
-  .mood-today__text {
-    font-size: 2rem;
-  }
-  .mood-today__share {
-    font-size: 2rem;
-    padding: 10px 20px;
-  }
   .mood-today__close {
     align-self: flex-end;
     position: absolute;
@@ -2050,7 +2043,7 @@ body.dark .post-actions button:hover {
     width: 50px;
     height: 50px;
     color: red;
-  }
+  } 
 }
 
 @media (max-width: 769px) and (max-width: 768px) {
@@ -2477,26 +2470,53 @@ body.dark .post-actions button:hover {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.42);
   }
   #postoptions {
-    height: 75px;
-    padding: 14px 18px;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    height: 20px;
+    padding: 5px 8px;
+    position: absolute;
+    transform: translateY(-75px);
+    left: 0;
+    right: 0;
   }
+
   body.dark #postoptions {
     border-top-color: rgba(255, 255, 255, 0.06);
   }
   .buttons {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 14px;
-    flex-wrap: wrap;
+    opacity: 0;
+    right: 5px;
+    padding: 10px;
+    transform: translateY(0) translateX(-25px);
+    border-radius: 25px;
+    max-height: 50px;
+    width: 375px;
+    display: flex;
+    justify-content: center;
+  }
+  .post:hover .buttons {
+    opacity: 1;
+    transform: translateY(-5px) translateX(10px);
+    border-radius: 25px;
+    right: 5px;
+    transition:
+      opacity 0.2s,
+      transform 0.2s;
+    background-color: rgba(255, 255, 255, 0.4);
+    box-shadow: rgb(0, 0, 0, 0.7) 0 0 5px 2px;
+    color: black;
+    -webkit-backdrop-filter: blur(15px);
+    backdrop-filter: blur(15px);
   }
   .likebtn {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
+    padding: 5px 8px;
     border: none;
-    border-radius: 5px;
+    border-radius: 25px;
+    height: 65px;
+    gap: none;
     background: transparent;
     color: var(--text);
     font-size: 0.9rem;
@@ -2506,16 +2526,16 @@ body.dark .post-actions button:hover {
       background 0.15s,
       transform 0.15s;
   }
+
   .likebtn:hover {
-    background: rgba(0, 0, 0, 0.05);
-    transform: scale(1.05);
+    transform: none;
   }
   body.dark .likebtn:hover {
     background: rgba(255, 255, 255, 0.05);
   }
   .likebtn svg {
     width: 30px;
-    height: 30px;
+    height: 35px;
     transition:
       fill 0.2s,
       stroke 0.2s;
@@ -2526,6 +2546,16 @@ body.dark .post-actions button:hover {
   .likebtn.liked svg {
     fill: currentColor;
     stroke: currentColor;
+  }
+  .likebtn span.icon {
+    background-color: #fff;
+    color: #000;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .like-count {
     min-width: 20px;
@@ -2540,7 +2570,7 @@ body.dark .post-actions button:hover {
   }
   .post-actions button,
   .ctoggle {
-    width: 40px;
+    /* width: 40px;
     height: 40px;
     border: none;
     border-radius: 5px;
@@ -2550,7 +2580,8 @@ body.dark .post-actions button:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
+    cursor: pointer; */
+    display: none; /* disabled temporarily */
   }
   .post-actions button:active {
     transform: translateY(1px);
@@ -2573,12 +2604,9 @@ body.dark .post-actions button:hover {
   }
   .postdate {
     width: 100%;
-    margin-top: 8px;
     font-size: 1rem;
-    transform: translateY(-10px);
-    color: var(--text);
-    opacity: 0.5;
-    text-align: left;
+    color: black;
+    opacity: 1;
   }
   .expiration-date {
     position: absolute;
@@ -2682,9 +2710,6 @@ body.dark .post-actions button:hover {
   .post-actions button {
     width: 32px;
     height: 32px;
-  }
-  #postoptions {
-    padding: 12px 14px;
   }
   .conv-info {
     flex: 1;
@@ -2948,7 +2973,7 @@ body.dark .post-actions button:hover {
     align-items: center;
     justify-content: center;
     border-radius: 40px;
-    background: rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.05);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.2s;
   }
@@ -2964,7 +2989,7 @@ body.dark .post-actions button:hover {
     align-items: center;
     justify-content: center;
     border-radius: 40px;
-    background: rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.05);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.2s;
   }
@@ -2973,7 +2998,7 @@ body.dark .post-actions button:hover {
     height: 25px;
     transition: all 0.2s ease-in-out;
   }
-  .link:hover{
+  .link:hover {
     transform: translateX(0);
     border-radius: 40px !important;
     background-color: rgba(255, 255, 255, 0.08);
@@ -2982,7 +3007,8 @@ body.dark .post-actions button:hover {
     transform: none;
   }
 
-  .link.active, nav a#create.active  {
+  .link.active,
+  nav a#create.active {
     color: #fff;
     width: 150px !important;
     background: rgba(175, 175, 255, 0.35) !important;
