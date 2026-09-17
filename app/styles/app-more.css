@@ -5,7 +5,7 @@
   height: 450px;
   width: 100%;
   padding: 32px;
-  border-radius: 5px;
+  border-radius: 25px;
   color: #eee;
   display: flex;
   flex-direction: column;
@@ -34,7 +34,7 @@
   background: #5f95b9;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 25px;
   font-size: 2rem;
   font-weight: 600;
 
@@ -89,51 +89,37 @@
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 1rem 2rem;
-  border-radius: 5px;
+  padding: 20px 40px;
+  border-radius: 25px;
   color: white;
   font-weight: 500;
   opacity: 0;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   font-size: 1.5rem;
-  z-index: 99999999999999999999999999999999999999999999999999999999999999999999;
+  z-index: 99999999999999999999999999999999999999999999999999999999;
   display: flex;
   align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
   gap: 0.5rem;
 }
 
-.upload-feedback button {
-  text-decoration: none;
-  background: transparent;
-  width: 100%;
-  border: none;
-  height: 100%;
-  display: flex;
+.upload-feedback span {
+  display:flex;
   align-items: center;
+  justify-content: center;
 }
 
 .upload-success {
-  background: rgba(46, 213, 115, 0.9);
+  background: rgba(46, 213, 115, 0.4);
 }
 
 .upload-error {
-  background: rgba(255, 71, 87, 0.9);
+  background: rgba(255, 71, 87, 0.4);
 }
 
-.upload-feedback {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 1rem 2rem;
-  border-radius: 5px;
-  color: white;
-  font-weight: 500;
-  opacity: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  animation: slideInOut 3.5s ease forwards;
-}
+
 
 #userPostsSection {
   width: 80%;
@@ -184,14 +170,13 @@
 }
 
 #socialStats {
-  margin-top: 1rem;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  width: 80%;
-  max-width: 420px;
-  gap: 10px;
+  width: 500px;
+  padding: 20px;
+  gap: 5px;
 }
 
 .stat-block {
@@ -203,7 +188,7 @@
   padding: 12px 8px;
   background: var(--menu-bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 25px;
 }
 
 .stat-block strong {
@@ -235,8 +220,7 @@
 #accountinfo {
   height: auto;
   width: 70%;
-  max-width: 480px;
-  border-radius: var(--radius);
+  border-radius: 25px;
   background: var(--menu-bg);
   border: 1px solid var(--border);
   padding: 24px;
@@ -254,7 +238,7 @@
 
 .profile-bio {
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: 1.75rem;
   text-align: center;
   max-width: 90%;
 }
@@ -317,8 +301,8 @@
   gap: 16px;
   background: var(--menu-bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px 16px;
+  border-radius: 25px;
+  padding: 20px;
 }
 
 .setting-row-label p {
@@ -450,22 +434,24 @@
   height: 50px;
   overflow: hidden;
   padding: 0;
-  background-color: transparent;
+  background-color: black;
   align-items: center;
   justify-content: center;
   display: flex;
   flex-direction: row;
-  border-radius: 5px;
+  border-radius: 25px;
   font-size: 1.4rem;
   text-decoration: none;
 }
 
 #MoreAccSettings a #image {
-  width: 20%;
+  width: 100px;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 25px;
+  background-color: #181616;
 }
 
 #MoreAccSettings #image svg {
@@ -477,7 +463,7 @@
   fill: white;
 }
 
-#MoreAccSettings a:hover div svg {
+#MoreAccSettings a:hover div{
   transform: translateX(5px);
 }
 
@@ -489,7 +475,7 @@
   justify-content: center;
   display: flex;
   border: none;
-  background-color: black;
+  background-color: transparent;
   color: white;
 }
 
@@ -993,9 +979,21 @@ a.download-apk-btn:hover {
 }
 
 #accountinfo span#userNameProfile {
-  font-size: 3rem;
+  font-size: 5rem;
+  color: white !important;
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  align-items: center;
 }
 
+#accountinfo span#userNameProfile svg {
+  width: 50px;
+  height: 50px;
+}
+.profile_user_id {
+  font-size: 1.5rem;
+}
 #customisebg {
   margin-top: 20px;
   padding: 16px;
@@ -1131,9 +1129,12 @@ a.download-apk-btn:hover {
 
 .profile-posts h3,
 .posts-section h3 {
-  font-size: 1.2rem;
   margin-bottom: 16px;
   padding-left: 8px;
+}
+
+.posts-section h2 {
+  margin-left: 40px;
 }
 
 .modal-overlay,
@@ -1271,6 +1272,11 @@ a.download-apk-btn:hover {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 26px;
+}
+
+.no-suggestions {
+  font-size: 1.15rem;
+  font-style: italic;
 }
 
 .suggestion-avatar {
@@ -1955,10 +1961,10 @@ a.download-apk-btn:hover {
     align-items: center;
   }
   .upload-success {
-    background: rgba(46, 213, 115, 0.9);
+    background: rgba(46, 213, 115, 0.4);
   }
   .upload-error {
-    background: rgba(255, 71, 87, 0.9);
+    background: rgba(255, 71, 87, 0.4);
   }
   .upload-feedback {
     position: fixed;
@@ -2829,7 +2835,8 @@ a.download-apk-btn:hover {
   color: white;
   background: var(--menu-bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 25px;
+  font-size: 1.5rem;
   padding: 14px 16px;
 }
 #more-settings button:hover {

@@ -14,7 +14,7 @@ header {
 header img {
   width: 75px;
   height: 75px;
-  border-radius: 5px;
+  border-radius: 15px;
   transition: all 0.3s ease;
 }
 
@@ -399,6 +399,7 @@ nav {
   opacity: 0;
   height: 100px;
   overflow: hidden;
+  pointer-events: none;
 }
 @media (min-width: 769px) {
   nav.shown {
@@ -408,9 +409,13 @@ nav {
     width: 220px;
   }
 }
+nav.shown {
+  pointer-events: auto;
+}
 
 nav a#create {
   background: var(--accent-2);
+  color: white;
 }
 
 nav a#create.active {
@@ -814,14 +819,6 @@ body.focus-mode .tab.active {
     justify-content: center;
     z-index: 99999999999999999999;
   }
-  header img {
-    height: 45px;
-    width: 45px;
-    scale: 1.5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
   #accountheader {
     width: 20%;
   }
@@ -836,31 +833,37 @@ body.focus-mode .tab.active {
   }
   nav {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 97%;
-    height: 100vh;
+    top: calc(100vh - 100px);
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 65%;
+    height: 35px;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     justify-content: center;
     align-items: center;
-    transform: translateY(-100px);
     padding: none;
-    pointer-events: none;
-    transition: all 0.3s ease-in-out;
-    opacity: 0;
-  }
-  nav.shown {
-    transform: translateY(0);
+    border-radius: 50px;
     pointer-events: all;
+    background: rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
     opacity: 1;
+    gap: 5px;
   }
+  nav.scrolled {
+    top: calc(100vh - 70px);
+    height: 20px;
+    width: 50%;
+    background: rgba(0, 0, 0, 0.15);
+  }
+  
 
   nav #link {
     pointer-events: none !important;
   }
-  nav.shown #link {
-    pointer-events: all !important;
+  nav .link p{
+    display: none !important;
   }
 
   section#create {

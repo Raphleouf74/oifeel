@@ -151,5 +151,7 @@
     "help_ai_title": "génération IA",
     "help_ai_text": "crée une proposition de contenu à partir de ton idée, dans l'écran de création (options avancées). limité à quelques générations par semaine.",
     "help_ephemeral_title": "posts éphémères",
-    "help_ephemeral_text": "ces publications restent disponibles pendant une durée que tu choisis, avant de disparaître automatiquement pour tout le monde."
+    "help_ephemeral_text": "ces publications restent disponibles pendant une durée que tu choisis, avant de disparaître automatiquement pour tout le monde.",
+    "night_mode_on": "mode nuit activé",
+    "night_mode_off": "mode nuit désactivé"
 }

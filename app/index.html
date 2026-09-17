@@ -604,6 +604,7 @@
                     <button class="account-tab" data-tab="contenu">contenu</button>
                     <button class="account-tab" data-tab="donnees">mes données</button>
                     <button class="account-tab" data-tab="socials">connexions sociales</button>
+                    <button class="account-tab" data-tab="appearance">apparence</button>
                 </div>
                 <!-- Corps -->
                 <div class="account-body">
@@ -929,6 +930,7 @@
                             <div class="account-msg" id="deleteMsg"></div>
                         </div>
                     </div>
+                    <!-- ── CONNEXIONS SOCIALES ── -->
                     <div class="account-section" id="account-tab-socials">
                         <p class="account-section-title">connexions sociales</p>
                         <button id="link-discord-btn" class="discord-link-btn">
@@ -939,201 +941,236 @@
                             <button id="discord-unlink-btn" class="discord-unlink-link" type="button">délier</button>
                         </div>
                     </div>
-                </div>
-            </div>
-            <!-- /account-body -->
-        </div>
-        <!-- /account-panel-wrap -->
-    </div>
-    <!-- Modal (caché par défaut) -->
-    <div id="discord-link-modal" class="discord-link-overlay" hidden>
-        <div class="discord-link-modal">
-            <button id="discord-link-close" class="discord-link-close" aria-label="Fermer">✕</button>
-            <div id="discord-link-loading" class="discord-link-state">
-                <p>Génération du code…</p>
-            </div>
-            <div id="discord-link-success" class="discord-link-state" hidden>
-                <h3>Lie ton compte Discord</h3>
-                <p>Dans le serveur Discord, tape la commande :</p>
-                <div class="discord-link-code-row">
-                    <code id="discord-link-code">------</code>
-                    <button id="discord-link-copy" title="Copier">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            class="lucide lucide-copy-icon lucide-copy"
-                        >
-                            <rect
-                                width="14"
-                                height="14"
-                                x="8"
-                                y="8"
-                                rx="2"
-                                ry="2"
-                            />
-                            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
-                        </svg>
-                    </button>
-                </div>
-                <p class="discord-link-hint">
-                    <code>
-                        /lier code:
-                        <span id="discord-link-code-inline">------</span>
-                    </code>
-                </p>
-                <p class="discord-link-timer">
-                    Ce code expire dans
-                    <span id="discord-link-countdown">10:00</span>
-                </p>
-            </div>
-            <div id="discord-link-error" class="discord-link-state" hidden>
-                <p id="discord-link-error-msg">Une erreur est survenue.</p>
-                <button id="discord-link-retry" class="discord-link-btn">Réessayer</button>
-            </div>
-        </div>
-    </div>
-    <!-- /accountOverlay -->
-    <nav id="nav" role="navigation">
-        <a class="link active" id="home">
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="40"
-                height="40"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.25"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="link-icon"
-            >
-                <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/>
-                <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-            </svg>
-            <p class="link-title" data-i18n="nav_home">accueil</p>
-        </a>
-        <a class="link" id="messages">
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="36"
-                height="36"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.25"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="link-icon"
-            >
-                <path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/>
-            </svg>
-            <p class="link-title" data-i18n="nav_messages">messages</p>
-        </a>
-        <a class="link" id="create">
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="36"
-                height="36"
-                viewBox="0 0 24 24"
-                fill="#150668"
-                stroke="white"
-                stroke-width="2.25"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="link-icon"
-            >
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M8 12h8"/>
-                <path d="M12 8v8"/>
-            </svg>
-            <p class="link-title" data-i18n="nav_create">créer</p>
-        </a>
-        <a class="link" id="inbox">
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="36"
-                height="36"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.25"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="link-icon"
-            >
-                <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
-                <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
-            </svg>
-            <p class="link-title" data-i18n="nav_inbox">notifications</p>
-        </a>
-        <a class="link" id="more">
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="link-icon"
-            >
-                <path d="M5 12h14"/>
-                <path d="M12 5v14"/>
-            </svg>
-            <p class="link-title" data-i18n="nav_profile">plus</p>
-        </a>
-    </nav>
-    <section id="home" class="tab active">
-        <!-- Barre de sélection Posts / Stories -->
-        <div
-            id="feed-selector"
-            class="sort-bar"
-            role="tablist"
-            aria-label="Sélection du feed"
-        >
-            <span class="feed-selector__indicator"></span>
-            <button class="sort-btn" data-feed="posts" data-i18n="home_posts">posts</button>
-            <button class="sort-btn" data-feed="stories" data-i18n="home_stories">stories</button>
-        </div>
-        <!-- Container Stories -->
-        <div id="stories-container" class="feed-container hidden">
-            <div class="stories">
-                <h2 data-i18n="home_stories">stories</h2>
-                <div class="stories-list">
-                    <div class="story add-story" id="addStoryBtn" title="ajouter une story">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="22"
-                            height="22"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        >
-                            <path d="M5 12h14"/>
-                            <path d="M12 5v14"/>
-                        </svg>
+                    <!-- ── APPARENCE ── -->
+                    <div class="account-section" id="account-tab-appearance">
+                        <p class="account-section-title">apparence</p>
+                        <div id="nightmode">
+                            <label class="night-switch" id="postNightSwitch" title="assombrir les posts trop clairs">
+                                <input type="checkbox" id="postNightToggle">
+                                <span class="night-switch-track">
+                                    <span class="night-switch-icon night-switch-icon--sun">off</span>
+                                    <span class="night-switch-icon night-switch-icon--moon">on</span>
+                                    <span class="night-switch-thumb"></span>
+                                </span>
+                            </label>
+                            <div class="nightmode-info">
+                                <h2>assombrir les posts pour une meilleure expérience de nuit.</h2>
+                                <p><i>assombit les posts clair pour éviter de faire mal lors de la lecture des posts de couleur claires.</i></p>
+                            </div>
+                        </div>
+                        <div class="nightmode-schedule" id="nightmodeSchedule">
+                            <label class="nightmode-schedule-toggle">
+                                <input type="checkbox" id="postNightScheduleToggle">
+                                <span>activer automatiquement selon un horaire</span>
+                            </label>
+                            <div class="nightmode-schedule-times">
+                                <label for="postNightStart">de
+                                    <input type="time" id="postNightStart" value="22:00">
+                                </label>
+                                <label for="postNightEnd">à
+                                    <input type="time" id="postNightEnd" value="07:00">
+                                </label>
+                            </div>
+                            <p class="nightmode-schedule-hint">l’horaire peut passer minuit. Il s’applique chaque jour.</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Container Posts -->
-        <div id="posts-container" class="feed-container">
-            <div class="posts-section">
-                <h2 data-i18n="home_recent_posts">posts récents</h2>
-                <div id="moodWall"></div>
+        <!-- /account-body -->
+    </div>
+    <!-- /account-panel-wrap -->
+</div>
+<!-- Modal (caché par défaut) -->
+<div id="discord-link-modal" class="discord-link-overlay" hidden>
+    <div class="discord-link-modal">
+        <button id="discord-link-close" class="discord-link-close" aria-label="Fermer">✕</button>
+        <div id="discord-link-loading" class="discord-link-state">
+            <p>Génération du code…</p>
+        </div>
+        <div id="discord-link-success" class="discord-link-state" hidden>
+            <h3>Lie ton compte Discord</h3>
+            <p>Dans le serveur Discord, tape la commande :</p>
+            <div class="discord-link-code-row">
+                <code id="discord-link-code">------</code>
+                <button id="discord-link-copy" title="Copier">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="lucide lucide-copy-icon lucide-copy"
+                    >
+                        <rect
+                            width="14"
+                            height="14"
+                            x="8"
+                            y="8"
+                            rx="2"
+                            ry="2"
+                        />
+                        <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                    </svg>
+                </button>
             </div>
+            <p class="discord-link-hint">
+                <code>
+                    /lier code:
+                    <span id="discord-link-code-inline">------</span>
+                </code>
+            </p>
+            <p class="discord-link-timer">
+                Ce code expire dans
+                <span id="discord-link-countdown">10:00</span>
+            </p>
+        </div>
+        <div id="discord-link-error" class="discord-link-state" hidden>
+            <p id="discord-link-error-msg">Une erreur est survenue.</p>
+            <button id="discord-link-retry" class="discord-link-btn">Réessayer</button>
+        </div>
+    </div>
+</div>
+<!-- /accountOverlay -->
+<nav id="nav" role="navigation">
+    <a class="link active" id="home">
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="40"
+            height="40"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.25"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="link-icon"
+        >
+            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/>
+            <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        </svg>
+        <p class="link-title" data-i18n="nav_home">accueil</p>
+    </a>
+    <a class="link" id="messages">
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="36"
+            height="36"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.25"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="link-icon"
+        >
+            <path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/>
+        </svg>
+        <p class="link-title" data-i18n="nav_messages">messages</p>
+    </a>
+    <a class="link" id="create">
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="36"
+            height="36"
+            viewBox="0 0 24 24"
+            fill="#150668"
+            stroke="white"
+            stroke-width="2.25"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="link-icon"
+        >
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M8 12h8"/>
+            <path d="M12 8v8"/>
+        </svg>
+        <p class="link-title" data-i18n="nav_create">créer</p>
+    </a>
+    <a class="link" id="inbox">
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="36"
+            height="36"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.25"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="link-icon"
+        >
+            <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
+            <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
+        </svg>
+        <p class="link-title" data-i18n="nav_inbox">notifications</p>
+    </a>
+    <a class="link" id="more">
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="link-icon"
+        >
+            <path d="M5 12h14"/>
+            <path d="M12 5v14"/>
+        </svg>
+        <p class="link-title" data-i18n="nav_profile">plus</p>
+    </a>
+</nav>
+<section id="home" class="tab active">
+    <!-- Barre de sélection Posts / Stories -->
+    <div
+        id="feed-selector"
+        class="sort-bar"
+        role="tablist"
+        aria-label="Sélection du feed"
+    >
+        <span class="feed-selector__indicator"></span>
+        <button class="sort-btn" data-feed="posts" data-i18n="home_posts">posts</button>
+        <button class="sort-btn" data-feed="stories" data-i18n="home_stories">stories</button>
+    </div>
+    <!-- Container Stories -->
+    <div id="stories-container" class="feed-container hidden">
+        <div class="stories">
+            <h2 data-i18n="home_stories">stories</h2>
+            <div class="stories-list">
+                <div class="story add-story" id="addStoryBtn" title="ajouter une story">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="M5 12h14"/>
+                        <path d="M12 5v14"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Container Posts -->
+    <div id="posts-container" class="feed-container">
+        <div class="posts-section">
+            <div class="posts-section-header">
+                <h2 data-i18n="home_recent_posts">posts récents</h2>
+            </div>
+            <div id="moodWall"></div>
         </div>
     </section>
     <section id="create" class="tab hidden">
@@ -1686,9 +1723,6 @@
                 <div class="messages-sidebar">
                     <div class="messages-sidebar-header">
                         <h2 data-i18n="messages_title">messages</h2>
-                        <button id="new-conversation-btn" class="btn-icon" title="nouvelle conversation">
-                            +
-                        </button>
                     </div>
                     <div id="conversations-list"></div>
                 </div>
@@ -1721,30 +1755,10 @@
                 <span id="profileAvatar" class="profile-avatar">👤</span>
                 <span id="userNameProfile">username</span>
                 <p id="profileBio" class="profile-bio" hidden></p>
-                <p data-i18n="profile_user_id">
+                <p data-i18n="profile_user_id" class="profile_user_id">
                     identifiant utilisateur:
                     <span id="userId">connecte-toi</span>
                 </p>
-            </div>
-            <div id="socialStats">
-                <div class="stat-block">
-                    <strong id="statPosts">0</strong>
-                    <span data-i18n="stat_posts">posts</span>
-                </div>
-                <div class="stat-block">
-                    <strong id="statFollowers">0</strong>
-                    <span data-i18n="stat_followers">abonnés</span>
-                </div>
-                <div class="stat-block">
-                    <strong id="statFollowing">0</strong>
-                    <span data-i18n="stat_following">abonnements</span>
-                </div>
-            </div>
-            <div id="userPostsSection">
-                <h2 data-i18n="more_posts_title">historique des posts</h2>
-                <div id="userPostsWall">
-                    <i data-i18n="more_posts_empty">connecte-toi pour voir tes posts ici.</i>
-                </div>
             </div>
         </div>
         <div class="more-section" id="more-settings">

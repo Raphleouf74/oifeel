@@ -862,8 +862,8 @@ app.post('/api/ai/generate-post', async (req, res) => {
     const hint = String(req.body?.hint || '').trim().slice(0, 200);
 
     const userPrompt = hint
-      ? `Écris une courte publication (15 à 35 mots), à la première personne, sincère et naturelle, sur le thème ou l'humeur suivante : "${hint}". Pas de hashtags, pas d'emoji, pas de guillemets dans la réponse. Réponds uniquement avec le texte du post.`
-      : `Écris une courte publication (15 à 35 mots) à la première personne, exprimant une humeur ou un ressenti du moment, sincère et naturel, avec un ton varié (joyeux, mélancolique, drôle, motivant, fatigué, etc. au choix). Pas de hashtags, pas d'emoji, pas de guillemets dans la réponse. Réponds uniquement avec le texte du post.`;
+      ? `Écris une courte publication (15 à 35 mots, mais 200 caractères max.) à la première personne, sincère et naturelle, sur le thème ou l'humeur suivante : "${hint}". Pas de hashtags, pas d'emoji, pas de guillemets dans la réponse. Réponds uniquement avec le texte du post.`
+      : `Écris une courte publication (15 à 35 mots, mais 200 caractères max.) à la première personne, exprimant une humeur ou un ressenti du moment, sincère et naturel, avec un ton varié (joyeux, mélancolique, drôle, motivant, fatigué, etc. au choix). Pas de hashtags, pas d'emoji, pas de guillemets dans la réponse. Réponds uniquement avec le texte du post.`;
 
     const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',

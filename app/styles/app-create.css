@@ -16,7 +16,7 @@ input[type="radio"] {
 
 .mood-card {
   width: auto;
-  border-radius: 5px;
+  border-radius: 25px;
   padding: 1rem;
   width: 95%;
   color: white;
@@ -36,7 +36,7 @@ input[type="radio"] {
   gap: 0;
   height: 60px;
   width: 150px;
-  border-radius: 5px;
+  border-radius: 25px;
 }
 
 .skeleton::before {
@@ -144,7 +144,7 @@ input[type="radio"] {
   padding: 0;
   height: 50px;
   width: 50px;
-  border-radius: 5px;
+  border-radius: 25px;
   background-color: #1f1f1f;
 }
 
@@ -156,7 +156,7 @@ input[type="radio"] {
   width: 95%;
   align-items: center;
   justify-content: space-evenly;
-  border-radius: 5px;
+  border-radius: 25px;
   padding-top: 10px;
 }
 
@@ -169,7 +169,7 @@ input[type="radio"] {
   width: 100%;
   height: 175px;
   border: 3px solid black;
-  border-radius: 5px;
+  border-radius: 25px;
   margin-top: 15px;
   font-weight: bold;
 }
@@ -190,7 +190,7 @@ input[type="radio"] {
 }
 
 #previewMood {
-  border-radius: 5px;
+  border-radius: 25px;
   padding: 1rem;
   color: white;
   font-weight: 600;
@@ -214,14 +214,14 @@ input[type="radio"] {
   opacity: 0;
   transform: translateY(-15px);
   flex-direction: column;
-  border-radius: 5px;
+  border-radius: 25px;
 }
 
 #emojiPicker {
   height: 80%;
   width: 90%;
   margin-left: 5%;
-  border-radius: 5px;
+  border-radius: 25px;
   padding: none;
   background: rgb(32, 32, 32);
 }
@@ -264,7 +264,7 @@ input[type="radio"] {
   width: 3rem;
   padding: 0.5rem;
   text-align: center;
-  border-radius: 5px;
+  border-radius: 25px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.1);
   color: inherit;
@@ -278,7 +278,7 @@ input[type="radio"] {
 .story.skeleton {
   width: 66px;
   height: 66px;
-  border-radius: 5px;
+  border-radius: 25px;
   flex-shrink: 0;
 }
 
@@ -295,7 +295,7 @@ input[type="radio"] {
   height: auto;
   min-height: 80vh;
   background: var(--menu-bg);
-  border-radius: 5px;
+  border-radius: 25px;
   padding: 32px;
   display: flex;
   position: fixed;
@@ -336,7 +336,7 @@ input[type="radio"] {
   min-height: 120px;
   padding: 16px;
   border: 2px solid rgba(0, 0, 0, 0.08);
-  border-radius: 5px;
+  border-radius: 25px;
   background: var(--menu-bg);
   color: var(--text);
   font-size: 1rem;
@@ -388,7 +388,7 @@ body.dark .create-textarea:focus {
   gap: 6px;
   padding: 9px 14px;
   border: 1.5px solid rgba(0, 0, 0, 0.1);
-  border-radius: 5px;
+  border-radius: 25px;
   background: var(--menu-bg);
   color: var(--text);
   font-size: 0.85rem;
@@ -473,7 +473,7 @@ body.dark #ai-generate.ai-generate-btn:hover {
 .create-color-preset {
   width: 32px;
   height: 32px;
-  border-radius: 5px;
+  border-radius: 25px;
   border: 2px solid rgba(0, 0, 0, 0.15);
 
   transition:
@@ -498,7 +498,7 @@ body.dark #ai-generate.ai-generate-btn:hover {
   width: 32px;
   height: 32px;
   border: none;
-  border-radius: 5px;
+  border-radius: 25px;
 
   overflow: hidden;
 }
@@ -517,7 +517,7 @@ body.dark #ai-generate.ai-generate-btn:hover {
 
 .create-picker-panel {
   background: var(--menu-bg);
-  border-radius: 5px;
+  border-radius: 25px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   width: 90vw;
   height: 85vh;
@@ -545,7 +545,7 @@ body.dark .create-picker-header {
   width: 32px;
   height: 32px;
   border: none;
-  border-radius: 5px;
+  border-radius: 25px;
   background: transparent;
   color: var(--text);
   font-size: 1.5rem;
@@ -584,7 +584,7 @@ body.dark .sticker-search {
 
 .sticker-item {
   aspect-ratio: 1;
-  border-radius: 5px;
+  border-radius: 25px;
   overflow: hidden;
 
   transition:
@@ -605,14 +605,14 @@ body.dark .sticker-search {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 5px;
+  border-radius: 25px;
 }
 
 .create-preview {
   margin-bottom: 22px;
   height: 105px;
   width: 70%;
-  border-radius: 5px;
+  border-radius: 25px;
   display: flex;
   margin-top: 50px;
   justify-content: center;
@@ -633,7 +633,7 @@ body.dark .sticker-search {
   position: relative;
   height: 250px;
   width: 80%;
-  border-radius: 5px;
+  border-radius: 25px;
   background: #ffffff;
   border: 2px solid rgba(0, 0, 0, 0.08);
   display: flex;
@@ -665,7 +665,7 @@ body.dark .sticker-search {
 .create-preview-sticker {
   max-width: 140px;
   max-height: 140px;
-  border-radius: 5px;
+  border-radius: 25px;
   margin-top: 8px;
 }
 
@@ -702,7 +702,7 @@ body.dark .sticker-search {
   min-height: 160px;
   padding: 1.75rem;
   border: 2px solid rgba(95, 149, 185, 0.3);
-  border-radius: 5px;
+  border-radius: 25px;
   background: linear-gradient(
     135deg,
     rgba(95, 149, 185, 0.05) 0%,
@@ -762,7 +762,7 @@ body.dark .sticker-search {
   gap: 0.6rem;
   padding: 0.9rem 1.4rem;
   border: 2px solid rgba(95, 149, 185, 0.4);
-  border-radius: 5px;
+  border-radius: 25px;
   background: rgba(95, 149, 185, 0.08);
   color: var(--text);
   font-size: 1.75rem;
@@ -825,7 +825,7 @@ body.dark .sticker-search {
   box-shadow: 0 8px 20px rgba(95, 149, 185, 0.2);
   height: 75px;
   width: 75px;
-  border-radius: 5px;
+  border-radius: 25px;
   color: var(--text);
 }
 
@@ -866,7 +866,7 @@ body.dark .sticker-search {
   gap: 0.6rem;
   padding: 0.7rem 1.2rem;
   border: 2px solid rgba(95, 149, 185, 0.4);
-  border-radius: 5px;
+  border-radius: 25px;
   background: transparent;
   color: var(--text);
 
@@ -885,7 +885,7 @@ body.dark .sticker-search {
 .color-preview-box {
   width: 32px;
   height: 32px;
-  border-radius: 5px;
+  border-radius: 25px;
   border: 2px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   background-color: #ffffff;
@@ -895,7 +895,7 @@ body.dark .sticker-search {
   width: 56px;
   height: 56px;
   border: 2px solid rgba(95, 149, 185, 0.4);
-  border-radius: 5px;
+  border-radius: 25px;
 
   background: transparent;
   transition: all 0.3s ease;
@@ -913,7 +913,7 @@ body.dark .sticker-search {
   gap: 0.4rem;
   padding: 0.8rem 1rem;
   border: 2px solid rgba(95, 149, 185, 0.3);
-  border-radius: 5px;
+  border-radius: 25px;
   background: rgba(95, 149, 185, 0.05);
   transition: all 0.3s ease;
 }
@@ -978,7 +978,7 @@ body.dark .sticker-search {
   width: 100%;
   aspect-ratio: 1;
   border: 2px solid rgba(95, 149, 185, 0.3);
-  border-radius: 5px;
+  border-radius: 25px;
 
   transition: all 0.3s ease;
   background: linear-gradient(135deg, #39e8ff, #436fb6) !important;
@@ -1023,7 +1023,7 @@ body.dark .sticker-search {
 .create-preview-sticker {
   max-width: 100%;
   max-height: 180px;
-  border-radius: 5px;
+  border-radius: 25px;
   box-shadow: 0 8px 24px rgba(95, 149, 185, 0.15);
 }
 
@@ -1033,7 +1033,7 @@ body.dark .sticker-search {
   background: rgba(95, 149, 185, 0.08);
   border: 2px solid rgba(95, 149, 185, 0.4);
   color: var(--text);
-  border-radius: 5px;
+  border-radius: 25px;
 
   transition: all 0.3s ease;
   display: flex;
@@ -1080,7 +1080,7 @@ body.dark .sticker-search {
 
 .create-picker-panel {
   background: linear-gradient(135deg, #1a1a1a 0%, #0f0f1a 100%);
-  border-radius: 5px;
+  border-radius: 25px;
   box-shadow:
     0 25px 60px rgba(95, 149, 185, 0.2),
     0 0 80px rgba(95, 149, 185, 0.1);
@@ -1118,7 +1118,7 @@ body.dark .sticker-search {
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
-  border-radius: 5px;
+  border-radius: 25px;
 }
 
 .create-picker-close:hover {
@@ -1181,7 +1181,7 @@ body.dark .sticker-search {
   width: 100%;
   aspect-ratio: 1;
   border: 2px solid rgba(95, 149, 185, 0.3);
-  border-radius: 5px;
+  border-radius: 25px;
 
   transition: all 0.3s ease;
   background: linear-gradient(135deg, #39e8ff, #436fb6) !important;
@@ -1224,7 +1224,7 @@ body.dark .sticker-search {
   width: 100px;
   height: 100px;
   border: 2px solid rgba(95, 149, 185, 0.4);
-  border-radius: 5px;
+  border-radius: 25px;
 
   background: transparent;
   transition: all 0.3s ease;
@@ -1238,7 +1238,7 @@ body.dark .sticker-search {
 .custom-color-preview {
   flex: 1;
   height: 100px;
-  border-radius: 5px;
+  border-radius: 25px;
   border: 2px solid rgba(95, 149, 185, 0.3);
   box-shadow: 0 8px 20px rgba(95, 149, 185, 0.15);
   background-color: #ffffff;
@@ -1273,7 +1273,7 @@ body.dark .sticker-search {
   flex: 1;
   padding: 0.9rem;
   border: 2px solid rgba(95, 149, 185, 0.3);
-  border-radius: 5px;
+  border-radius: 25px;
   background: rgba(95, 149, 185, 0.05);
   color: var(--text);
   font-size: 0.95rem;
@@ -1292,7 +1292,7 @@ body.dark .sticker-search {
   background: linear-gradient(135deg, #5f95b9 0%, #ff6b9d 100%);
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 25px;
 
   transition: all 0.3s ease;
   font-weight: 600;
@@ -1317,7 +1317,7 @@ body.dark .sticker-search {
 .sticker-results img {
   width: 100%;
   height: auto;
-  border-radius: 5px;
+  border-radius: 25px;
 
   transition: all 0.3s ease;
   border: 2px solid transparent;
@@ -1355,7 +1355,7 @@ body.dark .sticker-search {
   align-items: center;
   gap: 0.9rem;
   padding: 0.6rem 0.8rem;
-  border-radius: 5px;
+  border-radius: 25px;
   border: 2px solid transparent;
   background: rgba(95, 149, 185, 0.05);
   cursor: pointer;
@@ -1367,12 +1367,33 @@ body.dark .sticker-search {
   background: rgba(95, 149, 185, 0.1);
 }
 
+.music-item:hover .music-item-title {
+  font-size: 1.75rem;
+}
+.music-item:hover .music-item-artist {
+  font-size: 1.5rem;
+}
+.music-item:hover img {
+  width: 75px;
+  height: 75px;
+  border-radius: 10px;
+}
+.music-item:hover .music-item-play {
+  width: 150px;
+  height: 95%;
+  border-radius: 10px;
+}
+.music-item:hover .music-item-play svg {
+  scale: 3;
+}
+
 .music-item img {
   width: 46px;
   height: 46px;
-  border-radius: 5px;
+  border-radius: 25px;
   object-fit: cover;
   flex-shrink: 0;
+  transition: all 0.2s ease-in-out;
 }
 
 .music-item-info {
@@ -1390,6 +1411,7 @@ body.dark .sticker-search {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: all 0.2s ease-in-out;
 }
 
 .music-item-artist {
@@ -1398,6 +1420,7 @@ body.dark .sticker-search {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: all 0.2s ease-in-out;
 }
 
 .music-item-play {
@@ -1411,7 +1434,7 @@ body.dark .sticker-search {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.15s ease;
+  transition: all 0.15s ease;
 }
 
 .music-item-play:hover {
@@ -1430,7 +1453,7 @@ body.dark .sticker-search {
   gap: 0.7rem;
   padding: 0.5rem 0.7rem;
   margin-top: 0.7rem;
-  border-radius: 5px;
+  border-radius: 25px;
   background: rgba(95, 149, 185, 0.08);
   border: 1.5px solid rgba(95, 149, 185, 0.3);
 }
@@ -1442,7 +1465,7 @@ body.dark .sticker-search {
 .chosen-track-preview img {
   width: 36px;
   height: 36px;
-  border-radius: 5px;
+  border-radius: 25px;
   object-fit: cover;
   flex-shrink: 0;
 }
@@ -1493,7 +1516,7 @@ body.dark .sticker-search {
   width: 100%;
   height: 60px;
   border: none;
-  border-radius: 5px;
+  border-radius: 25px;
 
   margin-bottom: 1.5rem;
   box-shadow: 0 4px 16px rgba(95, 149, 185, 0.15);
@@ -1538,7 +1561,7 @@ body.dark .sticker-search {
   gap: 1.5rem;
   padding: 2.5rem;
   border: 2px solid rgba(95, 149, 185, 0.25);
-  border-radius: 5px;
+  border-radius: 25px;
   background: linear-gradient(
     135deg,
     rgba(95, 149, 185, 0.08) 0%,
@@ -1603,7 +1626,7 @@ body.dark .sticker-search {
   width: 50%;
   height: 350px;
   background: linear-gradient(135deg, #1a1a1a 0%, #0f0f1a 100%);
-  border-radius: 5px;
+  border-radius: 25px;
   box-shadow:
     0 25px 60px rgba(95, 149, 185, 0.2),
     0 0 80px rgba(95, 149, 185, 0.1);
@@ -1633,7 +1656,7 @@ body.dark .sticker-search {
   width: 52px;
   height: 32px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 5px;
+  border-radius: 25px;
   transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.2);
   flex-shrink: 0;
@@ -1645,7 +1668,7 @@ body.dark .sticker-search {
   width: 28px;
   height: 28px;
   background: var(--text);
-  border-radius: 5px;
+  border-radius: 25px;
   top: 2px;
   left: 2px;
   transition: all 0.3s ease;
@@ -1681,7 +1704,7 @@ body.dark .sticker-search {
 .create-duration {
   padding: 2rem;
   background: rgba(95, 149, 185, 0.08);
-  border-radius: 5px;
+  border-radius: 25px;
   border: 2px solid rgba(95, 149, 185, 0.25);
   display: flex;
   flex-direction: column;
@@ -1707,7 +1730,7 @@ body.dark .sticker-search {
   padding: 0.8rem;
   text-align: center;
   border: 2px solid rgba(95, 149, 185, 0.4);
-  border-radius: 5px;
+  border-radius: 25px;
   background: rgba(95, 149, 185, 0.05);
   color: var(--text);
   font-size: 1.1rem;
@@ -1738,7 +1761,7 @@ body.dark .sticker-search {
   color: var(--text);
   padding: 1rem;
   background: rgba(95, 149, 185, 0.08);
-  border-radius: 5px;
+  border-radius: 25px;
 }
 
 .create-duration-preview strong {
@@ -1752,7 +1775,7 @@ body.dark .sticker-search {
   align-items: center;
   padding: 14px;
   margin-top: 15px;
-  border-radius: 5px;
+  border-radius: 25px;
   background: rgba(25, 25, 25);
 
   transition: background 0.2s;
@@ -1779,7 +1802,7 @@ body.dark .create-toggle:hover {
 .create-toggle-slider {
   width: 44px;
   height: 24px;
-  border-radius: 5px;
+  border-radius: 25px;
   background: rgba(0, 0, 0, 0.15);
   position: relative;
   flex-shrink: 0;
@@ -1791,7 +1814,7 @@ body.dark .create-toggle:hover {
   position: absolute;
   width: 18px;
   height: 18px;
-  border-radius: 5px;
+  border-radius: 25px;
   background: white;
   top: 3px;
   left: 3px;
@@ -1831,7 +1854,7 @@ body.dark .create-toggle:hover {
 .create-duration {
   display: block;
   padding: 16px;
-  border-radius: 5px;
+  border-radius: 25px;
   background: rgba(95, 149, 185, 0.08);
   margin-bottom: 18px;
   transition: all 0.25s ease;
@@ -1858,7 +1881,7 @@ body.dark .create-toggle:hover {
 .create-duration-field input {
   padding: 10px;
   border: 1.5px solid rgba(0, 0, 0, 0.1);
-  border-radius: 5px;
+  border-radius: 25px;
   background: var(--menu-bg);
   color: var(--text);
   text-align: center;
@@ -1911,10 +1934,9 @@ body.dark .create-toggle:hover {
   width: 50%;
   padding: 16px;
   border: none;
-  border-radius: 5px;
+  border-radius: 25px;
   font-size: 2.5rem;
   font-weight: 700;
-  margin-top: 50px;
   display: flex;
   align-items: center;
   pointer-events: all;
@@ -1955,7 +1977,7 @@ body.dark .create-toggle:hover {
   top: 50%;
   right: 23%;
   background: rgba(0, 0, 0, 0.8);
-  border-radius: 5px;
+  border-radius: 25px;
   padding: 14px;
   display: flex;
   align-items: center;
@@ -1974,10 +1996,10 @@ body.dark .search-input-wrap {
 }
 
 .search-input-wrap input {
-  width: 100%;
-  padding: 12px 16px;
+  width: 95%;
+  padding: 15px;
   border: 1.5px solid rgba(0, 0, 0, 0.1);
-  border-radius: 5px;
+  border-radius: 25px;
   background: var(--menu-bg);
   color: var(--text);
   font-size: 0.95rem;
@@ -2019,7 +2041,7 @@ body.dark .search-input-wrap {
 
 .swatch {
   aspect-ratio: 1;
-  border-radius: 5px;
+  border-radius: 25px;
   border: 2px solid transparent;
 
   transition:
@@ -2059,7 +2081,7 @@ body.dark .search-input-wrap {
 .draft-banner {
   background: rgba(95, 149, 185, 0.12);
   border: 1px solid rgba(95, 149, 185, 0.3);
-  border-radius: 5px;
+  border-radius: 25px;
   padding: 8px 12px;
   font-size: 0.85rem;
   display: flex;
@@ -2073,7 +2095,7 @@ body.dark .search-input-wrap {
   background: transparent;
   border: 1px solid var(--border);
   color: #888;
-  border-radius: 5px;
+  border-radius: 25px;
   padding: 2px 10px;
   font-size: 0.8rem;
 }
@@ -2110,7 +2132,7 @@ body.focus-mode .suggestions-banner {
 .mention-avatar {
   width: 28px;
   height: 28px;
-  border-radius: 5px;
+  border-radius: 25px;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   display: flex;
   align-items: center;
@@ -2150,7 +2172,7 @@ body.focus-mode .suggestions-banner {
   font-weight: 400;
   color: #666;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 5px;
+  border-radius: 25px;
   padding: 2px 10px;
 }
 
@@ -2197,7 +2219,7 @@ body.focus-mode .suggestions-banner {
 .cal__cell {
   width: 13px;
   height: 13px;
-  border-radius: 5px;
+  border-radius: 25px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.04);
   cursor: default;
@@ -2240,14 +2262,14 @@ body.focus-mode .suggestions-banner {
 .cal__leg-cell {
   width: 13px;
   height: 13px;
-  border-radius: 5px;
+  border-radius: 25px;
 }
 
 .cal__tooltip {
   position: absolute;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 5px;
+  border-radius: 25px;
   padding: 10px 14px;
   font-size: 0.82rem;
   line-height: 1.6;
@@ -2261,7 +2283,7 @@ body.focus-mode .suggestions-banner {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: white;
-  border-radius: 5px;
+  border-radius: 25px;
   width: 150px;
   padding: 7px 16px;
   font-size: 1.25rem;
@@ -2280,7 +2302,7 @@ body.focus-mode .suggestions-banner {
 .suggestions-banner {
   background: rgba(95, 149, 185, 0.06);
   border: 3px solid rgba(175, 175, 175, 0.3);
-  border-radius: 5px;
+  border-radius: 25px;
   width: 98.5%;
   padding: 16px;
   min-height: 350px;
@@ -2297,7 +2319,7 @@ body.focus-mode .suggestions-banner {
 }
 
 .banner-header h3 {
-  font-size: 2rem;
+  font-size: 2.5rem;
   margin: 0;
   background: #ffffff;
   -webkit-background-clip: text;
@@ -2310,7 +2332,7 @@ body.focus-mode .suggestions-banner {
   border: none;
   color: white;
   padding: 6px 12px;
-  border-radius: 5px;
+  border-radius: 25px;
   height: 55px;
   width: 55px;
   display: flex;
@@ -2336,7 +2358,7 @@ body.focus-mode .suggestions-banner {
   gap: 12px;
   padding: 16px;
   background: rgba(0, 0, 0, 0.3);
-  border-radius: 5px;
+  border-radius: 25px;
 
   transition: all 0.2s;
   width: 95%;
@@ -2363,7 +2385,7 @@ body.focus-mode .suggestions-banner {
   .suggestions-banner {
     background: rgba(95, 149, 185, 0.06);
     border: 1px solid rgba(95, 149, 185, 0.3);
-    border-radius: 5px;
+    border-radius: 25px;
     padding: 20px;
     margin: 24px 0;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -2387,7 +2409,7 @@ body.focus-mode .suggestions-banner {
     border: none;
     color: white;
     padding: 6px 12px;
-    border-radius: 5px;
+    border-radius: 25px;
     cursor: pointer;
     transition: all 0.2s;
   }
@@ -2401,7 +2423,7 @@ body.focus-mode .suggestions-banner {
     gap: 12px;
     padding: 16px;
     background: rgba(0, 0, 0, 0.3);
-    border-radius: 5px;
+    border-radius: 25px;
     cursor: pointer;
     transition: all 0.2s;
   }

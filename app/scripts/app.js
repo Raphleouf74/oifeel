@@ -142,24 +142,6 @@ try {
     console.warn('Feed SSE not supported:', err);
 }
 
-window.addEventListener('beforeunload', () => {
-    Object.values(window.__oifeelSSE || {}).forEach((sse) => {
-        try { sse.close?.(); } catch (_) { }
-    });
-    if (_notifPollTimer) {
-        clearInterval(_notifPollTimer);
-        _notifPollTimer = null;
-    }
-    if (_notifSSE) {
-        try { _notifSSE.close(); } catch (_) { }
-        _notifSSE = null;
-    }
-    if (_banUpdateTimer) {
-        clearInterval(_banUpdateTimer);
-        _banUpdateTimer = null;
-    }
-    _notifSSEActive = false;
-}, { once: true });
 
 // ── 2. SSE dédié aux notifications (/api/notifications/stream) ─
 // On évite les boucles de reconnexion manuelles ; le navigateur gère déjà la reprise
@@ -466,6 +448,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
     });
+    setTimeout(() => {
+        if (wall.children.length === 0) {
+            const dotsloader = document.createElement('div');
+            dotsloader.id = 'dotsloader';
+            wall.appendChild(dotsloader);
+        }
+    }, 1000);
 
 });
 
@@ -502,18 +491,24 @@ const feedSelector = document.getElementById('feed-selector');
 // Chaque section scrollable doit déclencher l'effet de scroll du header
 // Optimisé avec throttle pour éviter trop de reflows
 if (tabSections.length) {
+    const lastScrollPositions = new WeakMap();
     const handleScroll = throttle((sectionEl) => {
         const currentScroll = sectionEl.scrollTop;
-        if (currentScroll > 50) {
-            header.classList.add('scrolled');
-            profileheader.classList.add('scrolled');
-            nav.classList.add('scrolled');
-            feedSelector.classList.add('scrolled');
-        } else {
+        const previousScroll = lastScrollPositions.get(sectionEl) ?? currentScroll;
+        const scrollingUp = currentScroll < previousScroll;
+        lastScrollPositions.set(sectionEl, currentScroll);
+
+
+        if (window.matchMedia('(min-width: 1px)').matches && scrollingUp) {
+            nav.classList.remove('scrolled');
             header.classList.remove('scrolled');
             profileheader.classList.remove('scrolled');
-            nav.classList.remove('scrolled');
             feedSelector.classList.remove('scrolled');
+        } else {
+            nav.classList.add('scrolled');
+            header.classList.add('scrolled');
+            profileheader.classList.add('scrolled');
+            feedSelector.classList.add('scrolled');
         }
     }, 66); // ~60fps throttle
 
@@ -589,7 +584,6 @@ const ephemeralToggle = document.getElementById('ephemeralToggle');
 const durationPicker = document.getElementById('durationPicker');
 const durationInputs = document.querySelectorAll('#durationPicker input[type="number"]');
 const msgDeleteTime = document.getElementById('msgdeletetime');
-
 
 
 // Mise à jour du texte de suppression en fonction des inputs
@@ -792,7 +786,14 @@ function displayMood(mood) {
     const moodcard = document.createElement("div");
     moodcard.className = "post";
     moodcard.dataset.id = mood.id;
-    moodcard.style.setProperty('--mood-color', colorToRgba(mood.color, 0.4));
+    // Couleur d'origine choisie par l'auteur, conservée telle quelle
+    // pour pouvoir revenir en arrière si le switch jour/nuit est
+    // désactivé plus tard.
+    const originalColor = mood.color || '#ffffff';
+    moodcard.dataset.originalColor = originalColor;
+    if (mood.textColor) moodcard.dataset.textColor = mood.textColor;
+    const { bg: displayColor, textColor } = getPostDisplayColors(originalColor, mood.textColor);
+    moodcard.style.setProperty('--mood-color', colorToRgba(displayColor, 0.4));
     wall.prepend(moodcard);
     if (mood.id == "1") {
         moodcard.classList.add('WelcomeMood');
@@ -801,7 +802,7 @@ function displayMood(mood) {
     // ---- POST CONTENT ----
     const content = document.createElement("div");
     content.className = "post-content";
-    content.style.background = mood.color;
+    content.style.background = displayColor;
 
     // Wrapper pour centrer emoji + texte
     const innerWrap = document.createElement("div");
@@ -822,9 +823,7 @@ function displayMood(mood) {
         content.style.boxShadow = `inset 4px 0 0 ${mood.authorTheme.accentColor}`;
     }
 
-    // Appliquer couleur de texte si fournie, sinon choisir automatiquement
-    const textColor = mood.textColor || (() => { return getBrightness(mood.color || "#ffffff") < 128 ? "#FFFFFF" : "#000000"; })();
-
+    // textColor déjà déterminé plus haut (tient compte du switch jour/nuit)
     emojiSpan.style.color = textColor;
     textSpan.style.color = textColor;
 
@@ -1002,8 +1001,9 @@ function displayMood(mood) {
     const likeCount = document.createElement("span");
     likeCount.className = "like-count";
     likeCount.textContent = mood.likes || 0;
-    // Adapter la couleur du bouton like au fond du post
-    const isDarkBg = getBrightness(mood.color || "#ffffff") < 128;
+    // Adapter la couleur du bouton like au fond du post (couleur réellement affichée,
+    // donc déjà assombrie si le switch jour/nuit est actif)
+    const isDarkBg = getBrightness(displayColor) < 128;
     likeBtn.appendChild(likeIcon);
     likeBtn.appendChild(likeCount);
 
@@ -1510,6 +1510,216 @@ function colorToRgba(color, alpha) {
     return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
 }
 
+// ============================================================
+// Switch Jour/Nuit des posts
+// ------------------------------------------------------------
+// Quand activé, tout post dont la couleur de fond est blanche ou
+// très claire (proche du blanc) est automatiquement assombri —
+// même teinte, mais luminosité réduite — pour rester confortable
+// à l'oeil. La couleur de texte est recalculée en conséquence.
+// L'état du switch est mémorisé (localStorage) et s'applique aussi
+// bien aux posts déjà affichés qu'à ceux qui arrivent ensuite.
+// ============================================================
+
+const NIGHT_MODE_STORAGE_KEY = 'oifeel_postNightMode';
+const NIGHT_MODE_SCHEDULE_STORAGE_KEY = 'oifeel_postNightSchedule';
+const NIGHT_MODE_LIGHT_THRESHOLD = 0; // luma (0-255) au-delà de laquelle une couleur est jugée "proche du blanc"
+const NIGHT_MODE_TARGET_LIGHTNESS = 0.22; // luminosité (0-1) visée une fois assombrie
+
+function isPostNightModeOn() {
+    return localStorage.getItem(NIGHT_MODE_STORAGE_KEY) === '1';
+}
+
+function setPostNightMode(on) {
+    localStorage.setItem(NIGHT_MODE_STORAGE_KEY, on ? '1' : '0');
+}
+
+function getPostNightSchedule() {
+    try {
+        const saved = JSON.parse(localStorage.getItem(NIGHT_MODE_SCHEDULE_STORAGE_KEY) || '{}');
+        return {
+            enabled: saved.enabled === true,
+            start: /^\d{2}:\d{2}$/.test(saved.start) ? saved.start : '22:00',
+            end: /^\d{2}:\d{2}$/.test(saved.end) ? saved.end : '07:00'
+        };
+    } catch (_) {
+        return { enabled: false, start: '22:00', end: '07:00' };
+    }
+}
+
+function setPostNightSchedule(schedule) {
+    localStorage.setItem(NIGHT_MODE_SCHEDULE_STORAGE_KEY, JSON.stringify(schedule));
+}
+
+function isPostNightScheduleActive(schedule, now = new Date()) {
+    if (!schedule.enabled) return false;
+    const current = now.getHours() * 60 + now.getMinutes();
+    const [startHour, startMinute] = schedule.start.split(':').map(Number);
+    const [endHour, endMinute] = schedule.end.split(':').map(Number);
+    const start = startHour * 60 + startMinute;
+    const end = endHour * 60 + endMinute;
+    if (start === end) return true;
+    return start < end
+        ? current >= start && current < end
+        : current >= start || current < end;
+}
+
+function applyPostNightSchedule() {
+    const schedule = getPostNightSchedule();
+    if (!schedule.enabled) return;
+    const shouldBeOn = isPostNightScheduleActive(schedule);
+    if (isPostNightModeOn() === shouldBeOn) return;
+    setPostNightMode(shouldBeOn);
+
+    const toggle = document.getElementById('postNightToggle');
+    if (toggle) toggle.checked = shouldBeOn;
+    refreshAllPostNightColors();
+}
+
+function hexToRgbParts(hex) {
+    const normalized = (hex || '#ffffff').replace('#', '');
+    const full = normalized.length === 3
+        ? normalized.split('').map((c) => c + c).join('')
+        : normalized;
+    const r = parseInt(full.substring(0, 2), 16);
+    const g = parseInt(full.substring(2, 4), 16);
+    const b = parseInt(full.substring(4, 6), 16);
+    if ([r, g, b].some(Number.isNaN)) return { r: 255, g: 255, b: 255 };
+    return { r, g, b };
+}
+
+function rgbToHsl(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h = 0, s = 0;
+    const l = (max + min) / 2;
+    const d = max - min;
+    if (d !== 0) {
+        s = d / (1 - Math.abs(2 * l - 1));
+        switch (max) {
+            case r: h = ((g - b) / d) % 6; break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h *= 60;
+        if (h < 0) h += 360;
+    }
+    return { h, s, l };
+}
+
+function hslToHex(h, s, l) {
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = l - c / 2;
+    let r1 = 0, g1 = 0, b1 = 0;
+    if (h < 60) { r1 = c; g1 = x; }
+    else if (h < 120) { r1 = x; g1 = c; }
+    else if (h < 180) { g1 = c; b1 = x; }
+    else if (h < 240) { g1 = x; b1 = c; }
+    else if (h < 300) { r1 = x; b1 = c; }
+    else { r1 = c; b1 = x; }
+    const toHex = (v) => Math.round((v + m) * 255).toString(16).padStart(2, '0');
+    return `#${toHex(r1)}${toHex(g1)}${toHex(b1)}`;
+}
+
+// Renvoie la couleur "de nuit" à utiliser pour un post : si la
+// couleur d'origine est proche du blanc, on garde sa teinte et on
+// baisse juste la luminosité. Sinon on renvoie la couleur telle quelle.
+function getNightAdjustedColor(hex) {
+    const original = hex || '#ffffff';
+    if (getBrightness(original) < NIGHT_MODE_LIGHT_THRESHOLD) return original;
+
+    const { r, g, b } = hexToRgbParts(original);
+    const { h, s } = rgbToHsl(r, g, b);
+    // Blanc / gris pur : pas de teinte réelle (s ≈ 0), et h vaut alors
+    // 0° par convention (pas "rouge" pour autant) — il ne faut surtout
+    // pas forcer de saturation dessus, sinon on obtient un marron/rouge
+    // délavé au lieu d'un gris neutre. On ne relève la saturation
+    // minimale que si la couleur avait déjà une vraie teinte à
+    // préserver (ex: un rose ou un bleu très pâle).
+    const targetSat = s > 0.02 ? Math.max(s, 0.22) : 0;
+    return hslToHex(h, targetSat, NIGHT_MODE_TARGET_LIGHTNESS);
+}
+
+// Calcule la couleur de fond effective + la couleur de texte à
+// utiliser pour un post, en tenant compte du switch jour/nuit.
+function getPostDisplayColors(originalColor, explicitTextColor) {
+    const base = originalColor || '#ffffff';
+    const nightOn = isPostNightModeOn();
+    const bg = nightOn ? getNightAdjustedColor(base) : base;
+    const wasAdjusted = bg !== base;
+
+    // Si la couleur a été assombrie, la couleur de texte choisie par
+    // l'auteur (pensée pour le fond clair d'origine) n'est plus
+    // forcément lisible : on recalcule automatiquement dans ce cas.
+    const textColor = (!wasAdjusted && explicitTextColor)
+        ? explicitTextColor
+        : (getBrightness(bg) < 128 ? '#FFFFFF' : '#000000');
+
+    return { bg, textColor };
+}
+
+// Reparcourt tous les posts déjà affichés et réapplique leurs
+// couleurs (fond + texte) selon l'état actuel du switch jour/nuit.
+function refreshAllPostNightColors() {
+    showFeedback('info', isPostNightModeOn() ? 'night_mode_on' : 'night_mode_off');
+    document.querySelectorAll('.post[data-original-color]').forEach((moodcard) => {
+        const originalColor = moodcard.dataset.originalColor;
+        const explicitTextColor = moodcard.dataset.textColor || null;
+        const { bg, textColor } = getPostDisplayColors(originalColor, explicitTextColor);
+
+        moodcard.style.setProperty('--mood-color', colorToRgba(bg, 0.4));
+
+        const content = moodcard.querySelector('.post-content');
+        if (content) content.style.background = bg;
+
+        const textSpan = moodcard.querySelector('.post-text');
+        const emojiSpan = moodcard.querySelector('.post-emoji');
+        if (textSpan) textSpan.style.color = textColor;
+        if (emojiSpan) emojiSpan.style.color = textColor;
+    });
+}
+
+function initPostNightSwitch() {
+    const toggle = document.getElementById('postNightToggle');
+    if (!toggle) return;
+    const scheduleToggle = document.getElementById('postNightScheduleToggle');
+    const startInput = document.getElementById('postNightStart');
+    const endInput = document.getElementById('postNightEnd');
+    const schedule = getPostNightSchedule();
+
+    if (scheduleToggle) scheduleToggle.checked = schedule.enabled;
+    if (startInput) startInput.value = schedule.start;
+    if (endInput) endInput.value = schedule.end;
+
+    applyPostNightSchedule();
+    toggle.checked = isPostNightModeOn();
+    toggle.addEventListener('change', () => {
+        setPostNightMode(toggle.checked);
+        refreshAllPostNightColors();
+    });
+
+    const saveSchedule = () => {
+        const nextSchedule = {
+            enabled: scheduleToggle?.checked === true,
+            start: startInput?.value || '22:00',
+            end: endInput?.value || '07:00'
+        };
+        setPostNightSchedule(nextSchedule);
+        applyPostNightSchedule();
+    };
+    scheduleToggle?.addEventListener('change', saveSchedule);
+    startInput?.addEventListener('change', saveSchedule);
+    endInput?.addEventListener('change', saveSchedule);
+    setInterval(applyPostNightSchedule, 30000);
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPostNightSwitch);
+} else {
+    initPostNightSwitch();
+}
+
 
 
 // Initialiser les valeurs au démarrage
@@ -1533,7 +1743,6 @@ function showFeedback(type, messageKey, vars = {}) {
 
     // ---- Icône ----
     const icon = document.createElement("span");
-    icon.className = "material-symbols-rounded";
     icon.innerHTML = icons[type];
 
     // ---- Texte ----
@@ -1811,7 +2020,6 @@ if (submitBtn) {
                 });
 
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                else { console.log(newMood) }
 
                 const savedMood = await response.json();
                 showFeedback("success", "fb_post_shared"); // au lieu d'un texte brut
@@ -2570,7 +2778,6 @@ async function addInboxNotification(
 
     // Structure de base
     const iconSpan = document.createElement("span");
-    iconSpan.className = "material-symbols-rounded";
     iconSpan.style.color = typeColors[type] || "#777";
     iconSpan.textContent = icon; // 🔒 OK : icône interne, safe
 
@@ -2841,8 +3048,8 @@ export async function logout() {
     const userIDspan = document.getElementById('userId');
     const accountAvatar = document.getElementById('accountavatar');
     if (userName) userName.textContent = 'non connecté';
-    if (userNameProfile) userNameProfile.textContent = 'USERNAME';
-    if (userIDspan) userIDspan.textContent = 'Connectez tu';
+    if (userNameProfile) userNameProfile.textContent = 'username';
+    if (userIDspan) userIDspan.textContent = 'connectes toi';
     if (accountAvatar) accountAvatar.alt = '';
     // Hide ban screen if shown
     const banOverlay = document.getElementById('ban-overlay');
@@ -2898,6 +3105,25 @@ function showBanScreen(banData) {
         banOverlay.classList.remove('hidden');
     }
 }
+window.addEventListener('beforeunload', () => {
+    Object.values(window.__oifeelSSE || {}).forEach((sse) => {
+        try { sse.close?.(); } catch (_) { }
+    });
+    if (_notifPollTimer) {
+        clearInterval(_notifPollTimer);
+        _notifPollTimer = null;
+    }
+    if (_notifSSE) {
+        try { _notifSSE.close(); } catch (_) { }
+        _notifSSE = null;
+    }
+    if (_banUpdateTimer) {
+        clearInterval(_banUpdateTimer);
+        _banUpdateTimer = null;
+    }
+    _notifSSEActive = false;
+}, { once: true });
+
 
 export async function getCurrentUser() {
     const token = getToken();
@@ -3168,6 +3394,14 @@ function applyThemeFontClass(el, font) {
 
 let _themeSaveDebounce = null;
 
+function _applyBackgroundTheme(accentHex) {
+    document.body.style.backgroundColor = "rgb(0,0,0)";
+    const glow = colorToRgba(accentHex || '#5f95b9', 1);
+    const gradient = `linear-gradient(to right, ${glow} -25%, rgba(0,0,0) 40%)`;
+    document.body.style.background = gradient;
+    document.body.style.backgroundAttachment = 'fixed';
+}
+
 function _updateThemePreview() {
     const accentInput = document.getElementById('themeAccentColor');
     const fontSelect = document.getElementById('themeFontSelect');
@@ -3175,8 +3409,10 @@ function _updateThemePreview() {
     const text = document.getElementById('themePreviewText');
     if (!accentInput || !fontSelect || !card) return;
 
-    card.style.borderColor = accentInput.value;
-    card.style.boxShadow = `inset 4px 0 0 ${accentInput.value}`;
+    const accent = accentInput.value || '#5f95b9';
+    card.style.borderColor = accent;
+    card.style.boxShadow = `inset 4px 0 0 ${accent}`;
+    _applyBackgroundTheme(accent);
     applyThemeFontClass(text, fontSelect.value);
 }
 
@@ -3244,6 +3480,7 @@ function _initThemeSettings() {
             const ownBio = document.getElementById('profileBio');
             if (ownName) { ownName.style.color = theme.accentColor; applyThemeFontClass(ownName, theme.font); }
             if (ownBio) applyThemeFontClass(ownBio, theme.font);
+            _applyBackgroundTheme(theme.accentColor || '#5f95b9');
         } catch (err) {
             console.warn('⚠️ Impossible de charger le thème du compte:', err);
         } finally {
@@ -5467,11 +5704,6 @@ function injectMessagingUI() {
         backBtn.addEventListener('click', closeThread);
     }
 
-    const newConvBtn = document.getElementById('new-conversation-btn');
-    if (newConvBtn && !newConvBtn.__listenerAdded) {
-        newConvBtn.__listenerAdded = true;
-        newConvBtn.addEventListener('click', openUserSearch);
-    }
 }
 
 // ─── User search ──────────────────────────────────────────────
@@ -5482,7 +5714,7 @@ function createUserSearchModal() {
     modal.innerHTML = `
     <div class="modal-panel user-search-panel">
       <div class="modal-header">
-        <h3>Nouvelle conversation</h3>
+        <h3>nouvelle conversation</h3>
         <button class="modal-close" id="close-user-search">×</button>
       </div>
       <div class="search-input-wrap">
@@ -5559,7 +5791,12 @@ async function loadConversations() {
         list.innerHTML = '';
 
         if (!conversations.length) {
-            list.innerHTML = '<p class="empty">Aucune conversation</p>';
+            list.innerHTML = `
+            <p class="empty">Aucune conversation</p>
+            <button id="new-conversation-btn" class="btn-icon" title="nouvelle conversation">
+                +
+            </button>`;
+            document.getElementById('new-conversation-btn').addEventListener('click', openUserSearch);
             return;
         }
 
@@ -5588,15 +5825,33 @@ async function loadConversations() {
                     <div class="conv-preview">${preview}</div>
                 </div>`;
             div.addEventListener('click', () => openConversation(otherUserId, otherName));
+
             list.appendChild(div);
+
+
         }
+        const add_convo = document.createElement('div');
+        add_convo.style.width = '100%';
+        add_convo.style.display = 'flex';
+        add_convo.style.justifyContent = 'center';
+        add_convo.style.alignItems = 'center';
+        add_convo.innerHTML = `
+            <button id="new-conversation-btn" class="btn-icon" title="nouvelle conversation">
+                nouvelle conversation
+            </button>`;
+        list.appendChild(add_convo);
+        add_convo.querySelector('#new-conversation-btn').addEventListener('click', openUserSearch);
     } catch (err) { console.error('❌ Load conversations error:', err); }
 }
 
 // Afficher "non connecté" si pas de userId
 if (!currentUserId) {
     const el = document.getElementById('conversations-list');
-    if (el) el.innerHTML = '<p class="empty">tu n\'es pas connecté(e), connecte-toi afin de discuter!</p>';
+    if (el) el.innerHTML = `
+    <p class="empty">tu n\'es pas connecté(e), connecte-toi afin de discuter!</p> 
+    <button class="btn-icon" onclick="document.getElementById('authModal').style.display = 'flex'" data-i18n="login_register_btn">
+        inscription / connexion
+    </button>`;
 }
 
 async function openConversation(otherUserId, otherName) {
@@ -6352,7 +6607,7 @@ async function injectSuggestionsBanner() {
         const list = banner.querySelector('.suggestions-list');
 
         if (!data.suggestions || data.suggestions.length === 0) {
-            list.innerHTML = '<div class="no-suggestions">Aucun compte à recommander pour le moment.</div>';
+            list.innerHTML = '<div class="no-suggestions">aucun compte à recommander pour le moment.</div>';
         } else {
             // Afficher 10 suggestions max
             data.suggestions.slice(0, 10).forEach(user => {
