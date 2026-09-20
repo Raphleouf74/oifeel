@@ -739,14 +739,7 @@ body.dark .sv-bubble__face {
   animation: postTextIn 0.3s 0.1s ease both;
 }
 
-.post-sticker {
-  max-width: 180px;
-  max-height: 180px;
-  border-radius: 5px;
-  margin-top: 8px;
-  display: block;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-}
+
 
 /* ---- Pilule musique (extrait Deezer, 30s) ---- */
 
@@ -991,6 +984,22 @@ body.dark .sv-bubble__face {
   stroke: currentColor;
 }
 
+@keyframes like-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.035);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.post.like-pop .likebtn svg {
+  animation: like-pop 0.5s ease;
+}
+
 .like-count {
   min-width: 20px;
   font-size: 1.25rem;
@@ -1103,8 +1112,7 @@ body.dark .post-actions button:hover {
   flex-shrink: 0;
 }
 
-.post.ai-generated.ai-avoid .post-inner,
-.post.ai-generated.ai-avoid .post-sticker {
+.post.ai-generated.ai-avoid .post-inner{
   filter: blur(14px);
   pointer-events: none;
   -webkit-user-select: none;
@@ -1725,14 +1733,6 @@ body.dark .post-actions button:hover {
   word-break: break-word;
 }
 
-#permalink-sticker {
-  max-width: 220px;
-  max-height: 180px;
-
-  border-radius: 5px;
-
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-}
 
 #permalink-track {
   display: flex;
@@ -2067,18 +2067,6 @@ body.dark .post-actions button:hover {
     pointer-events: none;
   }
 
-  #moodWall {
-    display: flex;
-    gap: -100px;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    left: 0;
-    width: 95vw;
-    margin: 0;
-    margin-left: 0;
-    position: relative;
-  }
   .stories {
     margin-top: 100px;
     margin-bottom: 2rem;
@@ -2418,19 +2406,13 @@ body.dark .post-actions button:hover {
     right: 11px;
   }
   .post {
-    background: var(--menu-bg);
-    border-radius: 5px;
-    overflow: hidden;
-    margin-bottom: 40px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-    transition: box-shadow 0.2s;
-    width: 100%;
+    min-height: 350px;
   }
   .post:hover {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }
   .post-content {
-    height: 150px;
+    height: 350px;
     width: 100%;
     padding: 32px 24px;
     display: flex;
@@ -2448,13 +2430,13 @@ body.dark .post-actions button:hover {
     width: 100%;
   }
   .post-emoji {
-    font-size: 5rem;
+    font-size: 7.5rem !important;
     line-height: 1;
     filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.15));
     animation: postEmojiIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   }
   .post-text {
-    font-size: 1.75rem;
+    font-size: 2rem !important;
     font-weight: 600;
     line-height: 1.5;
     word-break: break-word;
@@ -2462,13 +2444,7 @@ body.dark .post-actions button:hover {
     max-width: 100%;
     animation: postTextIn 0.3s 0.1s ease both;
   }
-  .post-sticker {
-    max-width: 180px;
-    max-height: 180px;
-    border-radius: 5px;
-    display: block;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.42);
-  }
+
   #postoptions {
     height: 20px;
     padding: 5px 8px;
@@ -2651,8 +2627,7 @@ body.dark .post-actions button:hover {
     height: 14px;
     flex-shrink: 0;
   }
-  .post.ai-generated.ai-avoid .post-inner,
-  .post.ai-generated.ai-avoid .post-sticker {
+  .post.ai-generated.ai-avoid .post-inner{
     filter: blur(14px);
     pointer-events: none;
     -webkit-user-select: none;

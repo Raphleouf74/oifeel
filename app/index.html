@@ -183,6 +183,14 @@
                 <p class="siteInfos">
                     <span id="SiteVersion">...</span>
                 </p>
+                <a
+                    href="https://stats.uptimerobot.com/pslRSAKman"
+                    style="text-decoration: none; display: flex; justify-content: center; align-items: center;"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    <p class="siteInfos" data-i18n="uptime_status">statut de l'app</p>
+                </a>
             </div>
         </div>
         <div id="authModal" style="display: none;">
@@ -605,6 +613,7 @@
                     <button class="account-tab" data-tab="donnees">mes données</button>
                     <button class="account-tab" data-tab="socials">connexions sociales</button>
                     <button class="account-tab" data-tab="appearance">apparence</button>
+                    <button class="account-tab" data-tab="notifications">notifications</button>
                 </div>
                 <!-- Corps -->
                 <div class="account-body">
@@ -955,7 +964,9 @@
                             </label>
                             <div class="nightmode-info">
                                 <h2>assombrir les posts pour une meilleure expérience de nuit.</h2>
-                                <p><i>assombit les posts clair pour éviter de faire mal lors de la lecture des posts de couleur claires.</i></p>
+                                <p>
+                                    <i>assombit les posts clair pour éviter de faire mal lors de la lecture des posts de couleur claires.</i>
+                                </p>
                             </div>
                         </div>
                         <div class="nightmode-schedule" id="nightmodeSchedule">
@@ -964,15 +975,44 @@
                                 <span>activer automatiquement selon un horaire</span>
                             </label>
                             <div class="nightmode-schedule-times">
-                                <label for="postNightStart">de
+                                <label for="postNightStart">
+                                    de
                                     <input type="time" id="postNightStart" value="22:00">
                                 </label>
-                                <label for="postNightEnd">à
+                                <label for="postNightEnd">
+                                    à
                                     <input type="time" id="postNightEnd" value="07:00">
                                 </label>
                             </div>
                             <p class="nightmode-schedule-hint">l’horaire peut passer minuit. Il s’applique chaque jour.</p>
                         </div>
+                    </div>
+                    <!-- ── NOTIFICATIONS ── -->
+                    <div class="account-section" id="account-tab-notifications">
+                        <p class="account-section-title">notifications</p>
+                        <p class="account-notification-intro">choisis les alertes que tu souhaites recevoir sur cet appareil.</p>
+                        <div class="account-toggle-row">
+                            <span class="account-toggle-label"><strong>activité</strong><small>likes, commentaires, nouveaux abonnés et messages</small></span>
+                            <label class="account-switch">
+                                <input type="checkbox" id="browserActivityNotif">
+                                <span class="account-switch-slider"></span>
+                            </label>
+                        </div>
+                        <div class="account-toggle-row">
+                            <span class="account-toggle-label"><strong>rappel du soir</strong><small>un rappel quotidien pour partager ton humeur</small></span>
+                            <label class="account-switch">
+                                <input type="checkbox" id="browserReminderNotif">
+                                <span class="account-switch-slider"></span>
+                            </label>
+                        </div>
+                        <div class="account-field account-notification-time">
+                            <label class="account-label" for="browserReminderTime">heure du rappel</label>
+                            <input class="account-input" id="browserReminderTime" type="time" value="19:00">
+                        </div>
+                        <button class="account-btn account-btn-primary" id="enableBrowserNotifBtn">activer les notifications</button>
+                        <button class="account-btn account-btn-ghost" id="testBrowserNotifBtn">envoyer une notification test</button>
+                        <div class="account-msg" id="browserNotifMsg"></div>
+                        <p class="account-notification-hint">les rappels fonctionnent tant que l’application est ouverte. Les alertes même lorsque l’app est fermée nécessitent l’activation des notifications push côté serveur.</p>
                     </div>
                 </div>
             </div>
@@ -1198,38 +1238,40 @@
             <div class="create-toolbar">
                 <!-- Emoji picker button -->
                 <div class="create-emoji-group">
-                    <input
-                        type="text"
-                        class="moodEmoji"
-                        id="chosenEmojiPreview"
-                        readonly
-                    >
-                    <label
-                        for="chosenEmojiPreview"
-                        class="create-tool-btn"
-                        id="emojiToolBtn"
-                        title="ajouter un emoji"
-                    >
-                        choisis un emoji
-                        <div id="deleteCurrentEmoji" class="emoji-preview">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                class="lucide lucide-trash-icon lucide-trash"
-                            >
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
-                                <path d="M3 6h18"/>
-                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                            </svg>
-                        </div>
-                    </label>
+                    <div>
+                        <input
+                            type="text"
+                            class="moodEmoji"
+                            id="chosenEmojiPreview"
+                            readonly
+                        >
+                        <label
+                            for="chosenEmojiPreview"
+                            class="create-tool-btn"
+                            id="emojiToolBtn"
+                            title="ajouter un emoji"
+                        >
+                            choisis un emoji
+                            <div id="deleteCurrentEmoji" class="emoji-preview">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="lucide lucide-trash-icon lucide-trash"
+                                >
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                                    <path d="M3 6h18"/>
+                                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                </svg>
+                            </div>
+                        </label>
+                    </div>
                     <!-- Music picker button -->
                     <button type="button" class="create-tool-btn create-advanced-tool" id="musicToolBtn">
                         <svg
@@ -1256,6 +1298,7 @@
                                 type="button"
                                 class="color-picker-trigger"
                                 id="colorPickerTrigger"
+                                data-color-target="background"
                                 title="choisir une couleur ou un gradient"
                             >
                                 <div id="colorPreviewBox" class="color-preview-box"></div>
@@ -1275,19 +1318,23 @@
                     <div class="create-color-picker">
                         <label data-i18n="create_color">texte</label>
                         <div class="color-input-wrapper">
-                            <input
-                                type="color"
+                            <button
+                                type="button"
+                                class="color-picker-trigger color-input"
                                 id="textColor"
                                 value="#000000"
-                                class="color-input"
+                                data-color-target="text"
+                                title="choisir la couleur du texte"
                             >
+                                <div id="textColorPreviewBox" class="color-preview-box"></div>
+                            </button>
                             <div class="hex-input-wrapper">
                                 <span>#</span>
                                 <input
                                     type="text"
                                     id="textColorHex"
                                     maxlength="6"
-                                    placeholder="000000"
+                                    placeholder="ffffff"
                                     class="hex-input"
                                 >
                             </div>
@@ -1354,7 +1401,7 @@
             <div id="colorPickerModal" class="create-picker-overlay hidden">
                 <div class="create-picker-panel color-picker-panel">
                     <div class="create-picker-header">
-                        <span data-i18n="create_bg">fond du post</span>
+                        <span id="colorPickerTitle" data-i18n="create_bg">fond du post</span>
                         <button
                             type="button"
                             class="create-picker-close"
@@ -1478,7 +1525,7 @@
                                     value="#ffffff"
                                     class="custom-color-input"
                                 >
-                                <label for="moodColor" data-i18n="create_custom_color_pick">choisis une couleur</label>
+                                <label id="customColorLabel" for="moodColor" data-i18n="create_custom_color_pick">choisis une couleur</label>
                                 <div class="custom-color-preview" id="customColorPreview"></div>
                             </div>
                             <div class="custom-color-hex">
@@ -1507,34 +1554,6 @@
                     <emoji-picker id="emojiPicker"></emoji-picker>
                 </div>
             </div>
-            <!-- Sticker picker overlay (hidden by default) -->
-            <div id="stickerPickerOverlay" class="create-picker-overlay" style="display: none!important">
-                <div class="create-picker-panel">
-                    <div class="create-picker-header">
-                        <span>recherche un sticker</span>
-                        <button type="button" class="create-picker-close" aria-label="fermer">
-                            ×
-                        </button>
-                    </div>
-                    <div class="sticker-search">
-                        <input type="text" id="stickerSearchInput" placeholder="rechercher sur Tenor...">
-                        <button type="button" id="stickerSearchBtn">
-                            <svg
-                                width="18"
-                                height="18"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2.5"
-                                viewBox="0 0 24 24"
-                            >
-                                <circle cx="11" cy="11" r="8"/>
-                                <path d="m21 21-4.35-4.35"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <div id="stickerResults" class="sticker-results"></div>
-                </div>
-            </div>
             <!-- Music picker overlay (hidden by default) -->
             <div id="musicPickerOverlay" class="create-picker-overlay" style="display: none!important">
                 <div class="create-picker-panel">
@@ -1542,22 +1561,6 @@
                         <span>ajoute un extrait musical</span>
                         <button type="button" class="create-picker-close-music" aria-label="fermer">
                             ×
-                        </button>
-                    </div>
-                    <div class="sticker-search">
-                        <input type="text" id="musicSearchInput" placeholder="titre, artiste...">
-                        <button type="button" id="musicSearchBtn">
-                            <svg
-                                width="18"
-                                height="18"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2.5"
-                                viewBox="0 0 24 24"
-                            >
-                                <circle cx="11" cy="11" r="8"/>
-                                <path d="m21 21-4.35-4.35"/>
-                            </svg>
                         </button>
                     </div>
                     <div id="musicResults" class="music-results"></div>
@@ -1572,19 +1575,6 @@
                 </div>
                 <button type="button" id="chosenTrackRemove" aria-label="retirer la musique">×</button>
             </div>
-            <!-- Preview live -->
-            <!-- <div class="create-preview"> 
-                    <div class="create-preview-label" data-i18n="create_preview">
-                        aperçu
-                    </div>
-                    <div id="previewMood" class="create-preview-card">
-                        <div class="create-preview-emoji" id="previewEmoji">👋</div>
-                        <div class="create-preview-text" id="previewText">
-                            ton message apparaîtra ici...
-                        </div>
-                        <div id="previewSticker" class="create-preview-sticker" style="display: none"></div>
-                    </div>
-                </div>-->
             <div id="advancedOptions" hidden>
                 <div id="container">
                     <button

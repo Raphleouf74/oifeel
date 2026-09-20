@@ -48,7 +48,7 @@ try {
 // ============================================================
 // MONGODB — persistance inter-redémarrages
 // ============================================================
-const MONGO_URI = 'mongodb+srv://MoodShareAdminRaph:Jem4ppelleraphael!@cluster0.7lnr6qq.mongodb.net/?appName=Cluster0';
+const MONGO_URI = os.getenv("MONGO_URI") || process.env.MONGO_URI;
 cron.schedule("0 0 * * *", async () => {
   try {
     if (!posts.length) return;
@@ -74,7 +74,6 @@ const postSchema = new mongoose.Schema({
   emoji: String,
   color: String,
   textColor: String,
-  stickerUrl: { type: String, default: null },
   track: {
     type: {
       title: { type: String, default: null },
@@ -239,7 +238,6 @@ const messageSchema = new mongoose.Schema({
   content: { type: String, default: '' },
   encrypted: { type: Boolean, default: false },
   sharedPostId: { type: String, default: null },
-  stickerUrl: { type: String, default: null },
   timestamp: { type: Date, default: Date.now }
 }, { _id: false });
 
@@ -738,7 +736,6 @@ app.post("/api/posts", async (req, res) => {
       emoji: cleanEmoji,
       color: req.body.color,
       textColor: req.body.textColor,
-      stickerUrl: req.body.stickerUrl || null,
       track: cleanTrack,
       anonymous: isAnon,
       id: Date.now().toString(),
@@ -2554,12 +2551,11 @@ app.post('/api/conversations/:otherUserId/messages', requireAuth, async (req, re
 
     const userId = req.session.user.id;
     const otherUserId = req.params.otherUserId;
-    const { content, sharedPostId, stickerUrl, encrypted } = req.body;
-    const safeStickerUrl = typeof stickerUrl === 'string' && stickerUrl.trim() ? stickerUrl.trim() : null;
+    const { content, sharedPostId, encrypted } = req.body;
     const safeContent = typeof content === 'string' ? content.trim() : '';
 
-    if (!safeContent && !sharedPostId && !safeStickerUrl) {
-      return res.status(400).json({ error: 'message, sticker ou post requis' });
+    if (!safeContent && !sharedPostId) {
+      return res.status(400).json({ error: 'message, post requis' });
     }
 
     const convId = getConversationId(userId, otherUserId);
@@ -2589,7 +2585,6 @@ app.post('/api/conversations/:otherUserId/messages', requireAuth, async (req, re
       content: safeContent || '',
       encrypted: !!encrypted,
       sharedPostId: sharedPostId || null,
-      stickerUrl: safeStickerUrl,
       timestamp: new Date()
     };
 
@@ -2605,7 +2600,7 @@ app.post('/api/conversations/:otherUserId/messages', requireAuth, async (req, re
 
     await createNotification(otherUserId, 'message',
       `${req.session.user.displayName}`,
-      sharedPostId ? 'a partagé un post' : safeStickerUrl ? 'a envoyé un sticker' : safeContent,
+      sharedPostId ? 'a partagé un post' : safeContent,
       { senderId: userId, conversationId: convId }
     );
 
@@ -3808,7 +3803,6 @@ app.post('/api/bot/mood', requireBotSecret, async (req, res) => {
       emoji: '💬',
       color: "#000",
       textColor: "#fff",
-      stickerUrl: null,
       track: null,
       anonymous: false,
       id: Date.now().toString(),

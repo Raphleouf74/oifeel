@@ -119,6 +119,60 @@
   background: rgba(255, 71, 87, 0.4);
 }
 
+/* Partage en image et préférences de notifications */
+.account-notification-intro,
+.account-notification-hint {
+  margin: 0 0 16px;
+  color: rgba(255,255,255,.58);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.account-notification-hint { margin-top: 14px; font-size: 11px; }
+.account-toggle-label { display: flex; flex-direction: column; gap: 3px; }
+.account-toggle-label small { opacity: .56; font-size: 11px; }
+.account-notification-time { max-width: 190px; }
+#testBrowserNotifBtn { margin-top: 10px; }
+
+#post-share-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0,0,0,.72);
+  -webkit-backdrop-filter: blur(9px);
+  backdrop-filter: blur(9px);
+}
+
+.post-share-panel {
+  position: relative;
+  width: min(390px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  padding: 24px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 22px;
+  background: #202026;
+  color: #fff;
+  box-shadow: 0 24px 70px rgba(0,0,0,.5);
+}
+
+.post-share-panel h2 { margin: 0 34px 5px 0; font-size: 17px; }
+.post-share-panel > p { margin: 0 0 18px; color: rgba(255,255,255,.6); font-size: 12px; line-height: 1.45; }
+.post-share-close {
+  position: absolute; top: 14px; right: 14px; width: 30px; height: 30px;
+  border: 0; border-radius: 50%; background: rgba(255,255,255,.1); color: #fff;
+  cursor: pointer; font-size: 21px; line-height: 1;
+}
+.post-share-preview { display: block; width: min(240px, 80%); margin: 0 auto 18px; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+.post-share-actions { display: flex; gap: 9px; }
+.post-share-actions button { flex: 1; border: 0; border-radius: 10px; padding: 11px 8px; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; }
+.post-share-save { background: #a78bce; color: #1d1029; }
+.post-share-link { background: rgba(255,255,255,.1); color: #fff; }
+.post-share-actions button:hover { filter: brightness(1.1); }
+
 
 
 #userPostsSection {

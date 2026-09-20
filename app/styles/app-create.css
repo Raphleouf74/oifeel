@@ -462,12 +462,17 @@ body.dark #ai-generate.ai-generate-btn:hover {
 
 .create-emoji-group {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   width: 100%;
   align-items: left;
   gap: 7px;
   margin-bottom: 10px;
   justify-content: space-evenly;
+}
+
+.create-emoji-group div {
+  display: flex;
+  flex-direction: row;
 }
 
 .create-color-preset {
@@ -562,51 +567,6 @@ body.dark .create-picker-close-emoji:hover {
   background: rgba(255, 255, 255, 0.08);
 }
 
-.sticker-search {
-  display: flex;
-  gap: 8px;
-  padding: 14px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-body.dark .sticker-search {
-  border-bottom-color: rgba(255, 255, 255, 0.08);
-}
-
-.sticker-results {
-  padding: 16px;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 12px;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.sticker-item {
-  aspect-ratio: 1;
-  border-radius: 25px;
-  overflow: hidden;
-
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
-  background: rgba(0, 0, 0, 0.02);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.sticker-item:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.sticker-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 25px;
-}
 
 .create-preview {
   margin-bottom: 22px;
@@ -662,12 +622,6 @@ body.dark .sticker-search {
   transition: color 0.3s;
 }
 
-.create-preview-sticker {
-  max-width: 140px;
-  max-height: 140px;
-  border-radius: 25px;
-  margin-top: 8px;
-}
 
 .create-header {
   width: 100%;
@@ -703,11 +657,7 @@ body.dark .sticker-search {
   padding: 1.75rem;
   border: 2px solid rgba(95, 149, 185, 0.3);
   border-radius: 25px;
-  background: linear-gradient(
-    135deg,
-    rgba(95, 149, 185, 0.05) 0%,
-    rgba(255, 107, 157, 0.02) 100%
-  );
+  background: rgba(0, 0, 0);
   color: var(--text);
   font-size: 1.1rem;
   font-family: inherit;
@@ -767,7 +717,7 @@ body.dark .sticker-search {
   color: var(--text);
   font-size: 1.75rem;
   text-align: center;
-  width: 85%;
+  width: 100%;
   justify-content: space-evenly;
   transition: all 0.3s ease;
   font-weight: 600;
@@ -843,7 +793,7 @@ body.dark .sticker-search {
 }
 
 .create-color-picker--full {
-  width: 100%;
+  width: auto;
 }
 
 .create-color-picker label {
@@ -892,19 +842,8 @@ body.dark .sticker-search {
 }
 
 .color-input {
-  width: 56px;
-  height: 56px;
-  border: 2px solid rgba(95, 149, 185, 0.4);
-  border-radius: 25px;
-
-  background: transparent;
-  transition: all 0.3s ease;
-}
-
-.color-input:hover {
-  border-color: #5f95b9;
-  box-shadow: 0 0 16px rgba(95, 149, 185, 0.3);
-  transform: scale(1.05);
+  width: auto;
+  height: auto;
 }
 
 .hex-input-wrapper {
@@ -1020,12 +959,7 @@ body.dark .sticker-search {
   animation: float 3s ease-in-out infinite;
 }
 
-.create-preview-sticker {
-  max-width: 100%;
-  max-height: 180px;
-  border-radius: 25px;
-  box-shadow: 0 8px 24px rgba(95, 149, 185, 0.15);
-}
+
 
 #publish-tools {
   padding: 1.3rem;
@@ -1069,25 +1003,12 @@ body.dark .sticker-search {
   align-items: center;
   justify-content: center;
   z-index: 10000;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+
   animation: fadeIn 0.3s ease;
 }
 
 .create-picker-overlay.hidden {
   display: none !important;
-}
-
-.create-picker-panel {
-  background: linear-gradient(135deg, #1a1a1a 0%, #0f0f1a 100%);
-  border-radius: 25px;
-  box-shadow:
-    0 25px 60px rgba(95, 149, 185, 0.2),
-    0 0 80px rgba(95, 149, 185, 0.1);
-  max-width: 90%;
-  max-height: 85vh;
-  overflow: auto;
-  border: 1px solid rgba(95, 149, 185, 0.2);
 }
 
 .color-picker-panel {
@@ -1184,7 +1105,7 @@ body.dark .sticker-search {
   border-radius: 25px;
 
   transition: all 0.3s ease;
-  background: linear-gradient(135deg, #39e8ff, #436fb6) !important;
+  background: linear-gradient(135deg, #39e8ff, #436fb6);
   position: relative;
 }
 
@@ -1262,73 +1183,6 @@ body.dark .sticker-search {
   padding: 1.5rem !important;
 }
 
-.sticker-search {
-  display: flex;
-  gap: 0.8rem;
-  padding: 1.5rem;
-  border-bottom: 1px solid rgba(95, 149, 185, 0.15);
-}
-
-.sticker-search input {
-  flex: 1;
-  padding: 0.9rem;
-  border: 2px solid rgba(95, 149, 185, 0.3);
-  border-radius: 25px;
-  background: rgba(95, 149, 185, 0.05);
-  color: var(--text);
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
-}
-
-.sticker-search input:focus {
-  outline: none;
-  border-color: #5f95b9;
-  background: rgba(95, 149, 185, 0.1);
-  box-shadow: 0 0 0 4px rgba(95, 149, 185, 0.1);
-}
-
-.sticker-search button {
-  padding: 0.9rem 1.5rem;
-  background: linear-gradient(135deg, #5f95b9 0%, #ff6b9d 100%);
-  color: white;
-  border: none;
-  border-radius: 25px;
-
-  transition: all 0.3s ease;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(95, 149, 185, 0.2);
-}
-
-.sticker-search button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(95, 149, 185, 0.3);
-}
-
-.sticker-results {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 1rem;
-  padding: 1.5rem;
-}
-
-.sticker-results img {
-  width: 100%;
-  height: auto;
-  border-radius: 25px;
-
-  transition: all 0.3s ease;
-  border: 2px solid transparent;
-}
-
-.sticker-results img:hover {
-  transform: scale(1.1);
-  filter: brightness(1.2);
-  border-color: #5f95b9;
-  box-shadow: 0 8px 20px rgba(95, 149, 185, 0.2);
-}
 
 /* ============================================================
    MUSIQUE — recherche & sélection d'un extrait (API Deezer)
@@ -1598,14 +1452,14 @@ body.dark .sticker-search {
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 5;
+  z-index: 15;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.25);
   display: flex;
   align-items: center;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   justify-content: center;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
   transition: all 0.2s ease-in-out;
 }
 
@@ -1625,13 +1479,15 @@ body.dark .sticker-search {
 #advancedOptions #container {
   width: 50%;
   height: 350px;
-  background: linear-gradient(135deg, #1a1a1a 0%, #0f0f1a 100%);
+  background: rgba(0, 20, 50, 0.6);
   border-radius: 25px;
   box-shadow:
     0 25px 60px rgba(95, 149, 185, 0.2),
     0 0 80px rgba(95, 149, 185, 0.1);
   display: flex;
   flex-direction: column;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   align-items: center;
   justify-content: center;
 }
@@ -2279,19 +2135,7 @@ body.focus-mode .suggestions-banner {
   pointer-events: none;
 }
 
-#sticker-button {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: white;
-  border-radius: 25px;
-  width: 150px;
-  padding: 7px 16px;
-  font-size: 1.25rem;
 
-  z-index: 20;
-  white-space: nowrap;
-  transition: background 0.2s;
-}
 
 .no-posts {
   text-align: center;
@@ -2372,6 +2216,8 @@ body.focus-mode .suggestions-banner {
 @media (max-width: 769px) {
   .create-container {
     width: 95vw;
+    height: 100vh;
+    background: transparent;
   }
   #advancedOptions #container {
     width: 90%;
@@ -2430,5 +2276,113 @@ body.focus-mode .suggestions-banner {
   .suggestion-card:hover {
     background: rgba(0, 0, 0, 0.5);
     transform: translateY(-2px);
+  }
+  .color-preview-box {
+    height: 75px;
+    width: 75px;
+    scale: 1.2;
+    border-radius: 25px;
+  }
+  .color-picker-trigger {
+    gap: 5px;
+    padding: 0px;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--text);
+    transition: all 0.3s ease;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  #colorPickerTrigger,
+  .color-picker-trigger {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    z-index: 10;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  }
+  .hex-input-wrapper {
+    display: flex;
+    align-items: end;
+    justify-content: end;
+    text-align: end;
+    gap: 0.4rem;
+    padding: 0.8rem 1rem;
+    width: 105px;
+    transform: translateX(-61px);
+    border: 2px solid rgba(95, 149, 185, 0.3);
+    border-radius: 25px;
+    background: rgba(95, 149, 185, 0.05);
+    transition: all 0.3s ease;
+  }
+  .hex-input-wrapper span {
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 700;
+    font-size: 0.9rem;
+    transform: translateY(-1px) translateX(22.5px);
+  }
+  #moodColorHex {
+    transform: translateX(17.5px);
+  }
+
+  .hex-input {
+    width: 70px;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-size: 0.95rem;
+    font-family: "DM Sans", sans-serif;
+    font-weight: 700;
+    transform: translateX(15px);
+    text-transform: uppercase;
+    outline: none;
+    transition: all 0.2s ease;
+  }
+
+  .hex-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .hex-input:focus {
+    color: #5f95b9;
+  }
+
+  .hex-input-wrapper:focus-within {
+    border-color: #5f95b9;
+    background: rgba(95, 149, 185, 0.1);
+    box-shadow: 0 0 12px rgba(95, 149, 185, 0.15);
+  }
+  .create-picker-panel,
+  .color-picker-panel {
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 25px;
+    box-shadow:
+      0 25px 60px rgba(95, 149, 185, 0.2),
+      0 0 80px rgba(95, 149, 185, 0.1);
+    max-width: 90%;
+    max-height: 85vh;
+    overflow: auto;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(95, 149, 185, 0.2);
+  }
+  .create-picker-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    animation: fadeIn 0.3s ease;
   }
 }

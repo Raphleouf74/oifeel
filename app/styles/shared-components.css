@@ -199,22 +199,7 @@ body.loading {
   align-items: center;
 }
 
-.tenor-credit {
-  text-align: center;
-  padding: 12px;
-  font-size: 0.8rem;
-  color: var(--text);
-  opacity: 0.6;
-}
 
-.tenor-credit a {
-  color: var(--accent);
-  text-decoration: none;
-}
-
-.tenor-credit a:hover {
-  text-decoration: underline;
-}
 
 #moreOptionsBtn {
   width: 50%;
@@ -229,7 +214,7 @@ body.loading {
   border: none;
   transition: all 0.2s ease;
   font-weight: 600;
-  z-index: 15;
+  z-index: 35;
 }
 
 #moreOptionsBtn:hover {
@@ -247,23 +232,7 @@ body.loading {
   transition: transform 0.3s ease;
 }
 
-.tenor-credit {
-  padding: 1rem;
-  text-align: center;
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.5);
-  border-top: 1px solid rgba(95, 149, 185, 0.15);
-}
 
-.tenor-credit a {
-  color: #5f95b9;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.tenor-credit a:hover {
-  text-decoration: underline;
-}
 
 #pickColorModal {
   position: fixed;
@@ -786,29 +755,16 @@ body.loading {
     justify-content: center;
     align-items: center;
   }
-  .tenor-credit {
-    text-align: center;
-    padding: 12px;
-    font-size: 0.8rem;
-    color: var(--text);
-    opacity: 0.6;
-  }
-  .tenor-credit a {
-    color: var(--accent);
-    text-decoration: none;
-  }
-  .tenor-credit a:hover {
-    text-decoration: underline;
-  }
+
   #moreOptionsBtn {
     width: 81%;
     display: flex;
     align-items: center;
     justify-content: space-evenly;
-    height: 50px;
-    border-radius: 5px;
-    font-size: 2rem;
-    background: rgba(0, 0, 0, 0.04);
+    height: 75px;
+    border-radius: 25px;
+    font-size: 2.75rem;
+    background: rgba(0, 0, 75, 0.6);
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
