@@ -476,11 +476,15 @@ function initBrowserNotificationSettings() {
     activity.addEventListener('change', persist);
     reminder.addEventListener('change', persist);
     reminderTime.addEventListener('change', persist);
-    document.getElementById('enableBrowserNotifBtn')?.addEventListener('click', enableBrowserNotifications);
-    document.getElementById('testBrowserNotifBtn')?.addEventListener('click', async () => {
-        const sent = await _showSystemNotification('oifeel.', { body: 'Les notifications sont bien activées. À bientôt !', tag: 'oifeel-test' });
-        showMsg('browserNotifMsg', sent ? 'notification envoyée.' : 'active d’abord les notifications.', sent ? 'success' : 'error');
-    });
+    // Les navigateurs PWA utilisent le vrai abonnement Web Push dans pwa.js.
+    // Ce repli reste utile sur les navigateurs qui ne le prennent pas en charge.
+    if (!('PushManager' in window)) {
+        document.getElementById('enableBrowserNotifBtn')?.addEventListener('click', enableBrowserNotifications);
+        document.getElementById('testBrowserNotifBtn')?.addEventListener('click', async () => {
+            const sent = await _showSystemNotification('oifeel.', { body: 'Les notifications sont bien activées. À bientôt !', tag: 'oifeel-test' });
+            showMsg('browserNotifMsg', sent ? 'notification envoyée.' : 'active d’abord les notifications.', sent ? 'success' : 'error');
+        });
+    }
     _scheduleBrowserReminder();
 }
 
@@ -3156,6 +3160,9 @@ export async function getCurrentUser() {
 
 // UI wiring (simple)
 document.addEventListener('DOMContentLoaded', () => {
+    if (typeof trackAnalyticsVisit === 'function') {
+        trackAnalyticsVisit();
+    }
     const openLogin = document.getElementById('openLogin');
     const openRegister = document.getElementById('openRegister');
     const guestBtn = document.getElementById('guestLogin');
@@ -6839,6 +6846,7 @@ function escHtml(text) {
     div.textContent = text;
     return div.innerHTML;
 }
+window.showMsg = showMsg;
 
 // ============================================================
 // PARTAGE D'UN POST EN IMAGE
@@ -6861,7 +6869,7 @@ function _wrapCanvasText(ctx, text, maxWidth) {
 function _shareCardCanvas(mood) {
     const canvas = document.createElement('canvas');
     canvas.width = 1080;
-    canvas.height = 1350;
+    canvas.height = 1920;
     const ctx = canvas.getContext('2d');
     const background = mood.color || '#caa9df';
     const colors = String(background).match(/#[0-9a-f]{3,8}|rgba?\([^)]*\)/gi) || [];
@@ -6875,7 +6883,7 @@ function _shareCardCanvas(mood) {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Un léger voile rend l'export lisible quel que soit le fond choisi.
-    const shade = ctx.createLinearGradient(0, 0, 1080, 1350);
+    const shade = ctx.createLinearGradient(0, 0, 1080, 1920);
     shade.addColorStop(0, 'rgba(255,255,255,.18)');
     shade.addColorStop(1, 'rgba(0,0,0,.08)');
     ctx.fillStyle = shade;
@@ -6904,9 +6912,9 @@ function _shareCardCanvas(mood) {
     ctx.globalAlpha = .75;
     ctx.font = '400 29px DMSans, Arial, sans-serif';
     const date = mood.createdAt ? new Date(mood.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
-    ctx.fillText(date, 86, 1220);
+    ctx.fillText(date, 86, 1790);
     ctx.textAlign = 'right';
-    ctx.fillText('oifeel.', 994, 1220);
+    ctx.fillText('oifeel.', 994, 1790);
     ctx.globalAlpha = 1;
     return canvas;
 }
@@ -6923,6 +6931,7 @@ function _downloadShareCard(canvas, mood) {
 }
 
 function openPostShareModal(mood) {
+    window.oifeelTrack?.('share', 'share');
     document.getElementById('post-share-modal')?.remove();
     const canvas = _shareCardCanvas(mood);
     const overlay = document.createElement('div');

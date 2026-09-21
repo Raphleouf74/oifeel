@@ -12,6 +12,9 @@ const rateLimit = require("express-rate-limit");
 const fs = require("fs");
 const fsPromises = require("fs/promises");
 const cron = require("node-cron");
+const createAnalytics = require('./services/analytics.cjs');
+const createShareCards = require('./services/share-cards.cjs');
+const createWebPush = require('./services/webpush.cjs');
 
 const jwtService = require('./services/jwt.cjs');
 
@@ -48,7 +51,7 @@ try {
 // ============================================================
 // MONGODB — persistance inter-redémarrages
 // ============================================================
-const MONGO_URI = os.getenv("MONGO_URI") || process.env.MONGO_URI;
+const MONGO_URI = process.env.MONGO_URI;
 cron.schedule("0 0 * * *", async () => {
   try {
     if (!posts.length) return;
@@ -128,6 +131,15 @@ const userSchema = new mongoose.Schema({
 
   // Notifications
   pushTokens: [{ type: String }],
+  pushSubscriptions: [{
+    endpoint: { type: String, required: true },
+    expirationTime: { type: Number, default: null },
+    keys: { p256dh: { type: String, required: true }, auth: { type: String, required: true } }
+  }],
+  pushPreferences: {
+    activity: { type: Boolean, default: false },
+    reminder: { type: Boolean, default: false }
+  },
 
   // Stats
   postsCount: { type: Number, default: 0 },
@@ -383,6 +395,7 @@ async function savePostsToFile() {
 async function persistPost(post) {
   await savePostsToFile();
   await saveToDB(post);
+  await recordEvent('post_created');
 }
 
 async function unpersistPost(id) {
@@ -504,6 +517,10 @@ function isAdminSecretRequest(req) {
   return !!process.env.ADMIN_SECRET && req.headers['x-admin-secret'] === process.env.ADMIN_SECRET;
 }
 
+// Initialisé après les middlewares afin que CORS et Helmet s'appliquent aussi
+// aux pages de partage et aux mesures anonymes.
+let analytics = { track: async () => { } };
+
 app.use(generalLimiter);
 
 app.use((req, res, next) => {
@@ -516,6 +533,17 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+analytics = createAnalytics({
+  mongoose,
+  app,
+  isAdminRequest: req => {
+    if (isAdminSecretRequest(req)) return true;
+    const token = req.headers.authorization?.startsWith('Bearer ') ? req.headers.authorization.slice(7) : null;
+    try { return jwtService.verify(token)?.role === 'admin'; } catch (_) { return false; }
+  }
+});
+createShareCards({ app, PostModel });
 
 const dataDir = path.join(__dirname, "data");
 const postsFile = path.join(dataDir, "posts.json");
@@ -755,6 +783,7 @@ app.post("/api/posts", async (req, res) => {
 
     posts.unshift(newPost);
     await persistPost(newPost);
+    analytics.track('post', req.body?.source || 'direct');
 
     // Attache le thème de l'auteur pour un affichage immédiat (sans attendre
     // un refetch du feed), sauf si le post est publié en anonyme.
@@ -2084,6 +2113,7 @@ app.post('/api/auth/register', async (req, res) => {
         displayName: newUser.displayName,
       }
     });
+    await recordEvent('registration');
   } catch (err) {
     console.error('❌ Register error:', err);
     res.status(500).json({ error: 'Erreur inscription' });
@@ -2162,7 +2192,7 @@ app.post('/api/auth/login', async (req, res) => {
         else resolve();
       });
     });
-
+    await recordEvent('login');
     console.log('✅ User logged in:', 'Session ID:', req.sessionID);
     res.json({
       user: {
@@ -2601,7 +2631,7 @@ app.post('/api/conversations/:otherUserId/messages', requireAuth, async (req, re
     await createNotification(otherUserId, 'message',
       `${req.session.user.displayName}`,
       sharedPostId ? 'a partagé un post' : safeContent,
-      { senderId: userId, conversationId: convId }
+      { senderId: userId, conversationId: convId, encrypted: !!encrypted }
     );
 
     try {
@@ -2625,6 +2655,7 @@ app.post('/api/conversations/:otherUserId/messages', requireAuth, async (req, re
 // NOTIFICATIONS ROUTES
 // ============================================================
 const notifClients = new Map();
+let webPush = { send: async () => false };
 
 function pushNotif(userId, notif) {
   const clients = notifClients.get(String(userId));
@@ -2646,12 +2677,15 @@ async function createNotification(userId, type, title, body, data = {}) {
   if (!mongoReady || !userId) return null;
 
   try {
+    // Le contenu d'un message chiffré ne doit jamais sortir de la messagerie,
+    // pas même sous forme de notification système.
+    const safeBody = type === 'message' && data.encrypted ? 'Nouveau message chiffré' : body;
     const notification = new NotificationModel({
       _id: `${Date.now()}_${Math.random().toString(36).slice(2)}`,
       userId: String(userId),
       type,
       title,
-      body,
+      body: safeBody,
       data,
       read: false,
       createdAt: new Date()
@@ -2674,11 +2708,7 @@ async function createNotification(userId, type, title, body, data = {}) {
     };
 
     pushNotif(userId, payload);
-
-    const user = await UserModel.findById(userId);
-    if (user && user.pushTokens && user.pushTokens.length > 0) {
-      // TODO: sendPushNotification(user.pushTokens, title, body, data);
-    }
+    await webPush.send(userId, payload, 'activity');
 
     return payload;
   } catch (err) {
@@ -2686,6 +2716,14 @@ async function createNotification(userId, type, title, body, data = {}) {
     return null;
   }
 }
+
+webPush = createWebPush({
+  app,
+  UserModel,
+  requireAuth,
+  mongoReady: () => mongoReady,
+  createNotification
+});
 
 app.get('/api/notifications', requireAuth, async (req, res) => {
   try {
@@ -3855,6 +3893,401 @@ app.post('/api/bot/report', requireBotSecret, async (req, res) => {
     res.status(500).json({ error: 'Erreur serveur' });
   }
 });
+async function initAnalytics() {
+  if (collection) return collection;
+
+  if (!process.env.MONGO_URI) {
+    console.warn('⚠️ MONGO_URI absent : analytics désactivées');
+    return null;
+  }
+
+  client = new MongoClient(process.env.MONGO_URI);
+
+  await client.connect();
+
+  db = client.db(
+    process.env.MONGO_DB_NAME || undefined
+  );
+
+  collection = db.collection('analytics_daily');
+
+  await collection.createIndex(
+    { date: 1 },
+    { unique: true }
+  );
+
+  console.log('📊 Analytics MongoDB connectées');
+
+  return collection;
+}
+
+
+/* =========================================================
+   UTILITAIRES
+   ========================================================= */
+
+function todayUTC() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+
+function normalizeSource(source) {
+  const allowed = [
+    'direct',
+    'tiktok',
+    'instagram',
+    'discord',
+    'share',
+    'whatsapp',
+    'google',
+    'youtube',
+    'other'
+  ];
+
+  const value = String(source || 'direct')
+    .toLowerCase()
+    .trim()
+    .slice(0, 30);
+
+  return allowed.includes(value)
+    ? value
+    : 'other';
+}
+
+
+const ALLOWED_EVENTS = new Set([
+  'visit',
+  'guest_login',
+  'registration',
+  'login',
+  'post_created',
+  'story_created',
+  'share_sheet_open',
+  'share',
+  'image_saved',
+  'link_copied',
+  'app_install',
+  'notification_request',
+  'notification_enabled',
+  'notification_refused'
+]);
+
+
+/* =========================================================
+   ENREGISTRER UN ÉVÉNEMENT
+   ========================================================= */
+
+async function recordEvent(event, source = 'direct') {
+  if (!collection) {
+    await initAnalytics();
+  }
+
+  if (!collection) return;
+
+  if (!ALLOWED_EVENTS.has(event)) {
+    return;
+  }
+
+  const date = todayUTC();
+  const cleanSource = normalizeSource(source);
+
+  const field = `events.${event}`;
+
+  await collection.updateOne(
+    { date },
+    {
+      $inc: {
+        [field]: 1,
+        [`sources.${cleanSource}`]: event === 'visit' ? 1 : 0
+      },
+
+      $setOnInsert: {
+        date,
+        createdAt: new Date()
+      },
+
+      $set: {
+        updatedAt: new Date()
+      }
+    },
+    {
+      upsert: true
+    }
+  );
+}
+
+
+/* =========================================================
+   RÉCUPÉRER LES STATS
+   ========================================================= */
+
+async function getAnalytics(days = 30) {
+  if (!collection) {
+    await initAnalytics();
+  }
+
+  if (!collection) {
+    return {
+      summary: {},
+      sources: [],
+      journey: []
+    };
+  }
+
+  days = Math.max(
+    1,
+    Math.min(
+      Number(days) || 30,
+      365
+    )
+  );
+
+  const start = new Date();
+
+  start.setUTCHours(0, 0, 0, 0);
+  start.setUTCDate(start.getUTCDate() - (days - 1));
+
+  const startDate = start.toISOString().slice(0, 10);
+
+  const rows = await collection
+    .find({
+      date: {
+        $gte: startDate
+      }
+    })
+    .sort({
+      date: -1
+    })
+    .toArray();
+
+
+  const eventNames = [
+    'visit',
+    'guest_login',
+    'registration',
+    'login',
+    'post_created',
+    'story_created',
+    'share_sheet_open',
+    'share',
+    'image_saved',
+    'link_copied',
+    'app_install',
+    'notification_request',
+    'notification_enabled',
+    'notification_refused'
+  ];
+
+
+  const totals = {};
+
+  for (const event of eventNames) {
+    totals[event] = 0;
+  }
+
+
+  const sourceTotals = {};
+
+
+  for (const row of rows) {
+
+    for (const event of eventNames) {
+      totals[event] += Number(
+        row.events?.[event] || 0
+      );
+    }
+
+
+    for (const [source, count] of Object.entries(
+      row.sources || {}
+    )) {
+      sourceTotals[source] =
+        (sourceTotals[source] || 0) +
+        Number(count || 0);
+    }
+  }
+
+
+  const journey = rows.map(row => ({
+    date: row.date,
+
+    visits: Number(
+      row.events?.visit || 0
+    ),
+
+    guestLogins: Number(
+      row.events?.guest_login || 0
+    ),
+
+    registrations: Number(
+      row.events?.registration || 0
+    ),
+
+    logins: Number(
+      row.events?.login || 0
+    ),
+
+    posts: Number(
+      row.events?.post_created || 0
+    ),
+
+    stories: Number(
+      row.events?.story_created || 0
+    ),
+
+    shareSheetOpens: Number(
+      row.events?.share_sheet_open || 0
+    ),
+
+    shares: Number(
+      row.events?.share || 0
+    )
+  }));
+
+
+  const sources = Object.entries(sourceTotals)
+    .map(([name, visits]) => ({
+      name,
+      visits
+    }))
+    .sort((a, b) => b.visits - a.visits);
+
+
+  return {
+    period: {
+      days,
+      start: startDate,
+      end: todayUTC()
+    },
+
+    summary: {
+      visits: totals.visit,
+      guestLogins: totals.guest_login,
+      registrations: totals.registration,
+      logins: totals.login,
+
+      posts: totals.post_created,
+      stories: totals.story_created,
+
+      shareSheetOpens: totals.share_sheet_open,
+      shares: totals.share,
+
+      savedImages: totals.image_saved,
+      copiedLinks: totals.link_copied,
+
+      appInstalls: totals.app_install,
+
+      notificationRequests:
+        totals.notification_request,
+
+      notificationEnabled:
+        totals.notification_enabled,
+
+      notificationRefused:
+        totals.notification_refused,
+
+      sharedVisits:
+        sourceTotals.share || 0
+    },
+
+    sources,
+
+    journey
+  };
+}
+
+
+/* =========================================================
+   ROUTES EXPRESS
+   ========================================================= */
+
+function registerAnalyticsRoutes(app, requireAdmin) {
+
+  /*
+   * Route publique.
+   * Elle ne demande aucune authentification.
+   */
+  app.post('/api/analytics/track', async (req, res) => {
+
+    try {
+
+      const {
+        event,
+        source
+      } = req.body || {};
+
+
+      if (!ALLOWED_EVENTS.has(event)) {
+        return res.status(400).json({
+          error: 'Événement invalide'
+        });
+      }
+
+
+      await recordEvent(
+        event,
+        source
+      );
+
+
+      return res.json({
+        ok: true
+      });
+
+    } catch (err) {
+
+      console.error(
+        '❌ Analytics track:',
+        err
+      );
+
+      /*
+       * Le tracking ne doit jamais casser
+       * l'application principale.
+       */
+      return res.status(200).json({
+        ok: false
+      });
+    }
+  });
+
+
+  /*
+   * Route ADMIN
+   */
+  app.get(
+    '/api/admin/analytics',
+    requireAdmin,
+    async (req, res) => {
+
+      try {
+
+        const days = Number(
+          req.query.days || 30
+        );
+
+        const data =
+          await getAnalytics(days);
+
+
+        return res.json(data);
+
+      } catch (err) {
+
+        console.error(
+          '❌ Admin analytics:',
+          err
+        );
+
+        return res.status(500).json({
+          error: 'Impossible de récupérer les statistiques'
+        });
+      }
+    }
+  );
+}
+
+
 
 // Debug routes
 function listRoutes() {

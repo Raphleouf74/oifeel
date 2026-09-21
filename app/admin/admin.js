@@ -96,6 +96,20 @@ function showPage(name) {
     if (name === "pinned") loadPinned();
     if (name === "users") renderUsers();
     if (name === "settings") renderSettings();
+    if (name === "analytics") loadAnalytics();
+}
+
+async function loadAnalytics() {
+    const target = document.getElementById('analytics-content');
+    if (!target) return;
+    target.textContent = 'chargement…';
+    try {
+        const response = await fetch(`${API}/admin/analytics?days=30`, { headers: adminHeaders() });
+        if (!response.ok) throw new Error();
+        const { days } = await response.json();
+        if (!days.length) { target.textContent = 'aucune donnée pour le moment.'; return; }
+        target.innerHTML = `<table class="data-table"><thead><tr><th>Jour</th><th>Visites</th><th>Inscriptions</th><th>Posts</th><th>Partages</th></tr></thead><tbody>${days.map(row => `<tr><td>${row.day}</td><td>${row.events?.visit || 0}</td><td>${row.events?.signup || 0}</td><td>${row.events?.post || 0}</td><td>${row.events?.share || 0}</td></tr>`).join('')}</tbody></table>`;
+    } catch (_) { target.textContent = 'statistiques indisponibles.'; }
 }
 
 // ======================
@@ -1385,3 +1399,662 @@ function verifiedBadge(isVerified) {
         <path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="#4c9eff"/>
     </svg>`;
 }
+/* =========================================================
+   ANALYTICS ADMIN
+   ========================================================= */
+
+let analyticsDays = 30;
+
+async function loadAnalytics(days = analyticsDays) {
+    analyticsDays = Number(days) || 30;
+
+    const container = document.getElementById('analytics-content');
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="analytics-loading">
+            Chargement des statistiques…
+        </div>
+    `;
+
+    try {
+        const response = await fetch(`/api/admin/analytics?days=${analyticsDays}`, {
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        renderAnalytics(data);
+    } catch (err) {
+        console.error('Erreur analytics:', err);
+
+        container.innerHTML = `
+            <div class="table-wrapper">
+                <div style="
+                    padding: 30px;
+                    text-align: center;
+                    color: var(--danger, #ef4444);
+                ">
+                    Impossible de charger les statistiques.
+                </div>
+            </div>
+        `;
+    }
+}
+
+
+function renderAnalytics(data) {
+    const container = document.getElementById('analytics-content');
+    if (!container) return;
+
+    const summary = data.summary || {};
+    const journey = data.journey || [];
+    const sources = data.sources || [];
+
+    const visits = Number(summary.visits || 0);
+    const posts = Number(summary.posts || 0);
+    const sharedVisits = Number(summary.sharedVisits || 0);
+
+    const postsPercentage = visits > 0
+        ? ((posts / visits) * 100).toFixed(1)
+        : '0.0';
+
+    container.innerHTML = `
+        <div class="analytics-toolbar">
+            <div></div>
+
+            <div style="display:flex; gap:8px; align-items:center;">
+                <select
+                    id="analytics-period"
+                    class="analytics-select"
+                    onchange="loadAnalytics(this.value)"
+                >
+                    <option value="7" ${analyticsDays === 7 ? 'selected' : ''}>
+                        7 jours
+                    </option>
+                    <option value="30" ${analyticsDays === 30 ? 'selected' : ''}>
+                        30 jours
+                    </option>
+                    <option value="90" ${analyticsDays === 90 ? 'selected' : ''}>
+                        90 jours
+                    </option>
+                </select>
+
+                <button
+                    class="btn btn-ghost"
+                    onclick="loadAnalytics()"
+                >
+                    Actualiser
+                </button>
+            </div>
+        </div>
+
+        <!-- =========================
+             SUMMARY CARDS
+        ========================== -->
+
+        <div class="analytics-stat-grid">
+
+            <div class="analytics-stat-card">
+                <div class="analytics-stat-label">
+                    VISITES
+                </div>
+
+                <div class="analytics-stat-value cyan">
+                    ${formatAnalyticsNumber(visits)}
+                </div>
+            </div>
+
+            <div class="analytics-stat-card">
+                <div class="analytics-stat-label">
+                    POSTS PUBLIÉS
+                </div>
+
+                <div class="analytics-stat-value green">
+                    ${formatAnalyticsNumber(posts)}
+                </div>
+            </div>
+
+            <div class="analytics-stat-card">
+                <div class="analytics-stat-label">
+                    VISITES → POST
+                </div>
+
+                <div class="analytics-stat-value orange">
+                    ${postsPercentage} %
+                </div>
+            </div>
+
+            <div class="analytics-stat-card">
+                <div class="analytics-stat-label">
+                    VISITES VIA UN LIEN PARTAGÉ
+                </div>
+
+                <div class="analytics-stat-value white">
+                    ${formatAnalyticsNumber(sharedVisits)}
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             JOURNEY
+        ========================== -->
+
+        <div class="analytics-box">
+
+            <div class="analytics-box-title">
+                Parcours (${analyticsDays} derniers jours)
+            </div>
+
+            <div class="analytics-table-wrapper">
+
+                <table class="analytics-table">
+
+                    <thead>
+                        <tr>
+                            <th>ÉTAPE</th>
+                            <th>TOTAL</th>
+                            <th>% DES VISITES</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        ${renderAnalyticsJourney(
+        'Visites (sessions)',
+        summary.visits
+    )}
+
+                        ${renderAnalyticsJourney(
+        'Connexions en invité',
+        summary.guestLogins,
+        visits
+    )}
+
+                        ${renderAnalyticsJourney(
+        'Inscriptions',
+        summary.registrations,
+        visits
+    )}
+
+                        ${renderAnalyticsJourney(
+        'Connexions',
+        summary.logins,
+        visits
+    )}
+
+                        ${renderAnalyticsJourney(
+        'Posts publiés',
+        summary.posts,
+        visits
+    )}
+
+                        ${renderAnalyticsJourney(
+        'Stories publiées',
+        summary.stories,
+        visits
+    )}
+
+                        ${renderAnalyticsJourney(
+        'Feuille de partage ouverte',
+        summary.shareSheetOpens,
+        visits
+    )}
+
+                        ${renderAnalyticsJourney(
+        'Partages via le système',
+        summary.shares,
+        visits
+    )}
+
+                        ${renderAnalyticsJourney(
+        'Images enregistrées',
+        summary.savedImages,
+        visits
+    )}
+
+                        ${renderAnalyticsJourney(
+        'Liens copiés',
+        summary.copiedLinks,
+        visits
+    )}
+
+                        ${renderAnalyticsJourney(
+        'Installations de l’app',
+        summary.appInstalls,
+        visits
+    )}
+
+                        ${renderAnalyticsJourney(
+        'Demandes de notifications',
+        summary.notificationRequests,
+        visits
+    )}
+
+                        ${renderAnalyticsJourney(
+        'Notifications activées',
+        summary.notificationEnabled,
+        visits
+    )}
+
+                        ${renderAnalyticsJourney(
+        'Notifications refusées',
+        summary.notificationRefused,
+        visits
+    )}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+        </div>
+
+
+        <!-- =========================
+             SOURCES
+        ========================== -->
+
+        <div class="analytics-box">
+
+            <div class="analytics-box-title">
+                D'où viennent les visites
+            </div>
+
+            <div class="analytics-table-wrapper">
+
+                <table class="analytics-table">
+
+                    <thead>
+                        <tr>
+                            <th>CANAL</th>
+                            <th>VISITES</th>
+                            <th>PART</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        ${sources.length
+            ? sources.map(source => `
+                                    <tr>
+                                        <td>${escapeAnalyticsHtml(source.name)}</td>
+                                        <td>${formatAnalyticsNumber(source.visits)}</td>
+                                        <td>
+                                            ${visits > 0
+                    ? ((source.visits / visits) * 100).toFixed(1)
+                    : '0.0'
+                } %
+                                        </td>
+                                    </tr>
+                                `).join('')
+            : `
+                                    <tr>
+                                        <td colspan="3" style="text-align:center; opacity:.5;">
+                                            Aucune donnée
+                                        </td>
+                                    </tr>
+                                `
+        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="analytics-help">
+                Astuce : utilise <code>?utm_source=tiktok</code>,
+                <code>?utm_source=discord</code>, etc. dans tes liens pour
+                savoir quel canal fonctionne.
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             DAILY
+        ========================== -->
+
+        <div class="analytics-box">
+
+            <div class="analytics-box-title">
+                Jour par jour
+            </div>
+
+            <div class="analytics-table-wrapper">
+
+                <table class="analytics-table">
+
+                    <thead>
+                        <tr>
+                            <th>DATE</th>
+                            <th>VISITES</th>
+                            <th>INVITÉS + INSCRITS</th>
+                            <th>POSTS</th>
+                            <th>PARTAGES</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        ${journey.length
+            ? journey.map(day => `
+                                    <tr>
+                                        <td>${escapeAnalyticsHtml(day.date)}</td>
+
+                                        <td>
+                                            ${formatAnalyticsNumber(day.visits)}
+                                        </td>
+
+                                        <td>
+                                            ${formatAnalyticsNumber(
+                Number(day.guestLogins || 0) +
+                Number(day.registrations || 0)
+            )}
+                                        </td>
+
+                                        <td>
+                                            ${formatAnalyticsNumber(day.posts)}
+                                        </td>
+
+                                        <td>
+                                            ${formatAnalyticsNumber(day.shares)}
+                                        </td>
+                                    </tr>
+                                `).join('')
+            : `
+                                    <tr>
+                                        <td colspan="5" style="text-align:center; opacity:.5;">
+                                            Aucune donnée
+                                        </td>
+                                    </tr>
+                                `
+        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+        </div>
+    `;
+
+    injectAnalyticsStyles();
+}
+
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+
+function renderAnalyticsJourney(label, value, total = null) {
+    const number = Number(value || 0);
+
+    let percentage = '0.0';
+
+    if (total !== null && Number(total) > 0) {
+        percentage = ((number / Number(total)) * 100).toFixed(1);
+    }
+
+    return `
+        <tr>
+            <td>${escapeAnalyticsHtml(label)}</td>
+            <td>${formatAnalyticsNumber(number)}</td>
+            <td>${percentage} %</td>
+        </tr>
+    `;
+}
+
+
+function formatAnalyticsNumber(value) {
+    return Number(value || 0).toLocaleString('fr-FR');
+}
+
+
+function escapeAnalyticsHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+
+/* =========================================================
+   CSS DE LA PAGE
+   ========================================================= */
+
+function injectAnalyticsStyles() {
+    if (document.getElementById('analytics-styles')) return;
+
+    const style = document.createElement('style');
+    style.id = 'analytics-styles';
+
+    style.textContent = `
+
+        .analytics-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .analytics-select {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 8px;
+            padding: 9px 12px;
+            outline: none;
+        }
+
+        .analytics-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .analytics-stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px;
+            min-height: 92px;
+        }
+
+        .analytics-stat-label {
+            color: var(--muted);
+            font-size: 10px;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .analytics-stat-value {
+            font-size: 26px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .analytics-stat-value.cyan {
+            color: #00cfeb;
+        }
+
+        .analytics-stat-value.green {
+            color: #22c55e;
+        }
+
+        .analytics-stat-value.orange {
+            color: #f59e0b;
+        }
+
+        .analytics-stat-value.white {
+            color: #e5e7eb;
+        }
+
+        .analytics-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            overflow: hidden;
+            margin-bottom: 14px;
+        }
+
+        .analytics-box-title {
+            padding: 15px;
+            font-size: 13px;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .analytics-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .analytics-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        .analytics-table th {
+            background: rgba(255,255,255,.025);
+            color: var(--muted);
+            font-size: 9px;
+            letter-spacing: .08em;
+            text-align: left;
+            padding: 10px 14px;
+            font-weight: 500;
+        }
+
+        .analytics-table th:not(:first-child),
+        .analytics-table td:not(:first-child) {
+            text-align: right;
+        }
+
+        .analytics-table td {
+            padding: 10px 14px;
+            border-top: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .analytics-table td:last-child {
+            color: var(--muted);
+        }
+
+        .analytics-help {
+            padding: 11px 14px;
+            font-size: 10px;
+            color: var(--muted);
+            border-top: 1px solid var(--border);
+        }
+
+        .analytics-help code {
+            color: var(--text);
+            font-family: monospace;
+        }
+
+        .analytics-loading {
+            padding: 50px;
+            text-align: center;
+            color: var(--muted);
+        }
+
+        @media (max-width: 900px) {
+            .analytics-stat-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 550px) {
+            .analytics-stat-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    `;
+
+    document.head.appendChild(style);
+}
+
+
+/* =========================================================
+   TRACKING CÔTÉ CLIENT
+   ========================================================= */
+
+const OIFEEL_ANALYTICS_SESSION_KEY = 'oifeel_analytics_session';
+
+
+function getAnalyticsSessionId() {
+    let id = localStorage.getItem(OIFEEL_ANALYTICS_SESSION_KEY);
+
+    if (!id) {
+        id = crypto.randomUUID();
+        localStorage.setItem(OIFEEL_ANALYTICS_SESSION_KEY, id);
+    }
+
+    return id;
+}
+
+
+function getAnalyticsSource() {
+    const params = new URLSearchParams(window.location.search);
+
+    return (
+        params.get('utm_source') ||
+        params.get('source') ||
+        'direct'
+    ).toLowerCase();
+}
+
+
+function trackAnalytics(event, extra = {}) {
+    const payload = {
+        event,
+        sessionId: getAnalyticsSessionId(),
+        source: getAnalyticsSource(),
+        path: window.location.pathname,
+        ...extra
+    };
+
+    fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        keepalive: true,
+        body: JSON.stringify(payload)
+    }).catch(() => { });
+}
+
+
+/* Une visite par session */
+function trackAnalyticsVisit() {
+    const key = 'oifeel_analytics_visit_sent';
+
+    if (sessionStorage.getItem(key)) return;
+
+    sessionStorage.setItem(key, '1');
+
+    trackAnalytics('visit');
+}
+
+
+/* Exposer pour le reste de l'app */
+window.trackAnalytics = trackAnalytics;
+window.trackAnalyticsVisit = trackAnalyticsVisit;
+window.loadAnalytics = loadAnalytics;
+window.renderAnalytics = renderAnalytics;
+
+
+/* L'admin lui-même ne doit normalement pas gonfler les visites */
