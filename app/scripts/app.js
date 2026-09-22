@@ -1,7 +1,16 @@
+import { trackVisitOnce, track as trackEvent } from './analytics.js';
+import { openShareSheet } from './share.js';
+import { initPwa, maybeAskPushAfterPost, notifyPosted } from './pwa.js';
+import { shareLink } from './config.js';
+
 window.openPermalinkModal = openPostModal;
 
 const API_BASE = "https://moodshare-7dd7.onrender.com";
 const API = API_BASE + '/api/';
+
+// Statistiques anonymes (1 visite / onglet) + PWA (service worker, installation, notifications)
+trackVisitOnce();
+initPwa({ notify: (type, msg) => showFeedback(type, msg) });
 // Liste des comptes certifiés (à remplir avec les vrais _id Mongo des 2 comptes oifeel)
 const VERIFIED_USER_IDS = new Set([
     '1786479728376',
@@ -21,6 +30,7 @@ function verifiedBadge(userId) {
 
     if (authToken) {
         localStorage.setItem('oifeel_token', authToken);
+        trackEvent('login');
         window.history.replaceState({}, document.title, window.location.pathname);
         location.reload();
     } else if (authError) {
@@ -277,7 +287,6 @@ function _receiveNotif(notif, opts = {}) {
 
     _renderNotifBadge();
     if (!opts.silent) _showNotifToast(n);
-    if (!opts.silent) _showBrowserActivityNotification(n);
     _refreshNotifPanel();
 }
 function _renderNotifBadge() {
@@ -385,108 +394,6 @@ function _refreshNotifPanel() {
 }
 
 function _escHtml(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
-
-// ============================================================
-// NOTIFICATIONS SYSTÈME — préférences locales à cet appareil
-// ============================================================
-const BROWSER_NOTIF_SETTINGS_KEY = 'oifeel_browser_notification_settings';
-const DEFAULT_BROWSER_NOTIF_SETTINGS = { activity: false, reminder: false, reminderTime: '19:00' };
-let _browserReminderTimer = null;
-
-function _getBrowserNotifSettings() {
-    try {
-        return { ...DEFAULT_BROWSER_NOTIF_SETTINGS, ...JSON.parse(localStorage.getItem(BROWSER_NOTIF_SETTINGS_KEY) || '{}') };
-    } catch (_) {
-        return { ...DEFAULT_BROWSER_NOTIF_SETTINGS };
-    }
-}
-
-function _saveBrowserNotifSettings(settings) {
-    localStorage.setItem(BROWSER_NOTIF_SETTINGS_KEY, JSON.stringify(settings));
-    _scheduleBrowserReminder();
-}
-
-async function _showSystemNotification(title, options = {}) {
-    if (!('Notification' in window) || Notification.permission !== 'granted') return false;
-    const payload = { icon: '/app/assets/logo/app_logo_dark.png', badge: '/app/assets/logo/app_logo_dark.png', ...options };
-    try {
-        const registration = await navigator.serviceWorker?.ready;
-        if (registration?.showNotification) {
-            await registration.showNotification(title, payload);
-        } else {
-            new Notification(title, payload);
-        }
-        return true;
-    } catch (_) { return false; }
-}
-
-function _showBrowserActivityNotification(notif) {
-    const settings = _getBrowserNotifSettings();
-    if (!settings.activity || !document.hidden) return;
-    const text = notif.message || `${notif.actorName || 'Quelqu’un'} a une nouvelle activité pour toi`;
-    _showSystemNotification('oifeel.', { body: text, tag: `oifeel-${notif._localId}` });
-}
-
-function _scheduleBrowserReminder() {
-    if (_browserReminderTimer) clearTimeout(_browserReminderTimer);
-    const settings = _getBrowserNotifSettings();
-    if (!settings.reminder || !('Notification' in window) || Notification.permission !== 'granted') return;
-
-    const [rawHours, rawMinutes] = (settings.reminderTime || '19:00').split(':').map(Number);
-    const hours = Number.isFinite(rawHours) ? rawHours : 19;
-    const minutes = Number.isFinite(rawMinutes) ? rawMinutes : 0;
-    const next = new Date();
-    next.setHours(hours, minutes, 0, 0);
-    if (next <= new Date()) next.setDate(next.getDate() + 1);
-    _browserReminderTimer = setTimeout(async () => {
-        const today = new Date().toISOString().slice(0, 10);
-        if (localStorage.getItem('oifeel_browser_reminder_sent') !== today) {
-            await _showSystemNotification('Un peu de toi, ce soir ?', {
-                body: 'Partage ton humeur du jour avec la communauté oifeel.',
-                tag: 'oifeel-evening-reminder'
-            });
-            localStorage.setItem('oifeel_browser_reminder_sent', today);
-        }
-        _scheduleBrowserReminder();
-    }, next.getTime() - Date.now());
-}
-
-async function enableBrowserNotifications() {
-    if (!('Notification' in window)) {
-        return showMsg('browserNotifMsg', 'ce navigateur ne prend pas en charge les notifications.', 'error');
-    }
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') {
-        return showMsg('browserNotifMsg', 'autorisation non accordée. Tu peux la modifier dans les réglages du navigateur.', 'error');
-    }
-    _scheduleBrowserReminder();
-    showMsg('browserNotifMsg', 'notifications activées pour cet appareil.', 'success');
-}
-
-function initBrowserNotificationSettings() {
-    const settings = _getBrowserNotifSettings();
-    const activity = document.getElementById('browserActivityNotif');
-    const reminder = document.getElementById('browserReminderNotif');
-    const reminderTime = document.getElementById('browserReminderTime');
-    if (!activity || !reminder || !reminderTime) return;
-    activity.checked = settings.activity;
-    reminder.checked = settings.reminder;
-    reminderTime.value = settings.reminderTime;
-    const persist = () => _saveBrowserNotifSettings({ activity: activity.checked, reminder: reminder.checked, reminderTime: reminderTime.value || '19:00' });
-    activity.addEventListener('change', persist);
-    reminder.addEventListener('change', persist);
-    reminderTime.addEventListener('change', persist);
-    // Les navigateurs PWA utilisent le vrai abonnement Web Push dans pwa.js.
-    // Ce repli reste utile sur les navigateurs qui ne le prennent pas en charge.
-    if (!('PushManager' in window)) {
-        document.getElementById('enableBrowserNotifBtn')?.addEventListener('click', enableBrowserNotifications);
-        document.getElementById('testBrowserNotifBtn')?.addEventListener('click', async () => {
-            const sent = await _showSystemNotification('oifeel.', { body: 'Les notifications sont bien activées. À bientôt !', tag: 'oifeel-test' });
-            showMsg('browserNotifMsg', sent ? 'notification envoyée.' : 'active d’abord les notifications.', sent ? 'success' : 'error');
-        });
-    }
-    _scheduleBrowserReminder();
-}
 
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1169,7 +1076,8 @@ function displayMood(mood) {
 
     const shareBtn = document.createElement('button');
     shareBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-link-icon lucide-link"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
-    shareBtn.title = 'Copier le lien du post';
+    shareBtn.title = 'Partager le post';
+    shareBtn.classList.add('post-share-btn');
     actionBar.appendChild(shareBtn);
 
     // const repostBtn = document.createElement('button');
@@ -1211,10 +1119,25 @@ function displayMood(mood) {
         textSpan.style.fontSize = "40px";
     }
 
-    shareBtn.addEventListener('click', (event) => {
-        event.stopPropagation();
-        openPostShareModal(mood);
+    shareBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openShareSheet(mood, { notify: (type, msg) => showFeedback(type, msg) });
     });
+
+    // Bouton partager flottant, visible sur mobile : sous 770px la barre d'actions des posts est
+    // masquée (app-home.css) et déborde de l'écran, ce bouton reste donc toujours accessible.
+    if (mood.id != "404" && mood.id != "1") {
+        const shareFab = document.createElement('button');
+        shareFab.type = 'button';
+        shareFab.className = 'post-share-fab';
+        shareFab.setAttribute('aria-label', 'partager ce post');
+        shareFab.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>';
+        shareFab.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openShareSheet(mood, { notify: (type, msg) => showFeedback(type, msg) });
+        });
+        content.appendChild(shareFab);
+    }
 
     // repostBtn.addEventListener('click', async () => {
     //     try {
@@ -2093,6 +2016,7 @@ if (submitBtn) {
                 const savedStory = await resStory.json();
                 addStoryToList(savedStory);
                 showFeedback("success", "story publiée!", "fb_story_posted");
+                trackEvent('story_created');
             }
             // ✅ Cas POST classique - on crée UNIQUEMENT un post
             else {
@@ -2133,6 +2057,9 @@ if (submitBtn) {
 
                 const savedMood = await response.json();
                 showFeedback("success", "fb_post_shared"); // au lieu d'un texte brut
+                trackEvent('post_created');
+                notifyPosted();
+                maybeAskPushAfterPost();
             }
 
             document.getElementById("moodInput").value = "";
@@ -2583,10 +2510,6 @@ let _e2eReady = false; // true si les clés E2E sont prêtes
 // MUSIQUE — recherche & sélection d'un extrait via l'API Deezer
 // (proxy serveur /api/music/search, pas de clé requise côté client)
 // ============================================================
-// ============================================================
-// MUSIQUE — recherche & sélection d'un extrait via l'API Deezer
-// (proxy serveur /api/music/search, pas de clé requise côté client)
-// ============================================================
 const _musicToolBtn = document.getElementById('musicToolBtn');
 const _musicOverlay = document.getElementById('musicPickerOverlay');
 const _musicSearchInput = document.getElementById('musicSearchInput');
@@ -2906,6 +2829,7 @@ export async function registerUser(username, password) {
         const txt = await res.text().catch(() => null);
         throw new Error(txt || 'Register failed');
     }
+    trackEvent('register');
     // registration succeeded; server doesn't return tokens, so perform login to obtain session
     try {
         await loginUser(password);
@@ -2939,7 +2863,7 @@ export async function loginUser(identifier, password) {
         return { requires2FA: true, method: data.method, pendingToken: data.pendingToken };
     }
     // server may return an access token in body and a user object
-    if (data && data.token) setToken(data.token);
+    if (data && data.token) { setToken(data.token); trackEvent('login'); }
     return data.user || data;
 }
 
@@ -2960,7 +2884,7 @@ export async function verifyLogin2FA(pendingToken, code) {
         throw new Error(errorData.error || 'Code invalide');
     }
     const data = await res.json();
-    if (data && data.token) setToken(data.token);
+    if (data && data.token) { setToken(data.token); trackEvent('login'); }
     return data.user || data;
 }
 
@@ -3047,6 +2971,7 @@ export async function loginGuest() {
     }
     const data = await res.json();
     setToken(data.token);
+    trackEvent('guest_login');
     return data.user;
 }
 
@@ -3160,9 +3085,6 @@ export async function getCurrentUser() {
 
 // UI wiring (simple)
 document.addEventListener('DOMContentLoaded', () => {
-    if (typeof trackAnalyticsVisit === 'function') {
-        trackAnalyticsVisit();
-    }
     const openLogin = document.getElementById('openLogin');
     const openRegister = document.getElementById('openRegister');
     const guestBtn = document.getElementById('guestLogin');
@@ -3860,10 +3782,6 @@ window.openAccountModal = openAccountModal;
 // ============================================================
 function init() {
     injectStyles();
-    initBrowserNotificationSettings();
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/app/service-worker.js').catch(() => { /* l'app reste utilisable sans SW */ });
-    }
 
     // ── Fermer ───────────────────────────────────────────────
     document.getElementById('accountCloseBtn')?.addEventListener('click', closeAccountModal);
@@ -6384,7 +6302,7 @@ function renderModal(mood, postId, postEl) {
     copyBtn.id = 'permalink-copy-btn';
     copyBtn.textContent = 'copier le lien';
     copyBtn.addEventListener('click', async () => {
-        const url = `${location.origin}${location.pathname}#post-${postId}`;
+        const url = shareLink(postId);
         try {
             await navigator.clipboard.writeText(url);
             copyBtn.textContent = 'copié!';
@@ -6845,131 +6763,6 @@ function escHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
-}
-window.showMsg = showMsg;
-
-// ============================================================
-// PARTAGE D'UN POST EN IMAGE
-// ============================================================
-function _wrapCanvasText(ctx, text, maxWidth) {
-    const words = String(text || '').trim().split(/\s+/);
-    const lines = [];
-    let line = '';
-    words.forEach(word => {
-        const candidate = line ? `${line} ${word}` : word;
-        if (ctx.measureText(candidate).width > maxWidth && line) {
-            lines.push(line);
-            line = word;
-        } else line = candidate;
-    });
-    if (line) lines.push(line);
-    return lines.slice(0, 8);
-}
-
-function _shareCardCanvas(mood) {
-    const canvas = document.createElement('canvas');
-    canvas.width = 1080;
-    canvas.height = 1920;
-    const ctx = canvas.getContext('2d');
-    const background = mood.color || '#caa9df';
-    const colors = String(background).match(/#[0-9a-f]{3,8}|rgba?\([^)]*\)/gi) || [];
-    if (String(background).includes('gradient') && colors.length >= 2) {
-        const gradient = ctx.createLinearGradient(0, 0, 1080, 1350);
-        colors.forEach((color, index) => gradient.addColorStop(index / (colors.length - 1), color));
-        ctx.fillStyle = gradient;
-    } else {
-        ctx.fillStyle = background;
-    }
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Un léger voile rend l'export lisible quel que soit le fond choisi.
-    const shade = ctx.createLinearGradient(0, 0, 1080, 1920);
-    shade.addColorStop(0, 'rgba(255,255,255,.18)');
-    shade.addColorStop(1, 'rgba(0,0,0,.08)');
-    ctx.fillStyle = shade;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const textColor = mood.textColor || getAutoTextColor(background);
-    ctx.fillStyle = textColor;
-    ctx.font = '600 47px DMSans, Arial, sans-serif';
-    ctx.fillText('oifeel.', 86, 104);
-    ctx.globalAlpha = .66;
-    ctx.font = '400 28px DMSans, Arial, sans-serif';
-    ctx.fillText('un moment partagé', 86, 148);
-    ctx.globalAlpha = 1;
-
-    const emoji = mood.emoji || '';
-    ctx.font = '150px "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(emoji, 540, 425);
-
-    ctx.font = '600 66px DMSans, Arial, sans-serif';
-    const lines = _wrapCanvasText(ctx, mood.text, 820);
-    const startY = 600 - ((lines.length - 1) * 42);
-    lines.forEach((line, index) => ctx.fillText(line, 540, startY + index * 86));
-
-    ctx.textAlign = 'left';
-    ctx.globalAlpha = .75;
-    ctx.font = '400 29px DMSans, Arial, sans-serif';
-    const date = mood.createdAt ? new Date(mood.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
-    ctx.fillText(date, 86, 1790);
-    ctx.textAlign = 'right';
-    ctx.fillText('oifeel.', 994, 1790);
-    ctx.globalAlpha = 1;
-    return canvas;
-}
-
-function _downloadShareCard(canvas, mood) {
-    canvas.toBlob(blob => {
-        if (!blob) return;
-        const anchor = document.createElement('a');
-        anchor.href = URL.createObjectURL(blob);
-        anchor.download = `oifeel-post-${mood.id || Date.now()}.png`;
-        anchor.click();
-        setTimeout(() => URL.revokeObjectURL(anchor.href), 1000);
-    }, 'image/png');
-}
-
-function openPostShareModal(mood) {
-    window.oifeelTrack?.('share', 'share');
-    document.getElementById('post-share-modal')?.remove();
-    const canvas = _shareCardCanvas(mood);
-    const overlay = document.createElement('div');
-    overlay.id = 'post-share-modal';
-    overlay.innerHTML = `
-        <section class="post-share-panel" role="dialog" aria-modal="true" aria-label="partager ce post">
-            <button class="post-share-close" type="button" aria-label="fermer">×</button>
-            <h2>partager ce post</h2>
-            <p>enregistre cette version au format image ou partage-la directement.</p>
-            <img class="post-share-preview" alt="aperçu de l’image à partager">
-            <div class="post-share-actions">
-                <button type="button" class="post-share-save">enregistrer l’image</button>
-                <button type="button" class="post-share-link">copier le lien</button>
-            </div>
-        </section>`;
-    const image = overlay.querySelector('.post-share-preview');
-    image.src = canvas.toDataURL('image/png');
-    const close = () => overlay.remove();
-    overlay.querySelector('.post-share-close').addEventListener('click', close);
-    overlay.addEventListener('click', event => { if (event.target === overlay) close(); });
-    overlay.querySelector('.post-share-save').addEventListener('click', async () => {
-        canvas.toBlob(async blob => {
-            if (!blob) return;
-            const file = new File([blob], `oifeel-post-${mood.id || Date.now()}.png`, { type: 'image/png' });
-            if (navigator.canShare?.({ files: [file] })) {
-                try { await navigator.share({ title: 'oifeel.', text: mood.text || '', files: [file] }); return; } catch (_) { /* téléchargement ci-dessous */ }
-            }
-            _downloadShareCard(canvas, mood);
-        }, 'image/png');
-    });
-    overlay.querySelector('.post-share-link').addEventListener('click', async () => {
-        const url = `${location.origin}${location.pathname}#post-${mood.id}`;
-        try {
-            await navigator.clipboard.writeText(url);
-            showFeedback('success', 'copied_link');
-        } catch (_) { prompt('copie ce lien :', url); }
-    });
-    document.body.appendChild(overlay);
 }
 
 // Auto-init

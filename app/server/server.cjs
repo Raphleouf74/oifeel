@@ -3893,33 +3893,6 @@ app.post('/api/bot/report', requireBotSecret, async (req, res) => {
     res.status(500).json({ error: 'Erreur serveur' });
   }
 });
-async function initAnalytics() {
-  if (collection) return collection;
-
-  if (!process.env.MONGO_URI) {
-    console.warn('⚠️ MONGO_URI absent : analytics désactivées');
-    return null;
-  }
-
-  client = new MongoClient(process.env.MONGO_URI);
-
-  await client.connect();
-
-  db = client.db(
-    process.env.MONGO_DB_NAME || undefined
-  );
-
-  collection = db.collection('analytics_daily');
-
-  await collection.createIndex(
-    { date: 1 },
-    { unique: true }
-  );
-
-  console.log('📊 Analytics MongoDB connectées');
-
-  return collection;
-}
 
 
 /* =========================================================
