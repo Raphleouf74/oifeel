@@ -242,9 +242,10 @@ input[type="radio"] {
   justify-content: center;
 }
 
-#durationPicker {
+#durationPicker.create-duration {
   display: block;
-  bottom: 50px;
+  position: fixed;
+  bottom: 50px !important;
   opacity: 1;
   width: 50%;
   background: rgba(25, 25, 25, 1);
@@ -463,11 +464,11 @@ body.dark #ai-generate.ai-generate-btn:hover {
 .create-emoji-group {
   display: flex;
   flex-direction: column;
-  width: 100%;
-  align-items: left;
+  width: 80%;
+  align-items: center;
   gap: 7px;
   margin-bottom: 10px;
-  justify-content: space-evenly;
+  justify-content: center;
 }
 
 .create-emoji-group div {
@@ -717,7 +718,7 @@ body.dark .create-picker-close-emoji:hover {
   color: var(--text);
   font-size: 1.75rem;
   text-align: center;
-  width: 100%;
+  width: 80%;
   justify-content: space-evenly;
   transition: all 0.3s ease;
   font-weight: 600;

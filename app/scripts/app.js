@@ -1867,14 +1867,11 @@ const optionnalsettings = document.querySelector('#advancedOptions #container');
 
 if (_ephemeralToggle && _durationPicker) {
     _durationPicker.style.opacity = '0';
-    _durationPicker.style.position = 'absolute';
     _ephemeralToggle.addEventListener('change', () => {
         if (_ephemeralToggle.checked) {
             _durationPicker.style.opacity = '1';
-            _durationPicker.style.position = 'default';
         } else {
             _durationPicker.style.opacity = '0';
-            _durationPicker.style.position = 'absolute';
         }
     });
 }
