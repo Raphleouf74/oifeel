@@ -15,7 +15,6 @@ const cron = require("node-cron");
 const createAnalytics = require('./services/analytics.cjs');
 const createShareCards = require('./services/share-cards.cjs');
 const createWebPush = require('./services/webpush.cjs');
-const registerAnalytics = require('./services/analytics.cjs').register;
 
 const jwtService = require('./services/jwt.cjs');
 
@@ -416,10 +415,6 @@ app.use((req, res, next) => {
   console.log(`[REQ] ${new Date().toISOString()} ${req.method} ${req.originalUrl} Origin=${req.headers.origin || 'none'}`);
   next();
 });
-registerAnalytics(app, {
-  requireAdmin,
-  isMongoReady: () => mongoReady
-});
 app.get('/ping', (req, res) => {
   res.set('x-server', 'oifeel-server');
   res.json({ ok: true, time: Date.now() });
@@ -544,7 +539,7 @@ analytics = createAnalytics({
   }
 });
 createShareCards({ app, PostModel });
-
+registerAnalytics({ app, requireAdmin, isMongoReady: () => mongoReady});
 const dataDir = path.join(__dirname, "data");
 const postsFile = path.join(dataDir, "posts.json");
 const configFile = path.join(dataDir, "config.json");
