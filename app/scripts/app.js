@@ -1034,7 +1034,6 @@ function displayMood(mood) {
     async function toggleLike() {
         if (likePending) return;          // ignore si déjà en cours
         likePending = true;
-        likeBtn.style.pointerEvents = 'none';
 
         const isLiked = likeBtn.classList.contains('liked');
         try {

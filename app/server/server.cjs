@@ -783,8 +783,6 @@ app.post("/api/posts", async (req, res) => {
 
     posts.unshift(newPost);
     await persistPost(newPost);
-    analytics.track('post', req.body?.source || 'direct');
-
     // Attache le thème de l'auteur pour un affichage immédiat (sans attendre
     // un refetch du feed), sauf si le post est publié en anonyme.
     const [newPostWithTheme] = await attachAuthorThemes([newPost]);
@@ -3951,42 +3949,15 @@ const ALLOWED_EVENTS = new Set([
    ========================================================= */
 
 async function recordEvent(event, source = 'direct') {
-  if (!collection) {
-    await initAnalytics();
+  const analyticsEvent = {
+    post_created: 'post',
+    registration: 'signup',
+    login: 'login'
+  }[event];
+
+  if (analyticsEvent) {
+    await analytics.track(analyticsEvent, source);
   }
-
-  if (!collection) return;
-
-  if (!ALLOWED_EVENTS.has(event)) {
-    return;
-  }
-
-  const date = todayUTC();
-  const cleanSource = normalizeSource(source);
-
-  const field = `events.${event}`;
-
-  await collection.updateOne(
-    { date },
-    {
-      $inc: {
-        [field]: 1,
-        [`sources.${cleanSource}`]: event === 'visit' ? 1 : 0
-      },
-
-      $setOnInsert: {
-        date,
-        createdAt: new Date()
-      },
-
-      $set: {
-        updatedAt: new Date()
-      }
-    },
-    {
-      upsert: true
-    }
-  );
 }
 
 

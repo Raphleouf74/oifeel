@@ -739,8 +739,6 @@ body.dark .sv-bubble__face {
   animation: postTextIn 0.3s 0.1s ease both;
 }
 
-
-
 /* ---- Pilule musique (extrait Deezer, 30s) ---- */
 
 .post-track {
@@ -905,38 +903,38 @@ body.dark .sv-bubble__face {
   left: 0;
   right: 0;
 }
+@media (min-width: 769px) {
+  .buttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    opacity: 0;
+    right: 5px;
+    padding: 10px;
+    transform: translateY(-30px) translateX(-25px);
+    border-radius: 25px;
+    max-height: 80px;
+    max-width: 7 0%;
+    width: 515px;
+  }
 
-.buttons {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
-  opacity: 0;
-  right: 5px;
-  padding: 10px;
-  transform: translateY(-30px) translateX(-25px);
-  border-radius: 25px;
-  max-height: 80px;
-  max-width: 7 0%;
-  width: 515px;
+  .post:hover .buttons {
+    opacity: 1;
+    transform: translateY(-45px) translateX(-10px);
+    border-radius: 25px;
+    right: 5px;
+    transition:
+      opacity 0.2s,
+      transform 0.2s;
+    background-color: rgba(255, 255, 255, 0.4);
+    box-shadow: rgb(0, 0, 0, 0.7) 0 0 5px 2px;
+    color: black;
+    -webkit-backdrop-filter: blur(15px);
+    backdrop-filter: blur(15px);
+  }
 }
-
-.post:hover .buttons {
-  opacity: 1;
-  transform: translateY(-45px) translateX(-10px);
-  border-radius: 25px;
-  right: 5px;
-  transition:
-    opacity 0.2s,
-    transform 0.2s;
-  background-color: rgba(255, 255, 255, 0.4);
-  box-shadow: rgb(0, 0, 0, 0.7) 0 0 5px 2px;
-  color: black;
-  -webkit-backdrop-filter: blur(15px);
-  backdrop-filter: blur(15px);
-}
-
 .likebtn {
   display: flex;
   align-items: center;
@@ -949,6 +947,7 @@ body.dark .sv-bubble__face {
   color: #eee;
   font-size: 1rem;
   font-weight: 600;
+  z-index: 1000;
 }
 
 .likebtn:hover {
@@ -1112,7 +1111,7 @@ body.dark .post-actions button:hover {
   flex-shrink: 0;
 }
 
-.post.ai-generated.ai-avoid .post-inner{
+.post.ai-generated.ai-avoid .post-inner {
   filter: blur(14px);
   pointer-events: none;
   -webkit-user-select: none;
@@ -1733,7 +1732,6 @@ body.dark .post-actions button:hover {
   word-break: break-word;
 }
 
-
 #permalink-track {
   display: flex;
   align-items: center;
@@ -2043,7 +2041,7 @@ body.dark .post-actions button:hover {
     width: 50px;
     height: 50px;
     color: red;
-  } 
+  }
 }
 
 @media (max-width: 769px) and (max-width: 768px) {
@@ -2446,44 +2444,32 @@ body.dark .post-actions button:hover {
   }
 
   #postoptions {
-    height: 20px;
-    padding: 5px 8px;
+    height: 67.5px;
+    width: 100%;
     position: absolute;
-    transform: translateY(-75px);
-    left: 0;
-    right: 0;
+    left: -10px;
+    display: flex;
+    flex-direction: row;
   }
 
   body.dark #postoptions {
     border-top-color: rgba(255, 255, 255, 0.06);
   }
-  .buttons {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    opacity: 0;
-    right: 5px;
-    padding: 10px;
-    transform: translateY(0) translateX(-25px);
-    border-radius: 25px;
-    max-height: 50px;
-    width: 375px;
-    display: flex;
-    justify-content: center;
-  }
-  .post:hover .buttons {
+  .post .buttons {
     opacity: 1;
-    transform: translateY(-5px) translateX(10px);
     border-radius: 25px;
-    right: 5px;
+    width: 100%;
+    transform: translateX(-7px);
     transition:
       opacity 0.2s,
       transform 0.2s;
-    background-color: rgba(255, 255, 255, 0.4);
+    background-color: rgba(0, 0, 0, 0.8);
     box-shadow: rgb(0, 0, 0, 0.7) 0 0 5px 2px;
-    color: black;
+    color: white;
     -webkit-backdrop-filter: blur(15px);
     backdrop-filter: blur(15px);
+    display: flex;
+    flex-direction: row;
   }
   .likebtn {
     display: flex;
@@ -2494,7 +2480,7 @@ body.dark .post-actions button:hover {
     height: 65px;
     gap: none;
     background: transparent;
-    color: var(--text);
+    color: white;
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
@@ -2524,10 +2510,10 @@ body.dark .post-actions button:hover {
     stroke: currentColor;
   }
   .likebtn span.icon {
-    background-color: #fff;
-    color: #000;
-    width: 50px;
-    height: 50px;
+    background-color: transparent;
+    color: #fff;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
@@ -2535,8 +2521,10 @@ body.dark .post-actions button:hover {
   }
   .like-count {
     min-width: 20px;
-    font-size: 1.25rem;
+    font-size: 2.25rem;
     text-align: center;
+    color: white;
+    margin-right: 20px;
   }
   .post-actions {
     display: flex;
@@ -2581,7 +2569,7 @@ body.dark .post-actions button:hover {
   .postdate {
     width: 100%;
     font-size: 1rem;
-    color: black;
+    color: white;
     opacity: 1;
   }
   .expiration-date {
@@ -2627,7 +2615,7 @@ body.dark .post-actions button:hover {
     height: 14px;
     flex-shrink: 0;
   }
-  .post.ai-generated.ai-avoid .post-inner{
+  .post.ai-generated.ai-avoid .post-inner {
     filter: blur(14px);
     pointer-events: none;
     -webkit-user-select: none;

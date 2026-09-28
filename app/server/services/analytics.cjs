@@ -6,7 +6,7 @@ module.exports = function createAnalytics({ mongoose, app, isAdminRequest }) {
     sources: { type: Map, of: Number, default: {} }
   }, { versionKey: false });
   const DailyAnalytics = mongoose.models.DailyAnalytics || mongoose.model('DailyAnalytics', schema);
-  const allowedEvents = new Set(['visit', 'guest', 'signup', 'post', 'share', 'install']);
+  const allowedEvents = new Set(['visit', 'guest', 'signup', 'login', 'post', 'share', 'install']);
   const allowedSources = new Set(['direct', 'tiktok', 'discord', 'instagram', 'share', 'other']);
   const day = () => new Date().toISOString().slice(0, 10);
 
