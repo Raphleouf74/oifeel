@@ -21,7 +21,7 @@ export function initPwa(opts = {}) {
     if (opts.notify) notify = opts.notify;
 
     if ('serviceWorker' in navigator) {
-        const register = () => navigator.serviceWorker.register('/sw.js')
+        const register = () => navigator.serviceWorker.register('/app/sw.js', { scope: '/app/' })
             .then((reg) => { swReg = reg; })
             .catch((err) => console.warn('Service worker :', err));
         if (document.readyState === 'complete') register();

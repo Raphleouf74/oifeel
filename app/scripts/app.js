@@ -2510,7 +2510,7 @@ const _musicToolBtn = document.getElementById('musicToolBtn');
 const _musicOverlay = document.getElementById('musicPickerOverlay');
 const _musicSearchInput = document.getElementById('musicSearchInput');
 const _musicSearchBtn = document.getElementById('musicSearchBtn');
-const _musicResults = document.getElementById('musicResults');
+const musicResults = document.getElementById('musicResults');
 const _chosenTrackPreview = document.getElementById('chosenTrackPreview');
 const _chosenTrackCover = document.getElementById('chosenTrackCover');
 const _chosenTrackTitle = document.getElementById('chosenTrackTitle');
@@ -2537,7 +2537,7 @@ function _stopMusicPreview() {
         _musicPreviewAudio.pause();
         _musicPreviewAudio = null;
     }
-    _musicResults?.querySelectorAll('.music-item-play.playing').forEach(b => b.classList.remove('playing'));
+    musicResults?.querySelectorAll('.music-item-play.playing').forEach(b => b.classList.remove('playing'));
 }
 
 if (_musicToolBtn && _musicOverlay) {
@@ -2576,14 +2576,14 @@ if (_musicSearchBtn && _musicSearchInput) {
     _musicSearchInput.addEventListener('input', () => {
         clearTimeout(_musicSearchDebounce);
         const q = _musicSearchInput.value.trim();
-        if (!q) { _musicResults.innerHTML = ''; return; }
+        if (!q) { musicResults.innerHTML = ''; return; }
         _musicSearchDebounce = setTimeout(() => _searchMusic(q), 400);
     });
 }
 
 async function _searchMusic(query) {
-    if (!_musicResults) return;
-    _musicResults.innerHTML = '<div class="music-empty">recherche...</div>';
+    if (!musicResults) return;
+    musicResults.innerHTML = '<div class="music-empty">recherche...</div>';
     try {
         const res = await fetch(`${API}music/search?q=${encodeURIComponent(query)}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -2591,16 +2591,16 @@ async function _searchMusic(query) {
         _renderMusicResults(data.results || []);
     } catch (err) {
         console.error('Erreur recherche musique:', err);
-        _musicResults.innerHTML = '<div class="music-empty">recherche indisponible, réessaie plus tard</div>';
+        musicResults.innerHTML = '<div class="music-empty">recherche indisponible, réessaie plus tard</div>';
     }
 }
 
 function _renderMusicResults(results) {
     _stopMusicPreview();
-    _musicResults.innerHTML = '';
+    musicResults.innerHTML = '';
 
     if (!results.length) {
-        _musicResults.innerHTML = '<div class="music-empty">aucun résultat</div>';
+        musicResults.innerHTML = '<div class="music-empty">aucun résultat</div>';
         return;
     }
 
@@ -2655,7 +2655,7 @@ function _renderMusicResults(results) {
             _musicOverlay.style.setProperty('display', 'none', 'important');
         });
 
-        _musicResults.appendChild(item);
+        musicResults.appendChild(item);
     });
 }
 
@@ -4126,7 +4126,7 @@ async function _fetchComments(postId) {
 
 function _updateCount(btn, count) {
     const span = btn.querySelector('.ccount');
-    if (span) span.textContent = count > 0 ? count : '';
+    if (span) span.textContent = count > 0 ? count : '0';
 }
 
 // ─── LocalStorage ───────────────────────────────────────────

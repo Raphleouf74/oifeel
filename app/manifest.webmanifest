@@ -1,19 +1,19 @@
 {
-  "id": "/",
+  "id": "/app/",
   "name": "oifeel.",
   "short_name": "oifeel.",
   "description": "Partage ton ressenti en une couleur, un emoji et une chanson. Personne ne juge ici.",
   "lang": "fr",
-  "start_url": "/?utm_source=pwa",
-  "scope": "/",
+  "start_url": "/app/?utm_source=pwa",
+  "scope": "/app/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#111111",
   "theme_color": "#111111",
   "categories": ["social", "lifestyle"],
   "icons": [
-    { "src": "/app/assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/app/assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/app/assets/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "/app/assets/logo/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/app/assets/logo/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/app/assets/logo/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

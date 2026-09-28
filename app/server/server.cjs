@@ -15,6 +15,7 @@ const cron = require("node-cron");
 const createAnalytics = require('./services/analytics.cjs');
 const createShareCards = require('./services/share-cards.cjs');
 const createWebPush = require('./services/webpush.cjs');
+const registerAnalytics = require('./services/analytics.cjs').register;
 
 const jwtService = require('./services/jwt.cjs');
 
@@ -319,7 +320,10 @@ if (MONGO_URI) {
 } else {
   console.warn('⚠️  MONGO_URI absent — persistance JSON seule');
 }
-
+registerAnalytics(app, {
+  requireAdmin,
+  isMongoReady: () => mongoReady
+});
 setInterval(async () => {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   let purgedCount = 0;
@@ -426,13 +430,9 @@ const corsOptions = {
     if (!origin) return callback(null, true);
     const allowedHosts = [
       "https://oifeel.netlify.app",
-      "http://127.0.0.1:5500",
-      "http://127.0.0.1:5501",
-      "http://127.0.0.1:5502",
-      "http://127.0.0.1:5503",
-      "http://127.0.0.1:3000",
-      "http://127.0.0.1:10000",
-      "https://moodshare-7dd7.onrender.com"
+
+      "https://moodshare-7dd7.onrender.com",
+      "http://127.0.0.1:5500"
     ];
     const localhostsRegex = /^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.1\.21)(:\d+)?$/;
 
@@ -3401,7 +3401,7 @@ app.get('/api/auth/google', (req, res) => {
 
 // ── GET /api/auth/google/callback — Google revient ici avec un code ──
 app.get('/api/auth/google/callback', async (req, res) => {
-  const FRONTEND_URL = process.env.FRONTEND_URL || 'https://oifeel.netlify.app';
+  const FRONTEND_URL = 'https://oifeel.netlify.app';
   try {
     const { code, state } = req.query;
 

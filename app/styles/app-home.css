@@ -1028,7 +1028,7 @@ body.dark .sv-bubble__face {
 }
 
 .ctoggle {
-  width: 50px !important;
+  width: 50px;
   justify-content: space-evenly;
   align-items: center;
   display: flex;
@@ -2530,22 +2530,21 @@ body.dark .post-actions button:hover {
     display: flex;
     align-items: center;
     gap: 4px;
-    margin-left: auto;
+    margin-right: 9px;
   }
   .post-actions button,
   .ctoggle {
-    /* width: 40px;
-    height: 40px;
+    width: 85px;
+    height: 50px;
     border: none;
-    border-radius: 5px;
+    border-radius: 18px;
     background: rgb(inherit, inherit, inherit, 0.5);
-    color: var(--text);
-    opacity: 0.6;
+    color: white;
+    opacity: 1;
     display: flex;
     align-items: center;
-    justify-content: center;
-    cursor: pointer; */
-    display: none; /* disabled temporarily */
+    justify-content: space-evenly;
+    cursor: pointer; 
   }
   .post-actions button:active {
     transform: translateY(1px);
@@ -2667,13 +2666,7 @@ body.dark .post-actions button:hover {
   .post-text {
     font-size: 1.1rem;
   }
-  .post-actions {
-    gap: 2px;
-  }
-  .post-actions button {
-    width: 32px;
-    height: 32px;
-  }
+  
   .conv-info {
     flex: 1;
     min-width: 0;

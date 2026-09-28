@@ -6,12 +6,12 @@
  * Placé à la RACINE du site pour contrôler toutes les pages.
  */
 const CACHE = 'oifeel-v1';
-const ICON = '/app/assets/icons/icon-192.png';
+const ICON = '/app/assets/logo/icon-192.png';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE).then((c) => c.addAll(['/', ICON]).catch(() => { }))
+    caches.open(CACHE).then((c) => c.addAll(['/app/', ICON]).catch(() => { }))
   );
 });
 
@@ -42,7 +42,7 @@ self.addEventListener('fetch', (event) => {
       const cached = await caches.match(req);
       if (cached) return cached;
       if (req.mode === 'navigate') {
-        const shell = await caches.match('/');
+        const shell = await caches.match('/app/');
         if (shell) return shell;
       }
       throw err;

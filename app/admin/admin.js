@@ -1319,10 +1319,10 @@ async function showUserIp(userId) {
             ipSub = `Dernière connexion : ${date}`;
         } else if (data.expired) {
             ipText = 'Données expirées';
-            ipSub = 'Données utilisateur éxpirées, connexion de l\'utilisateur requise pour récupérer l\'IP';
+            ipSub = '';
         } else {
             ipText = 'Aucune IP enregistrée';
-            ipSub = 'Utilisateur non connecté. L\'utilisateur doit se connecter pour que l\'IP soit enregistrée. Il ne s\'est jamais connecté depuis la dernière mise à jour de sécurité.';
+            ipSub = 'Utilisateur non connecté. IP non enregistrée.';
         }
         // Afficher dans une mini modale/toast enrichi
         toast(`🔍 ${ipText} — ${ipSub}`, data.ip ? 'info' : 'warn');
