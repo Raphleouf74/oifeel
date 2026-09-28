@@ -51,20 +51,24 @@ function register(app, { requireAdmin, isMongoReady }) {
     legacyHeaders: false
   });
 
-  app.post('/api/track', trackLimiter, (req, res) => {
-    // On répond tout de suite : le tracking ne doit jamais ralentir ni casser l'app.
-    res.status(204).end();
+  async function track(event, source) {
     try {
       if (!isMongoReady()) return;
-      const { event, source } = req.body || {};
       if (typeof event !== 'string' || !EVENTS.has(event)) return;
 
       const inc = { [`events.${event}`]: 1 };
       if (event === 'visit' && typeof source === 'string' && SOURCES.has(source)) {
         inc[`events.src_${source}`] = 1;
       }
-      AnalyticsDay.updateOne({ _id: parisDay() }, { $inc: inc }, { upsert: true }).catch(() => { });
+      await AnalyticsDay.updateOne({ _id: parisDay() }, { $inc: inc }, { upsert: true }).catch(() => { });
     } catch (_) { /* jamais bloquant */ }
+  }
+
+  app.post('/api/track', trackLimiter, (req, res) => {
+    // On répond tout de suite : le tracking ne doit jamais ralentir ni casser l'app.
+    res.status(204).end();
+    const { event, source } = req.body || {};
+    track(event, source);
   });
 
   app.get('/api/admin/analytics', requireAdmin, async (req, res) => {
@@ -83,6 +87,8 @@ function register(app, { requireAdmin, isMongoReady }) {
       res.status(500).json({ error: 'Erreur serveur' });
     }
   });
+
+  return { track };
 }
 
 module.exports = { register, parisDay, EVENTS, SOURCES };

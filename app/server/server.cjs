@@ -12,7 +12,7 @@ const rateLimit = require("express-rate-limit");
 const fs = require("fs");
 const fsPromises = require("fs/promises");
 const cron = require("node-cron");
-const createAnalytics = require('./services/analytics.cjs');
+const { register: registerAnalytics } = require('./analytics.cjs');
 const createShareCards = require('./services/share-cards.cjs');
 const createWebPush = require('./services/webpush.cjs');
 
@@ -529,17 +529,11 @@ app.use((req, res, next) => {
   next();
 });
 
-analytics = createAnalytics({
-  mongoose,
-  app,
-  isAdminRequest: req => {
-    if (isAdminSecretRequest(req)) return true;
-    const token = req.headers.authorization?.startsWith('Bearer ') ? req.headers.authorization.slice(7) : null;
-    try { return jwtService.verify(token)?.role === 'admin'; } catch (_) { return false; }
-  }
+analytics = registerAnalytics(app, {
+  requireAdmin,
+  isMongoReady: () => mongoReady
 });
 createShareCards({ app, PostModel });
-createAnalytics({ app, requireAdmin, isMongoReady: () => mongoReady});
 const dataDir = path.join(__dirname, "data");
 const postsFile = path.join(dataDir, "posts.json");
 const configFile = path.join(dataDir, "config.json");
@@ -3945,8 +3939,8 @@ const ALLOWED_EVENTS = new Set([
 
 async function recordEvent(event, source = 'direct') {
   const analyticsEvent = {
-    post_created: 'post',
-    registration: 'signup',
+    post_created: 'post_created',
+    registration: 'register',
     login: 'login'
   }[event];
 
