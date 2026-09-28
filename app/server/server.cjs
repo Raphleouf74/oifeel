@@ -320,10 +320,7 @@ if (MONGO_URI) {
 } else {
   console.warn('⚠️  MONGO_URI absent — persistance JSON seule');
 }
-registerAnalytics(app, {
-  requireAdmin,
-  isMongoReady: () => mongoReady
-});
+
 setInterval(async () => {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   let purgedCount = 0;
@@ -419,7 +416,10 @@ app.use((req, res, next) => {
   console.log(`[REQ] ${new Date().toISOString()} ${req.method} ${req.originalUrl} Origin=${req.headers.origin || 'none'}`);
   next();
 });
-
+registerAnalytics(app, {
+  requireAdmin,
+  isMongoReady: () => mongoReady
+});
 app.get('/ping', (req, res) => {
   res.set('x-server', 'oifeel-server');
   res.json({ ok: true, time: Date.now() });
