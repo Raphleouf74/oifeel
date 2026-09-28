@@ -539,7 +539,7 @@ analytics = createAnalytics({
   }
 });
 createShareCards({ app, PostModel });
-registerAnalytics({ app, requireAdmin, isMongoReady: () => mongoReady});
+createAnalytics({ app, requireAdmin, isMongoReady: () => mongoReady});
 const dataDir = path.join(__dirname, "data");
 const postsFile = path.join(dataDir, "posts.json");
 const configFile = path.join(dataDir, "config.json");
