@@ -3390,7 +3390,7 @@ app.get('/api/auth/google', (req, res) => {
 
 // ── GET /api/auth/google/callback — Google revient ici avec un code ──
 app.get('/api/auth/google/callback', async (req, res) => {
-  const FRONTEND_URL = 'https://oifeel.netlify.app';
+  const FRONTEND_URL = 'https://oifeel.netlify.app/app/';
   try {
     const { code, state } = req.query;
 
