@@ -78,6 +78,21 @@
   margin-left: 0;
   position: relative;
 }
+@media (max-width: 769px) {
+  #moodWall {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    left: 1%;
+    width: 98%;
+    margin: 0;
+    margin-left: 0;
+    margin-top:25px;
+    position: relative;
+    gap: 50px;
+  }
+}
 
 .stories-list {
   display: flex;
@@ -108,12 +123,13 @@
 .posts-section-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 10px;
 }
 
 .posts-section-header h2 {
-  margin: 0;
+  margin-top: 25px;
+  font-size: 2.25rem;
 }
 
 /* ---- Switch Jour/Nuit : assombrit les posts trop clairs ---- */
@@ -2404,13 +2420,13 @@ body.dark .post-actions button:hover {
     right: 11px;
   }
   .post {
-    min-height: 350px;
+    min-height: 45vh;
   }
   .post:hover {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }
   .post-content {
-    height: 350px;
+    height: 45vh;
     width: 100%;
     padding: 32px 24px;
     display: flex;
@@ -2544,7 +2560,7 @@ body.dark .post-actions button:hover {
     display: flex;
     align-items: center;
     justify-content: space-evenly;
-    cursor: pointer; 
+    cursor: pointer;
   }
   .post-actions button:active {
     transform: translateY(1px);

@@ -12,8 +12,8 @@
   "theme_color": "#111111",
   "categories": ["social", "lifestyle"],
   "icons": [
-    { "src": "/app/assets/logo/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/app/assets/logo/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/app/assets/logo/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "/app/assets/logo/app_logo_dark.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/app/assets/logo/app_logo_dark.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/app/assets/logo/app_logo_dark.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

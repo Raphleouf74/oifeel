@@ -1087,7 +1087,7 @@
 
 @media (max-width: 769px) {
   #TOSmsg {
-    position: absolute;
+    position: fixed;
     width: 90%;
     overflow-y: none;
     border-radius: 25px;
