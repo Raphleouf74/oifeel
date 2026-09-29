@@ -425,7 +425,7 @@ const corsOptions = {
     if (!origin) return callback(null, true);
     const allowedHosts = [
       "https://oifeel.netlify.app",
-
+      "http://192.168.1.38:5500",
       "https://moodshare-7dd7.onrender.com",
       "http://127.0.0.1:5500"
     ];

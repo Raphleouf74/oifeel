@@ -277,6 +277,7 @@ function initIntersectionObserver() {
 function initHeaderScrollEffect() {
     const header = document.getElementById('main-header');
     const sbp = document.getElementById('scroll-progress-bar');
+   
     if (!header) return;
     header.classList.remove('scrolled');
     sbp.classList.remove('scrolled');

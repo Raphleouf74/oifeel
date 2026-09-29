@@ -8,6 +8,51 @@ window.openPermalinkModal = openPostModal;
 const API_BASE = "https://moodshare-7dd7.onrender.com";
 const API = API_BASE + '/api/';
 
+// TEMP: expose les erreurs JavaScript dans l'interface mobile, sans DevTools.
+let _lastMobileErrorFeedbackAt = 0;
+
+function _showMobileErrorFeedback(error, source = '') {
+    const message = error instanceof Error
+        ? `${error.name}: ${error.message}`
+        : typeof error === 'string'
+            ? error
+            : String(error ?? 'Erreur inconnue');
+    const now = Date.now();
+    if (now - _lastMobileErrorFeedbackAt < 3000) return;
+    _lastMobileErrorFeedbackAt = now;
+
+    try {
+        showFeedback('error', `[debug mobile] ${message}${source ? ` (${source})` : ''}`);
+    } catch (_) {
+        const feedback = document.createElement('div');
+        feedback.textContent = `[debug mobile] ${message}${source ? ` (${source})` : ''}`;
+        feedback.style.cssText = 'position:fixed;z-index:999999;left:12px;right:12px;bottom:80px;padding:12px;background:#b91c1c;color:#fff;font:14px sans-serif;overflow-wrap:anywhere';
+        document.body?.appendChild(feedback);
+    }
+}
+
+window.addEventListener('error', (event) => {
+    const source = event.filename
+        ? `${event.filename.split('/').pop()}:${event.lineno || 0}`
+        : '';
+    _showMobileErrorFeedback(event.error || event.message || 'Erreur JavaScript', source);
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+    _showMobileErrorFeedback(event.reason || 'Promesse rejetée');
+});
+
+const _originalConsoleError = console.error.bind(console);
+console.error = (...args) => {
+    _originalConsoleError(...args);
+    const message = args.map((arg) => {
+        if (arg instanceof Error) return `${arg.name}: ${arg.message}`;
+        if (typeof arg === 'string') return arg;
+        try { return JSON.stringify(arg); } catch (_) { return String(arg); }
+    }).join(' ');
+    _showMobileErrorFeedback(message || 'console.error appelé');
+};
+
 // Statistiques anonymes (1 visite / onglet) + PWA (service worker, installation, notifications)
 trackVisitOnce();
 initPwa({ notify: (type, msg) => showFeedback(type, msg) });
@@ -496,6 +541,7 @@ const header = document.querySelector('header');
 const profileheader = document.getElementById('accountheader');
 const tabSections = document.querySelectorAll('section.tab');
 const feedSelector = document.getElementById('feed-selector');
+const TOS = document.getElementById('TOSmsg');
 
 // Chaque section scrollable doit déclencher l'effet de scroll du header
 // Optimisé avec throttle pour éviter trop de reflows
@@ -512,12 +558,14 @@ if (tabSections.length) {
             nav.classList.remove('scrolled');
             header.classList.remove('scrolled');
             profileheader.classList.remove('scrolled');
+            TOS.classList.remove('scrolled');
             feedSelector.classList.remove('scrolled');
         } else {
             nav.classList.add('scrolled');
             header.classList.add('scrolled');
             profileheader.classList.add('scrolled');
             feedSelector.classList.add('scrolled');
+            TOS.classList.add('scrolled');
         }
     }, 66); // ~60fps throttle
 

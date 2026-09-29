@@ -2428,13 +2428,13 @@ body.dark .post-actions button:hover {
     width: 100%;
   }
   .post-emoji {
-    font-size: 7.5rem !important;
+    font-size: 5rem;
     line-height: 1;
     filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.15));
     animation: postEmojiIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   }
   .post-text {
-    font-size: 2rem !important;
+    font-size: 2rem;
     font-weight: 600;
     line-height: 1.5;
     word-break: break-word;
@@ -2656,17 +2656,7 @@ body.dark .post-actions button:hover {
     border-color: rgba(255, 255, 0, 0.5);
     box-shadow: 0 2px 12px rgba(255, 255, 0, 0.3);
   }
-  .post-content {
-    min-height: 180px;
-    padding: 28px 20px;
-  }
-  .post-emoji {
-    font-size: 4rem;
-  }
-  .post-text {
-    font-size: 1.1rem;
-  }
-  
+
   .conv-info {
     flex: 1;
     min-width: 0;
