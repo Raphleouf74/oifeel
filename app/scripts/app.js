@@ -2,6 +2,9 @@ import { trackVisitOnce, track as trackEvent } from './analytics.js';
 import { openShareSheet } from './share.js';
 import { initPwa, maybeAskPushAfterPost, notifyPosted } from './pwa.js';
 import { shareLink } from './config.js';
+import { initSfx, playControlSfx } from './sfx.js';
+
+initSfx();
 
 window.openPermalinkModal = openPostModal;
 
@@ -486,6 +489,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // (OPTIONNEL) → Au bout de 3 tentatives, on bloque temporairement :
             if (securityStrike >= 3) {
                 showFeedback("error", "fb_xss_ban_warning");
+                playControlSfx(moodInput, 'error');
                 addInboxNotification("critical", null, "fb_xss_ban_warning");
                 moodInput.disabled = true;
                 const bandiv = document.getElementById("ban-overlay");
@@ -626,6 +630,7 @@ async function checkSiteVersion() {
     } catch (error) {
         console.error('erreur lors de la vérification de la version du site:', error);
         showFeedback("error", "fb_error_verify_version");
+        playControlSfx(moodInput, 'error');
         addInboxNotification("critical", "erreur lors de la vérification de la version du site", "voir console.", "dangerous")            // Désactive le cache du navigateur et recharge la page proprement
 
     }
@@ -655,14 +660,17 @@ function updateMsgDeleteTime() {
     // ✅ Vérification des valeurs invalides
     if (days >= 31) {
         showFeedback("error", "fb_error_day");
+        playControlSfx(moodInput, 'error');
         document.getElementById('durationDays').value = 30;
     }
     if (hours >= 24) {
         showFeedback("error", "fb_error_hour");
+        playControlSfx(moodInput, 'error');
         document.getElementById('durationHours').value = 23;
     }
     if (minutes >= 60) {
         showFeedback("error", "fb_error_minute");
+        playControlSfx(moodInput, 'error');
         document.getElementById('durationMinutes').value = 59;
     }
     if (!ephemeralToggle.checked) {
@@ -1095,10 +1103,13 @@ function displayMood(mood) {
                 mood.likes = updated.likes;
                 likeCount.textContent = mood.likes;
                 likeBtn.classList.toggle('liked');
+                setTimeout(() => playControlSfx(likeBtn, 'remove-like'), 275);
+                
                 if (!isLiked) {
                     moodcard.classList.remove('like-pop');
                     void moodcard.offsetWidth;
                     moodcard.classList.add('like-pop');
+                    setTimeout(() => playControlSfx(likeBtn, 'post-sent'), 275);
                     setTimeout(() => moodcard.classList.remove('like-pop'), 500);
                 }
                 // persist locally
@@ -1107,15 +1118,19 @@ function displayMood(mood) {
                 localStorage.setItem('likedPosts', JSON.stringify(arr));
             } else {
                 showFeedback("warning", "not_logged_in");
+                playControlSfx(moodInput, 'error');
             }
-        } catch (e) { console.error(e); showFeedback("error", "network_error"); }
+        } catch (e) { console.error(e); showFeedback("error", "network_error"); playControlSfx(moodInput, 'error');}
         finally {
             likePending = false;
             likeBtn.style.pointerEvents = '';
         }
     }
 
-    likeBtn.addEventListener('click', toggleLike);
+    likeBtn.addEventListener('click', () => {
+        toggleLike();
+        playControlSfx(likeBtn, 'like');
+    });
 
     // ---- ACTIONS:  share / report / repost ----
     const actionBar = document.createElement('div');
@@ -1859,6 +1874,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             displayMood(offlineMood)
             showFeedback("error", "tu n'es pas connecté/e à internet. vérifie ta connexion puis réessaye");
+            playControlSfx(moodInput, 'error');
 
         }
     }, 4500);
@@ -2029,6 +2045,7 @@ if (submitBtn) {
 
             if (!text) {
                 showFeedback("error", "écris quelque chose!", "fb_write_something");
+                playControlSfx(submitBtn, 'error');
                 return;
             }
 
@@ -2101,6 +2118,7 @@ if (submitBtn) {
 
                 const savedMood = await response.json();
                 showFeedback("success", "fb_post_shared"); // au lieu d'un texte brut
+                playControlSfx(submitBtn, 'post-sent');
                 trackEvent('post_created');
                 notifyPosted();
                 maybeAskPushAfterPost();
@@ -2119,6 +2137,7 @@ if (submitBtn) {
         } catch (error) {
             console.error('Erreur envoi post:', error);
             showFeedback("error", "fb_error_post");
+            playControlSfx(moodInput, 'error');
         } finally {
             submitBtn.classList.remove('submitting');
             submitBtn.disabled = false;
@@ -2823,12 +2842,13 @@ function gradients() {
 
 const logo = document.querySelector('header');
 
-logo.addEventListener('click', () => {
-    nav.classList.toggle('shown');
-});
-nav.addEventListener('click', () => {
-    nav.classList.toggle('shown');
-});
+function toggleNav() {
+    const isShown = nav.classList.toggle('shown');
+    playControlSfx(nav, isShown ? 'show-menu' : 'hide-menu');
+}
+
+logo.addEventListener('click', toggleNav);
+nav.addEventListener('click', toggleNav);
 
 
 //auth.js
@@ -3194,6 +3214,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showModal(register = false) {
+        playControlSfx(authModal, 'show-menu');
         isRegister = register;
         authTitle.textContent = register ? "inscription" : 'connexion';
         if (authModalForm) authModalForm.classList.add('shown');
