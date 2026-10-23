@@ -551,6 +551,7 @@ const TOS = document.getElementById('TOSmsg');
 // Optimisé avec throttle pour éviter trop de reflows
 if (tabSections.length) {
     const lastScrollPositions = new WeakMap();
+    const rubberBandResetTimers = new WeakMap();
     const handleScroll = throttle((sectionEl) => {
         const currentScroll = sectionEl.scrollTop;
         const previousScroll = lastScrollPositions.get(sectionEl) ?? currentScroll;
@@ -573,8 +574,91 @@ if (tabSections.length) {
         }
     }, 66); // ~60fps throttle
 
+    const finishRubberBand = (section) => {
+        clearTimeout(rubberBandResetTimers.get(section));
+        if (!section.classList.contains('rubber-band-active')) return;
+
+        section.classList.remove('rubber-band-active');
+        section.classList.add('rubber-band-reset');
+        section.style.setProperty('--rubber-band-offset', '0px');
+        rubberBandResetTimers.set(section, setTimeout(() => {
+            section.classList.remove('rubber-band-reset');
+            section.style.removeProperty('--rubber-band-offset');
+            rubberBandResetTimers.delete(section);
+        }, 300));
+    };
+
     tabSections.forEach(section => {
         section.addEventListener('scroll', () => handleScroll(section), { passive: true });
+
+        let startY = 0;
+        let startScrollTop = 0;
+        let allowRubberBand = false;
+
+        section.addEventListener('touchstart', (event) => {
+            if (event.touches.length !== 1) {
+                allowRubberBand = false;
+                finishRubberBand(section);
+                return;
+            }
+
+            clearTimeout(rubberBandResetTimers.get(section));
+            rubberBandResetTimers.delete(section);
+            section.classList.remove('rubber-band-reset', 'rubber-band-active');
+            section.style.removeProperty('--rubber-band-offset');
+            startY = event.touches[0].clientY;
+            startScrollTop = section.scrollTop;
+
+            allowRubberBand = true;
+            for (
+                let target = event.target instanceof Element ? event.target : null;
+                target && target !== section;
+                target = target.parentElement
+            ) {
+                const overflowY = window.getComputedStyle(target).overflowY;
+                if (
+                    (overflowY === 'auto' || overflowY === 'scroll')
+                    && target.scrollHeight > target.clientHeight
+                ) {
+                    allowRubberBand = false;
+                    break;
+                }
+            }
+        }, { passive: true });
+
+        section.addEventListener('touchmove', (event) => {
+            if (!allowRubberBand || event.touches.length !== 1) return;
+
+            const maxScrollTop = section.scrollHeight - section.clientHeight;
+            const requestedScrollTop = startScrollTop + startY - event.touches[0].clientY;
+            const overscroll = requestedScrollTop > maxScrollTop
+                ? maxScrollTop - requestedScrollTop
+                : requestedScrollTop < 0
+                    ? -requestedScrollTop
+                    : 0;
+
+            if (overscroll === 0 || maxScrollTop <= 0) {
+                section.classList.remove('rubber-band-active');
+                section.style.removeProperty('--rubber-band-offset');
+                return;
+            }
+
+            section.classList.remove('rubber-band-reset');
+            section.classList.add('rubber-band-active');
+            section.style.setProperty(
+                '--rubber-band-offset',
+                `${Math.sign(overscroll) * Math.min(Math.abs(overscroll) * 0.25, 48)}px`
+            );
+        }, { passive: true });
+
+        section.addEventListener('touchend', () => {
+            allowRubberBand = false;
+            finishRubberBand(section);
+        }, { passive: true });
+        section.addEventListener('touchcancel', () => {
+            allowRubberBand = false;
+            finishRubberBand(section);
+        }, { passive: true });
     });
 }
 
@@ -2847,9 +2931,18 @@ function toggleNav() {
     playControlSfx(nav, isShown ? 'show-menu' : 'hide-menu');
 }
 
-logo.addEventListener('click', toggleNav);
-nav.addEventListener('click', toggleNav);
-
+logo.addEventListener('mouseenter', () => {
+    nav.classList.add('shown');
+});
+nav.addEventListener('mouseenter', () => {
+    nav.classList.add('shown');
+});
+logo.addEventListener('mouseleave', () => {
+    nav.classList.remove('shown');
+});
+nav.addEventListener('mouseleave', () => {
+    nav.classList.remove('shown');
+});
 
 //auth.js
 
@@ -3254,7 +3347,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 finalizeLoggedInUI(result, usernameInput.value);
             }
         } catch (err) {
-            showFeedback(err.message || 'Erreur de connexion', 'error');
+            showFeedback('error', `identifiants invalides ou manquants.`);
         }
     });
 

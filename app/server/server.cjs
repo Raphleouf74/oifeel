@@ -88,6 +88,18 @@ const postSchema = new mongoose.Schema({
     },
     default: null
   },
+  // Playlist shared from Musibox (a link to musibox.netlify.app/playlist/<shareId>)
+  playlist: {
+    type: {
+      shareId: { type: String, default: null },
+      name: { type: String, default: null },
+      count: { type: Number, default: 0 },
+      durationSec: { type: Number, default: 0 },
+      covers: { type: [String], default: [] },
+      url: { type: String, default: null }
+    },
+    default: null
+  },
   anonymous: { type: Boolean, default: false },
   likes: { type: Number, default: 0 },
   views: { type: Number, default: 0 },
@@ -425,6 +437,7 @@ const corsOptions = {
     if (!origin) return callback(null, true);
     const allowedHosts = [
       "https://oifeel.netlify.app",
+      "https://musibox.netlify.app",
       "http://192.168.1.38:5500",
       "https://moodshare-7dd7.onrender.com",
       "http://127.0.0.1:5500"
@@ -717,6 +730,25 @@ async function attachAuthorThemes(postsArr) {
 
 // Construit un objet track "propre" à partir de ce que le client envoie,
 // pour ne jamais stocker/renvoyer de champs arbitraires non prévus.
+const MUSIBOX_URL = (process.env.MUSIBOX_URL || 'https://musibox.netlify.app').replace(/\/$/, '');
+
+// Playlist attached by Musibox. The link is rebuilt here from the id: a URL sent by the client is never trusted.
+function sanitizePlaylist(pl) {
+  if (!pl || typeof pl !== "object") return null;
+  const shareId = String(pl.shareId || "");
+  if (!/^[A-Za-z0-9]{4,16}$/.test(shareId)) return null;
+  return {
+    shareId,
+    name: sanitizeText(String(pl.name || "Playlist").slice(0, 40)),
+    count: Math.max(0, Math.min(100, parseInt(pl.count, 10) || 0)),
+    durationSec: Math.max(0, Math.min(86400, parseInt(pl.durationSec, 10) || 0)),
+    covers: (Array.isArray(pl.covers) ? pl.covers : [])
+      .filter((c) => typeof c === "string" && c.length < 500 && /^https:\/\/[a-z0-9.-]+\.dzcdn\.net\//i.test(c))
+      .slice(0, 4),
+    url: `${MUSIBOX_URL}/playlist/${shareId}`
+  };
+}
+
 function sanitizeTrack(track) {
   if (!track || typeof track !== "object") return null;
   const preview = typeof track.preview === "string" ? track.preview : null;
@@ -737,6 +769,7 @@ app.post("/api/posts", async (req, res) => {
     const cleanText = sanitizeText(req.body.text);
     const cleanEmoji = sanitizeText(req.body.emoji);
     const cleanTrack = sanitizeTrack(req.body.track);
+    const cleanPlaylist = sanitizePlaylist(req.body.playlist);
     // 1. Capturer l'IP (APRÈS les lignes const cleanText / cleanEmoji)
     const clientIp =
       (req.headers['x-forwarded-for']?.split(',')[0]?.trim()
@@ -746,7 +779,12 @@ app.post("/api/posts", async (req, res) => {
 
     const userId = req.session?.user?.id || req.user?.id || null;
     const isAnon = !!req.body.anonymous;
-    const userName = isAnon ? 'Anonyme' : (req.session?.user?.displayName || req.body.userName || 'Anonyme');
+    // With a Bearer token only (e.g. a post sent from Musibox) there is no session, so read the name from the account
+    let tokenName = null;
+    if (!isAnon && !req.session?.user?.displayName && userId && mongoReady && !String(userId).startsWith('guest_')) {
+      tokenName = (await UserModel.findById(userId).select('displayName').lean())?.displayName || null;
+    }
+    const userName = isAnon ? 'Anonyme' : (req.session?.user?.displayName || tokenName || req.body.userName || 'Anonyme');
 
     const newPost = {
       text: cleanText,
@@ -754,6 +792,7 @@ app.post("/api/posts", async (req, res) => {
       color: req.body.color,
       textColor: req.body.textColor,
       track: cleanTrack,
+      playlist: cleanPlaylist,
       anonymous: isAnon,
       id: Date.now().toString(),
       userId: isAnon ? null : userId,

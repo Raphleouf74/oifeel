@@ -2927,7 +2927,7 @@ body.dark .post-actions button:hover {
     height: 40px;
     width: 50px;
     padding: 8px;
-    margin-bottom: -3px;
+    margin-bottom: -5px;
     margin-left: 5px;
     margin-right: 5px;
     display: flex;
@@ -2935,8 +2935,8 @@ body.dark .post-actions button:hover {
     align-items: center;
     justify-content: center;
     border-radius: 40px;
-    background: rgba(255, 255, 255, 0.05);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: transparent;
+    box-shadow: none;
     transition: all 0.2s;
   }
   nav.scrolled .link {
@@ -2951,8 +2951,6 @@ body.dark .post-actions button:hover {
     align-items: center;
     justify-content: center;
     border-radius: 40px;
-    background: rgba(255, 255, 255, 0.05);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.2s;
   }
   nav.scrolled .link .link-icon {

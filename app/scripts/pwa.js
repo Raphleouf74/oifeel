@@ -258,9 +258,8 @@ export async function refreshNotificationSettings() {
     show('pushControls', false);
 
     if (!env.supported) return setNote('ce navigateur ne gère pas les notifications.');
-    if (!env.serverEnabled) return setNote('les notifications ne sont pas encore disponibles.');
     if (env.needsInstall) return setNote('sur iPhone, ajoute d\'abord oifeel. à l\'écran d\'accueil pour recevoir des notifications.');
-    if (!env.loggedIn) return setNote('connecte-toi (ou continue en invité) pour activer les notifications.');
+    if (!env.loggedIn) return setNote('connecte-toi pour activer les notifications.');
     if (env.permission === 'denied') return setNote('les notifications sont bloquées : autorise-les dans les réglages du site de ton navigateur.');
 
     setNote('');
