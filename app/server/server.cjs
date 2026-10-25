@@ -439,7 +439,6 @@ const corsOptions = {
       "https://oifeel.netlify.app",
       "https://musibox.netlify.app",
       "http://192.168.1.38:5500",
-      "https://musibox.netlify.app",
       "https://musibox.onrender.com",
       "https://moodshare-7dd7.onrender.com",
       "http://127.0.0.1:5500"
@@ -1052,6 +1051,7 @@ app.post('/api/posts/:id/repost', async (req, res) => {
       color: orig.color,
       textColor: orig.textColor,
       track: orig.track || null,
+      playlist: orig.playlist || null, // un repost garde la playlist Musibox
       id: Date.now().toString(),
       likes: 0,
       aiGenerated: !!orig.aiGenerated,

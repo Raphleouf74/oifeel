@@ -3069,3 +3069,36 @@ body.dark .post-actions button:hover {
       calc(3 * 100% / 3) 50%;
   }
 }
+
+/* ---------- Playlist Musibox attachée à un post ---------- */
+a.post-playlist {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+a.post-track.post-playlist:hover {
+  transform: translateY(-1px);
+  background: rgba(0, 0, 0, 0.5);
+}
+a#permalink-track.post-playlist:hover {
+  background: rgba(0, 0, 0, 0.42);
+}
+.post-playlist-go {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+#permalink-track .post-playlist-go {
+  transform: translateX(8px);
+}
+.post-playlist .post-track-title {
+  width: 120px;
+}

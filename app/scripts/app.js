@@ -1055,6 +1055,12 @@ function displayMood(mood) {
         content.appendChild(trackPill);
     }
 
+    // Pilule playlist Musibox (posts publiés depuis Musibox) — même emplacement que la pilule musique
+    if (mood.playlist && !(mood.track && (mood.track.preview || mood.track.trackId))) {
+        const playlistPill = buildPlaylistPill(mood.playlist, 'feed');
+        if (playlistPill) content.appendChild(playlistPill);
+    }
+
     // Tag "généré par IA"
     if (mood.aiGenerated) {
         moodcard.classList.add('ai-generated');
@@ -6392,6 +6398,11 @@ function renderModal(mood, postId, postEl) {
         card.appendChild(trackPill);
     }
 
+    if (mood.playlist && !(mood.track && mood.track.preview)) {
+        const playlistPill = buildPlaylistPill(mood.playlist, 'permalink');
+        if (playlistPill) card.appendChild(playlistPill);
+    }
+
     if (mood.ephemeral) {
         const ephLabel = document.createElement('span');
         ephLabel.id = 'permalink-ephemeral';
@@ -7372,3 +7383,54 @@ document.getElementById('googleAuthBtn')?.addEventListener('click', () => {
     // par défaut tant qu'on n'a pas la réponse, pour éviter un flash de contenu)
     checkDiscordStatus();
 })();
+
+
+// ---------- Playlist Musibox attachée à un post ----------
+// Les données viennent du serveur (post.playlist) ; tout est inséré via textContent,
+// et le lien n'est accepté que s'il s'agit d'une URL https /playlist/... (jamais de javascript:).
+// Textes traduisibles : ajouter "playlist_songs" et "playlist_open" dans les fichiers /app/lang/*.json
+function buildPlaylistPill(pl, variant) {
+    let href;
+    try {
+        const u = new URL(pl.url);
+        if (u.protocol !== 'https:' || !u.pathname.startsWith('/playlist/')) return null;
+        href = u.href;
+    } catch { return null; }
+
+    const tr = (typeof currentTranslations === 'object' && currentTranslations) || {};
+    const count = Number(pl.count) || 0;
+    const mins = Math.max(1, Math.round((Number(pl.durationSec) || 0) / 60));
+    const feed = variant === 'feed';
+
+    const pill = document.createElement('a');
+    if (feed) pill.className = 'post-track post-playlist';
+    else { pill.id = 'permalink-track'; pill.className = 'post-playlist'; }
+    pill.href = href;
+    pill.target = '_blank';
+    pill.rel = 'noopener noreferrer';
+    pill.setAttribute('aria-label', `${tr.playlist_open || 'Ouvrir dans Musibox'} : ${pl.name || ''}`);
+    pill.addEventListener('click', (e) => e.stopPropagation()); // ne pas ouvrir le permalien du post
+
+    const cover = document.createElement('img');
+    if (feed) cover.className = 'post-track-cover';
+    cover.src = (Array.isArray(pl.covers) && pl.covers[0]) || '';
+    cover.alt = '';
+
+    const info = document.createElement('div');
+    info.className = feed ? 'post-track-info' : 'permalink-track-info';
+    const title = document.createElement('span');
+    title.className = feed ? 'post-track-title' : 'permalink-track-title';
+    title.textContent = pl.name || 'Playlist';
+    const sub = document.createElement('span');
+    sub.className = feed ? 'post-track-artist' : 'permalink-track-artist';
+    sub.textContent = `${count} ${tr.playlist_songs || 'titres'} · ${mins} min`;
+    info.append(title, sub);
+
+    const go = document.createElement('span');
+    go.className = 'post-playlist-go';
+    go.setAttribute('aria-hidden', 'true');
+    go.textContent = '↗';
+
+    pill.append(cover, info, go);
+    return pill;
+}
