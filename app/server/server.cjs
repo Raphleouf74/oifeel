@@ -548,7 +548,7 @@ analytics = registerAnalytics(app, {
   requireAdmin,
   isMongoReady: () => mongoReady
 });
-createShareCards.register(app, { getPosts: () => posts, siteUrl: process.env.SITE_URL }); // aperçus /p/:id (voir services/share-cards.cjs)
+createShareCards({ app, PostModel }); // aperçus /p/:id
 musibox.registerRoutes(app); // GET /api/playlists/resolve
 const dataDir = path.join(__dirname, "data");
 const postsFile = path.join(dataDir, "posts.json");
