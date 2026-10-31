@@ -1,0 +1,85 @@
+/* ============================================================
+   playlist.css — playlists Musibox dans oifeel. : pilule dans les posts, fenêtre de lecture,
+   sélecteur du compositeur. Réutilise .oh-overlay / .oh-panel / .oh-btn (help-system.css).
+   ============================================================ */
+
+/* ---- pilule dans le fil et le permalien (même emplacement que la pilule musique) ---- */
+button.post-playlist {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+button.post-track.post-playlist:hover { transform: translateY(-1px); background: rgba(0, 0, 0, 0.5); }
+button#permalink-track.post-playlist:hover { background: rgba(0, 0, 0, 0.42); }
+.post-playlist .post-track-title { width: 120px; }
+.post-playlist-go {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+#permalink-track .post-playlist-go { transform: translateX(8px); }
+button.post-playlist:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* ---- fenêtre playlist ---- */
+.pl-panel { text-align: left; max-width: 460px; }
+.pl-head { display: flex; gap: 16px; align-items: center; margin: 4px 0 16px; }
+.pl-mosaic {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 104px;
+  height: 104px;
+  flex: none;
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+}
+.pl-mosaic img, .pl-mosaic-empty { width: 100%; height: 100%; object-fit: cover; background: rgba(255, 255, 255, 0.1); }
+.pl-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pl-kicker { font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted, #aaa); }
+.pl-name { margin: 0; font-size: 1.35rem; line-height: 1.2; overflow-wrap: anywhere; }
+.pl-meta, .pl-author { font-size: 0.85rem; color: var(--muted, #aaa); }
+.pl-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.pl-actions .oh-btn[hidden] { display: none; }
+.pl-actions a.oh-btn { text-decoration: none; display: inline-flex; align-items: center; }
+.pl-btn-secondary { background: rgba(255, 255, 255, 0.08); color: var(--text, #fff); }
+.pl-btn-secondary:hover { background: rgba(255, 255, 255, 0.15); }
+.pl-tracks { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: min(38vh, 340px); overflow-y: auto; }
+.pl-track { display: grid; grid-template-columns: 44px 1fr 38px; gap: 10px; align-items: center; padding: 6px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); }
+.pl-track.playing { background: rgba(255, 255, 255, 0.14); }
+.pl-track-cover { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; background: rgba(255, 255, 255, 0.1); }
+.pl-track-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.pl-track-title, .pl-track-artist { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pl-track-title { font-weight: 600; font-size: 0.92rem; }
+.pl-track-artist { font-size: 0.78rem; color: var(--muted, #aaa); }
+.pl-track-play { width: 38px; height: 38px; padding: 9px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.12); color: var(--text, #fff); cursor: pointer; }
+.pl-track.playing .pl-track-play { background: var(--accent, #5f95b9); color: #fff; }
+.pl-foot { margin: 12px 0 0; font-size: 0.78rem; color: var(--muted, #aaa); text-align: center; }
+
+/* ---- sélecteur du compositeur ---- */
+.pl-picker { padding: 4px 2px 8px; }
+.pl-picker-help { margin: 0 0 12px; font-size: 0.85rem; line-height: 1.45; opacity: 0.8; }
+.pl-picker-help a { color: var(--accent, #5f95b9); }
+.pl-picker-row { display: flex; gap: 8px; }
+.pl-picker-row input { flex: 1; min-width: 0; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border, rgba(255, 255, 255, 0.15)); background: rgba(255, 255, 255, 0.06); color: inherit; font: inherit; }
+.pl-picker-error { min-height: 1.3em; margin: 8px 0 0; font-size: 0.82rem; color: #ff7b7b; }
+
+@media (max-width: 480px) {
+  .pl-head { gap: 12px; }
+  .pl-mosaic { width: 84px; height: 84px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  button.post-playlist { transition: none; }
+}

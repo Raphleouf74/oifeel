@@ -134,21 +134,21 @@
 
 /* ---- Switch Jour/Nuit : assombrit les posts trop clairs ---- */
 
-.night-switch {
+.night-switch, .corner-switch {
   display: inline-flex;
   align-items: center;
   cursor: pointer;
   flex-shrink: 0;
 }
 
-.night-switch input {
+.night-switch input, .corner-switch input {
   position: absolute;
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-.night-switch-track {
+.night-switch-track, .corner-switch-track {
   position: relative;
   width: 60px;
   height: 35px;
@@ -162,7 +162,7 @@
   transition: background 0.2s ease;
 }
 
-.night-switch-icon {
+.night-switch-icon, .corner-switch-icon {
   font-size: 1.25rem;
   line-height: 1;
   z-index: 1;
@@ -250,7 +250,7 @@
 #nightmode {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content:left;
   flex-direction: row;
 }
 .nightmode-info {
@@ -288,7 +288,17 @@
   align-items: center;
   gap: 8px;
 }
+body.rounded * {
+  border-radius: 0 !important;
+  transition: inherit, border-radius 0.2s ease-in-out;
+}
 
+body.rounded .post-track-cover {
+  border-radius: 50% !important;
+}
+body * {
+  transition: inherit, border-radius 0.2s ease-in-out;
+}
 #postNightScheduleToggle {
   font-size: 0.9rem;
   font-weight: 600;
@@ -316,6 +326,70 @@
   color: #aaa;
   font-size: 0.72rem;
 }
+
+.corner-switch-thumb {
+  position: absolute;
+  top: 1px;
+  left: 2px;
+  width: 100px;
+  height: calc(100% - 2px);
+  border-radius: 7.5px;
+  background: #727272;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  animation: cornerSwitchThumbUnChecked 0.5s ease forwards;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.corner-switch input:checked + .corner-switch-track .corner-switch-thumb {
+  animation: cornerSwitchThumbChecked 0.5s ease forwards;
+}
+
+@keyframes cornerSwitchThumbChecked {
+  0% {
+    transform: translateX(0);
+    width: 35px;
+    border-radius: 7.5px;
+  }
+  50% {
+    width: 65px;
+    border-radius: 7.5px 15px 15px 7.5px;
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(35px);
+    width: 35px;
+    border-radius: 7.5px 7.5px 7.5px 7.5px;
+    background: rgba(100, 200, 100, 0.5);
+  }
+}
+@keyframes cornerSwitchThumbUnChecked {
+  0% {
+    transform: translateX(35px);
+    width: 35px;
+    border-radius: 7.5px;
+  }
+  50% {
+    width: 65px;
+    border-radius: 15px 7.5px 7.5px 15px;
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(0);
+    width: 35px;
+    border-radius: 7.5px;
+    background: rgba(200, 100, 100, 0.5);
+  }
+}
+.corner-switch input:focus-visible + .corner-switch-track {
+  outline: 2px solid var(--accent, #5f95b9);
+
+  outline-offset: 2px;
+}
+
+
+
 #postModal {
   width: 100%;
   max-width: 600px;
@@ -782,7 +856,7 @@ body.dark .sv-bubble__face {
   top: 4px;
   width: 55px;
   height: 55px;
-  border-radius: 50%;
+  border-radius: 50% !important;
   object-fit: cover;
   flex-shrink: 0;
   animation: rotate 25s linear infinite;

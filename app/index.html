@@ -45,6 +45,7 @@
         <link rel="stylesheet" href="/app/styles/comments.css">
         <link rel="stylesheet" href="/app/styles/help-system.css">
         <link rel="stylesheet" href="/app/styles/share-pwa.css">
+        <link rel="stylesheet" href="/app/styles/playlist.css">
         <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
     </head>
     <body>
@@ -199,10 +200,9 @@
                     inscription / connexion
                 </button>
                 <button
-                    disabled
+                    
                     style="color: red"
                     onclick="logout()"
-                    data-i18n="logout_btn"
                 >
                     déconnexion
                 </button>
@@ -986,7 +986,7 @@
                             <div class="nightmode-info">
                                 <h2>assombrir les posts pour une meilleure expérience de nuit.</h2>
                                 <p>
-                                    <i>assombit les posts clair pour éviter de faire mal lors de la lecture des posts de couleur claires.</i>
+                                    <i>assombrit les posts clair pour éviter de faire mal lors de la lecture des posts de couleur claires.</i>
                                 </p>
                             </div>
                         </div>
@@ -1006,6 +1006,23 @@
                                 </label>
                             </div>
                             <p class="nightmode-schedule-hint">l’horaire peut passer minuit. Il s’applique chaque jour.</p>
+                        </div>
+                        <div id="nightmode">
+                            <label class="corner-switch" id="displayRCornerSwitch" title="arrondir l'affichage">
+                                <input type="checkbox" id="displayRCornerToggle">
+                                <span class="corner-switch-track">
+                                    <span class="corner-switch-icon corner-switch-icon--sun">off</span>
+                                    <span class="corner-switch-icon corner-switch-icon--moon">on</span>
+                                    
+                                    <span class="corner-switch-thumb"></span>
+                                </span>
+                            </label>
+                            <div class="nightmode-info">
+                                <h2>arrondir les coins des bords pour le style</h2>
+                                <p>
+                                    <i>arrondit ou non les coins de l'affichage pour une préférence de style.</i>
+                                </p>
+                            </div>
                         </div>
                     </div>
                     <!-- ── NOTIFICATIONS & INSTALLATION ── -->
@@ -1346,6 +1363,23 @@
                     </svg>
                     <span>musique</span>
                 </button>
+                <!-- Playlist Musibox button -->
+                <button type="button" class="create-tool-btn create-advanced-tool" id="playlistToolBtn" aria-label="ajouter une playlist Musibox">
+                    <svg
+                        width="20"
+                        height="20"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        viewBox="0 0 24 24"
+                    >
+                        <path d="M3 6h13M3 12h13M3 18h7"/>
+                        <path d="M18 18V9l3-1"/>
+                        <circle cx="16" cy="18" r="2"/>
+                    </svg>
+                    <span>playlist</span>
+                </button>
             </div>
             <!-- Color presets -->
             <div class="create-color-group">
@@ -1624,6 +1658,26 @@
                 <div id="musicResults" class="music-results"></div>
             </div>
         </div>
+        <!-- Playlist Musibox : colle un lien de partage -->
+        <div id="playlistPickerOverlay" class="create-picker-overlay" style="display: none!important">
+            <div class="create-picker-panel">
+                <div class="create-picker-header">
+                    <span>ajoute une playlist Musibox</span>
+                    <button type="button" class="create-picker-close-playlist" aria-label="fermer">×</button>
+                </div>
+                <div class="pl-picker">
+                    <p class="pl-picker-help">
+                        crée ta playlist sur <a href="https://musibox.netlify.app" target="_blank" rel="noopener">Musibox</a>,
+                        puis <strong>Export → Share link…</strong> (sans mot de passe) et colle le lien ici.
+                    </p>
+                    <div class="pl-picker-row">
+                        <input id="playlistLinkInput" type="url" inputmode="url" placeholder="https://musibox.netlify.app/playlist/…" autocomplete="off" aria-label="lien Musibox">
+                        <button type="button" id="playlistLinkAdd" class="oh-btn oh-btn--primary">ajouter</button>
+                    </div>
+                    <p id="playlistLinkError" class="pl-picker-error" role="alert"></p>
+                </div>
+            </div>
+        </div>
         <!-- Chosen track preview, shown in the toolbar once a track is picked -->
         <div id="chosenTrackPreview" class="chosen-track-preview" hidden>
             <img id="chosenTrackCover" src="" alt="">
@@ -1632,6 +1686,15 @@
                 <span id="chosenTrackArtist"></span>
             </div>
             <button type="button" id="chosenTrackRemove" aria-label="retirer la musique">×</button>
+        </div>
+        <!-- Chosen playlist preview -->
+        <div id="chosenPlaylistPreview" class="chosen-track-preview" hidden>
+            <img id="chosenPlaylistCover" src="" alt="">
+            <div class="chosen-track-info">
+                <span id="chosenPlaylistTitle"></span>
+                <span id="chosenPlaylistMeta"></span>
+            </div>
+            <button type="button" id="chosenPlaylistRemove" aria-label="retirer la playlist">×</button>
         </div>
         <div id="advancedOptions" hidden>
             <div id="container">

@@ -136,7 +136,8 @@ export async function renderStoryCanvas(mood) {
     for (const l of lines) { ctx.fillText(l, W / 2, y); y += lh; }
 
     // musique
-    const tr = mood.track;
+    const pl = mood.playlist;
+    const tr = mood.track || (pl && pl.name ? { title: pl.name, artist: `${pl.count || 0} titres`, cover: pl.covers && pl.covers[0] } : null);
     if (tr && (tr.title || tr.artist)) {
         const cover = await loadImage(tr.cover);
         const label = [tr.title, tr.artist].filter(Boolean).join(' — ');

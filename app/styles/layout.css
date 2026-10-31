@@ -16,11 +16,16 @@ header {
   z-index: 99999999999999999999;
 }
 
-
 header:hover {
   width: 115px;
   height: 115px;
   border-radius: 15px;
+}
+
+@keyframes move {
+  to {
+    opacity: 0;
+  }
 }
 
 header img {
@@ -70,7 +75,9 @@ header.scrolled {
   cursor: pointer;
   z-index: 10000;
 
-  transition: 0.2s;
+  transition: all 0.2s ease-in-out;
+  animation: move ease-in-out;
+  animation-timeline: scroll();
 }
 
 #accountheader.scrolled {
@@ -876,7 +883,7 @@ body.focus-mode .tab.active {
   }
   nav {
     position: fixed;
-    top:unset;
+    top: unset;
     bottom: 25px;
     left: 50%;
     transform: translateX(-50%);

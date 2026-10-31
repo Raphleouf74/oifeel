@@ -14,6 +14,7 @@ const fsPromises = require("fs/promises");
 const cron = require("node-cron");
 const { register: registerAnalytics } = require('./analytics.cjs');
 const createShareCards = require('./services/share-cards.cjs');
+const musibox = require('./services/musibox.cjs');
 const createWebPush = require('./services/webpush.cjs');
 
 const jwtService = require('./services/jwt.cjs');
@@ -547,7 +548,8 @@ analytics = registerAnalytics(app, {
   requireAdmin,
   isMongoReady: () => mongoReady
 });
-createShareCards({ app, PostModel });
+createShareCards.register(app, { getPosts: () => posts, siteUrl: process.env.SITE_URL }); // aperçus /p/:id (voir services/share-cards.cjs)
+musibox.registerRoutes(app); // GET /api/playlists/resolve
 const dataDir = path.join(__dirname, "data");
 const postsFile = path.join(dataDir, "posts.json");
 const configFile = path.join(dataDir, "config.json");
@@ -770,7 +772,14 @@ app.post("/api/posts", async (req, res) => {
     const cleanText = sanitizeText(req.body.text);
     const cleanEmoji = sanitizeText(req.body.emoji);
     const cleanTrack = sanitizeTrack(req.body.track);
-    const cleanPlaylist = sanitizePlaylist(req.body.playlist);
+    // Playlist Musibox : le serveur vérifie le lien auprès de Musibox et garde un instantané fiable
+    let cleanPlaylist = null;
+    try {
+      cleanPlaylist = await musibox.buildFromBody(req.body.playlist, sanitizePlaylist);
+    } catch (e) {
+      if (e.code && String(e.code).startsWith('playlist_')) return res.status(e.status || 400).json({ error: e.message, code: e.code });
+      throw e;
+    }
     // 1. Capturer l'IP (APRÈS les lignes const cleanText / cleanEmoji)
     const clientIp =
       (req.headers['x-forwarded-for']?.split(',')[0]?.trim()

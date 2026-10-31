@@ -2,6 +2,7 @@ import { trackVisitOnce, track as trackEvent } from './analytics.js';
 import { openShareSheet } from './share.js';
 import { initPwa, maybeAskPushAfterPost, notifyPosted } from './pwa.js';
 import { shareLink } from './config.js';
+import { openPlaylistSheet, safePlaylistUrl, playlistMeta } from './playlist-sheet.js';
 import { initSfx, playControlSfx } from './sfx.js';
 
 initSfx();
@@ -1057,7 +1058,7 @@ function displayMood(mood) {
 
     // Pilule playlist Musibox (posts publiés depuis Musibox) — même emplacement que la pilule musique
     if (mood.playlist && !(mood.track && (mood.track.preview || mood.track.trackId))) {
-        const playlistPill = buildPlaylistPill(mood.playlist, 'feed');
+        const playlistPill = buildPlaylistPill(mood, 'feed');
         if (playlistPill) content.appendChild(playlistPill);
     }
 
@@ -1194,7 +1195,7 @@ function displayMood(mood) {
                 likeCount.textContent = mood.likes;
                 likeBtn.classList.toggle('liked');
                 setTimeout(() => playControlSfx(likeBtn, 'remove-like'), 275);
-                
+
                 if (!isLiked) {
                     moodcard.classList.remove('like-pop');
                     void moodcard.offsetWidth;
@@ -1210,7 +1211,7 @@ function displayMood(mood) {
                 showFeedback("warning", "not_logged_in");
                 playControlSfx(moodInput, 'error');
             }
-        } catch (e) { console.error(e); showFeedback("error", "network_error"); playControlSfx(moodInput, 'error');}
+        } catch (e) { console.error(e); showFeedback("error", "network_error"); playControlSfx(moodInput, 'error'); }
         finally {
             likePending = false;
             likeBtn.style.pointerEvents = '';
@@ -1911,7 +1912,11 @@ if (document.readyState === 'loading') {
 // Initialiser les valeurs au démarrage
 moodColorHex.value = formatHex(customColorInput.value);
 
-
+const body = document.querySelector('body');
+const dispRCornersInput = document.getElementById('displayRCornerToggle');
+dispRCornersInput.addEventListener('click', () => {
+    body.classList.toggle('rounded');
+});
 function showFeedback(type, messageKey, vars = {}) {
     const translated = t(messageKey, vars) || messageKey;
 
@@ -2191,6 +2196,7 @@ if (submitBtn) {
                     textColor: document.getElementById('textColor')?.value || null,
                     emoji,
                     track: _selectedTrack || null,
+                    playlist: _selectedPlaylist ? { shareId: _selectedPlaylist.shareId } : null,
                     ephemeral: ephemeralToggle.checked,
                     expiresAt,
                     aiGenerated: _lastAiGeneratedText !== null && text === _lastAiGeneratedText.trim()
@@ -2218,7 +2224,9 @@ if (submitBtn) {
             document.querySelector(".moodEmoji").value = "";
             _selectedEmoji = '👋';
             _selectedTrack = null;
+            _selectedPlaylist = null;
             _updateChosenTrackPreview();
+            _updateChosenPlaylistPreview();
             _lastAiGeneratedText = null;
             ephemeralToggle.checked = false;
             if (storyModeToggle) storyModeToggle.checked = false;
@@ -2807,7 +2815,9 @@ function _renderMusicResults(results) {
 
         item.addEventListener('click', () => {
             _selectedTrack = track;
+            _selectedPlaylist = null; // musique OU playlist
             _updateChosenTrackPreview();
+            _updateChosenPlaylistPreview();
             _stopMusicPreview();
             _musicOverlay.style.setProperty('display', 'none', 'important');
         });
@@ -2820,6 +2830,76 @@ if (_chosenTrackRemove) {
     _chosenTrackRemove.addEventListener('click', () => {
         _selectedTrack = null;
         _updateChosenTrackPreview();
+    });
+}
+
+// ============================================================
+// PLAYLIST MUSIBOX — attacher une playlist à un post
+// On colle un lien Musibox ; le serveur vérifie la playlist auprès de Musibox (GET /api/playlists/resolve)
+// et, à la publication, on n'envoie que son identifiant : le serveur refait lui-même la vérification.
+// ============================================================
+const _plToolBtn = document.getElementById('playlistToolBtn');
+const _plOverlay = document.getElementById('playlistPickerOverlay');
+const _plInput = document.getElementById('playlistLinkInput');
+const _plAddBtn = document.getElementById('playlistLinkAdd');
+const _plError = document.getElementById('playlistLinkError');
+const _chosenPlaylistPreview = document.getElementById('chosenPlaylistPreview');
+const _chosenPlaylistRemove = document.getElementById('chosenPlaylistRemove');
+let _selectedPlaylist = null;
+
+function _updateChosenPlaylistPreview() {
+    if (!_chosenPlaylistPreview) return;
+    if (_selectedPlaylist) {
+        document.getElementById('chosenPlaylistCover').src = (_selectedPlaylist.covers && _selectedPlaylist.covers[0]) || '';
+        document.getElementById('chosenPlaylistTitle').textContent = _selectedPlaylist.name;
+        document.getElementById('chosenPlaylistMeta').textContent = playlistMeta(_selectedPlaylist, currentTranslations || {});
+        _chosenPlaylistPreview.hidden = false;
+    } else {
+        _chosenPlaylistPreview.hidden = true;
+    }
+}
+
+function _closePlaylistPicker() {
+    _plOverlay.style.setProperty('display', 'none', 'important');
+}
+
+async function _attachPlaylistFromLink() {
+    const url = _plInput.value.trim();
+    if (!url) return;
+    _plAddBtn.disabled = true;
+    _plError.textContent = '';
+    try {
+        const res = await fetch(`${API}playlists/resolve?url=${encodeURIComponent(url)}`);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'lien introuvable');
+        _selectedPlaylist = data;
+        _selectedTrack = null;             // un post a soit une musique, soit une playlist
+        _updateChosenTrackPreview();
+        _updateChosenPlaylistPreview();
+        _plInput.value = '';
+        _closePlaylistPicker();
+    } catch (err) {
+        _plError.textContent = err instanceof TypeError ? 'connexion impossible, réessaie.' : err.message;
+    } finally {
+        _plAddBtn.disabled = false;
+    }
+}
+
+if (_plToolBtn && _plOverlay) {
+    _plToolBtn.addEventListener('click', () => {
+        _plError.textContent = '';
+        _plOverlay.style.setProperty('display', 'flex', 'important');
+        _plInput.focus();
+    });
+    _plOverlay.querySelector('.create-picker-close-playlist').addEventListener('click', _closePlaylistPicker);
+    _plOverlay.addEventListener('click', (e) => { if (e.target === _plOverlay) _closePlaylistPicker(); });
+    _plAddBtn.addEventListener('click', _attachPlaylistFromLink);
+    _plInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); _attachPlaylistFromLink(); } });
+}
+if (_chosenPlaylistRemove) {
+    _chosenPlaylistRemove.addEventListener('click', () => {
+        _selectedPlaylist = null;
+        _updateChosenPlaylistPreview();
     });
 }
 
@@ -3138,24 +3218,7 @@ export async function loginGuest() {
     return data.user;
 }
 
-export async function logout() {
-    try {
-        await fetch(`${API}auth/logout`, { method: 'POST', credentials: 'include' });
-    } catch (e) { /* ignore */ }
-    clearToken();
-    // Reset UI
-    const userName = document.getElementById('userName');
-    const userNameProfile = document.getElementById('userNameProfile');
-    const userIDspan = document.getElementById('userId');
-    const accountAvatar = document.getElementById('accountavatar');
-    if (userName) userName.textContent = 'non connecté';
-    if (userNameProfile) userNameProfile.textContent = 'username';
-    if (userIDspan) userIDspan.textContent = 'connectes toi';
-    if (accountAvatar) accountAvatar.alt = '';
-    // Hide ban screen if shown
-    const banOverlay = document.getElementById('ban-overlay');
-    if (banOverlay) banOverlay.classList.add('hidden');
-}
+
 
 let _banUpdateTimer = null;
 
@@ -3380,19 +3443,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    if (logoutBtn) logoutBtn.addEventListener('click', async () => {
-        await logout();
-        // clear UI
-        if (logoutBtn) logoutBtn.classList.add('hidden');
-        if (guestBtn) guestBtn.classList.remove('hidden');
-        // restore stored profile name or default
-        const saved = loadProfileLocal();
-        const restoredName = (saved && saved.displayName) ? saved.displayName : 'non connecté';
-        // Pas de badge ici : l'utilisateur est déconnecté, on affiche juste le pseudo en texte brut
-        userName.textContent = restoredName;
-        userNameProfile.textContent = restoredName;
-        userIDspan.textContent = restoredName;
-    });
 
     // Small helpers to persist simple profile prefs locally
     function saveProfileLocal(data) {
@@ -4001,7 +4051,39 @@ function init() {
     // ── Ajouter le bouton dans #profilemenu ───────────────────
     addMenuButton();
 }
+export async function logout() {
+    const guestBtn = document.getElementById('guestLogin');
 
+    const logoutBtn = document.getElementById('logoutBtn');
+    try {
+        await fetch(`${API}auth/logout`, { method: 'POST', credentials: 'include' });
+    } catch (e) { /* ignore */ }
+    clearToken();
+    // Reset UI
+    const userName = document.getElementById('userName');
+    const userNameProfile = document.getElementById('userNameProfile');
+    const userIDspan = document.getElementById('userId');
+    const accountAvatar = document.getElementById('accountavatar');
+    if (userName) userName.textContent = 'non connecté';
+    if (userNameProfile) userNameProfile.textContent = 'username';
+    if (userIDspan) userIDspan.textContent = 'connectes toi';
+    if (accountAvatar) accountAvatar.alt = '';
+    // Hide ban screen if shown
+    const banOverlay = document.getElementById('ban-overlay');
+    if (banOverlay) banOverlay.classList.add('hidden');
+
+    // clear UI
+    if (logoutBtn) logoutBtn.classList.add('hidden');
+    if (guestBtn) guestBtn.classList.remove('hidden');
+    // restore stored profile name or default
+    const saved = loadProfileLocal();
+    const restoredName = (saved && saved.displayName) ? saved.displayName : 'non connecté';
+    // Pas de badge ici : l'utilisateur est déconnecté, on affiche juste le pseudo en texte brut
+    userName.textContent = restoredName;
+    userNameProfile.textContent = restoredName;
+    userIDspan.textContent = restoredName;
+    setTimeout(() => location.reload(), 500);
+}
 function addMenuButton() {
     const profileMenu = document.getElementById('profilemenu');
     if (!profileMenu || document.getElementById('openAccountModalBtn')) return;
@@ -6399,7 +6481,7 @@ function renderModal(mood, postId, postEl) {
     }
 
     if (mood.playlist && !(mood.track && mood.track.preview)) {
-        const playlistPill = buildPlaylistPill(mood.playlist, 'permalink');
+        const playlistPill = buildPlaylistPill(mood, 'permalink');
         if (playlistPill) card.appendChild(playlistPill);
     }
 
@@ -7386,30 +7468,19 @@ document.getElementById('googleAuthBtn')?.addEventListener('click', () => {
 
 
 // ---------- Playlist Musibox attachée à un post ----------
-// Les données viennent du serveur (post.playlist) ; tout est inséré via textContent,
-// et le lien n'est accepté que s'il s'agit d'une URL https /playlist/... (jamais de javascript:).
-// Textes traduisibles : ajouter "playlist_songs" et "playlist_open" dans les fichiers /app/lang/*.json
-function buildPlaylistPill(pl, variant) {
-    let href;
-    try {
-        const u = new URL(pl.url);
-        if (u.protocol !== 'https:' || !u.pathname.startsWith('/playlist/')) return null;
-        href = u.href;
-    } catch { return null; }
-
+// Pilule dans le fil et le permalien (même emplacement que la pilule musique). Un clic ouvre la
+// fenêtre playlist (extraits + lien vers Musibox) sans quitter oifeel. Tout passe par textContent.
+function buildPlaylistPill(mood, variant) {
+    const pl = mood.playlist;
+    if (!pl || !safePlaylistUrl(pl.url)) return null;
     const tr = (typeof currentTranslations === 'object' && currentTranslations) || {};
-    const count = Number(pl.count) || 0;
-    const mins = Math.max(1, Math.round((Number(pl.durationSec) || 0) / 60));
     const feed = variant === 'feed';
 
-    const pill = document.createElement('a');
+    const pill = document.createElement('button');
+    pill.type = 'button';
     if (feed) pill.className = 'post-track post-playlist';
     else { pill.id = 'permalink-track'; pill.className = 'post-playlist'; }
-    pill.href = href;
-    pill.target = '_blank';
-    pill.rel = 'noopener noreferrer';
-    pill.setAttribute('aria-label', `${tr.playlist_open || 'Ouvrir dans Musibox'} : ${pl.name || ''}`);
-    pill.addEventListener('click', (e) => e.stopPropagation()); // ne pas ouvrir le permalien du post
+    pill.setAttribute('aria-label', `${tr.playlist_view || 'Voir la playlist'} : ${pl.name || ''}`);
 
     const cover = document.createElement('img');
     if (feed) cover.className = 'post-track-cover';
@@ -7423,13 +7494,24 @@ function buildPlaylistPill(pl, variant) {
     title.textContent = pl.name || 'Playlist';
     const sub = document.createElement('span');
     sub.className = feed ? 'post-track-artist' : 'permalink-track-artist';
-    sub.textContent = `${count} ${tr.playlist_songs || 'titres'} · ${mins} min`;
+    sub.textContent = playlistMeta(pl, tr);
     info.append(title, sub);
 
     const go = document.createElement('span');
     go.className = 'post-playlist-go';
     go.setAttribute('aria-hidden', 'true');
-    go.textContent = '↗';
+    go.textContent = '♪';
+
+    pill.addEventListener('click', (e) => {
+        e.stopPropagation();
+        _stopFeedTrack();
+        openPlaylistSheet(pl, {
+            stopOthers: _stopFeedTrack,
+            notify: (type, msg) => showFeedback(type, msg),
+            translations: tr,
+            author: (!mood.anonymous && mood.userName && mood.userName !== 'Anonyme') ? mood.userName : ''
+        });
+    });
 
     pill.append(cover, info, go);
     return pill;
