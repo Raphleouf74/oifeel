@@ -220,9 +220,99 @@ function cacheSet(key, buf) {
   cache.set(key, { buf, at: Date.now() });
 }
 
+// Pochettes d'une playlist Musibox (Deezer uniquement : le serveur n'enregistre que ces URLs)
+async function loadCovers(urls) {
+  return Promise.all((urls || []).slice(0, 4).map(async (u) => {
+    if (!/^https:\/\/[a-z0-9.-]+\.dzcdn\.net\//i.test(String(u))) return null;
+    try {
+      const r = await fetch(u, { signal: AbortSignal.timeout(3000) });
+      if (!r.ok) return null;
+      return await canvasLib.loadImage(Buffer.from(await r.arrayBuffer()));
+    } catch (_) { return null; }
+  }));
+}
+
+// Carte "playlist" : mosaïque 2×2 des pochettes + nom, durée et auteur
+function drawPlaylistCard(ctx, W, H, post, imgs) {
+  const pl = post.playlist;
+  const colors = parseColors(post.color);
+  const fg = pickTextColor(post, colors);
+  const light = luminance(fg) > 128;
+  const soft = light ? 'rgba(255,255,255,0.72)' : 'rgba(0,0,0,0.6)';
+
+  const g = ctx.createLinearGradient(0, 0, W, H);
+  if (colors.length === 1) { g.addColorStop(0, shade(colors[0], 0.12)); g.addColorStop(1, shade(colors[0], -0.2)); }
+  else colors.forEach((c, i) => g.addColorStop(i / (colors.length - 1), c));
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = light ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+  ctx.beginPath(); ctx.arc(W - 120, 90, 300, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(120, H + 40, 220, 0, Math.PI * 2); ctx.fill();
+
+  ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+
+  // mosaïque 2×2 (si moins de 4 pochettes, on répète celles qu'on a)
+  const M = 380, mx = 80, my = (H - M) / 2, cell = M / 2;
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 40; ctx.shadowOffsetY = 12;
+  ctx.fillStyle = '#000'; roundedRect(ctx, mx, my, M, M, 36); ctx.fill();
+  ctx.restore();
+  ctx.save();
+  roundedRect(ctx, mx, my, M, M, 36); ctx.clip();
+  const avail = (imgs || []).filter(Boolean);
+  for (let i = 0; i < 4; i++) {
+    const x = mx + (i % 2) * cell, y = my + Math.floor(i / 2) * cell;
+    if (avail.length) ctx.drawImage(avail[i % avail.length], x, y, cell, cell);
+    else { ctx.fillStyle = light ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.16)'; ctx.fillRect(x, y, cell, cell); }
+  }
+  ctx.restore();
+
+  const x0 = mx + M + 70, maxW = W - x0 - 80;
+  const mins = Math.max(1, Math.round((pl.durationSec || 0) / 60));
+
+  ctx.fillStyle = soft; ctx.font = `34px ${FONT}`;
+  ctx.fillText('playlist · Musibox', x0, my + 44);
+
+  const name = truncate(plain(pl.name), 80) || 'Playlist';
+  let size = 80, lines = [];
+  for (; size >= 44; size -= 4) {
+    ctx.font = `${size}px ${FONT}`;
+    lines = wrapLines(ctx, name, maxW);
+    if (lines.length <= 2) break;
+  }
+  lines = lines.slice(0, 2);
+  ctx.fillStyle = fg; ctx.font = `${size}px ${FONT}`;
+  let y = my + 140;
+  for (const l of lines) { ctx.fillText(fitEllipsis(ctx, l, maxW), x0, y); y += size * 1.15; }
+
+  ctx.fillStyle = soft; ctx.font = `40px ${FONT}`;
+  ctx.fillText(`${pl.count || 0} titres · ${mins} min`, x0, y + 18);
+
+  const text = truncate(plain(post.text), 90);
+  if (text && text !== `🎧 ${name}`) {
+    ctx.font = `30px ${FONT}`;
+    const tl = wrapLines(ctx, text, maxW).slice(0, 2);
+    let ty = y + 82;
+    for (const l of tl) { ctx.fillText(fitEllipsis(ctx, l, maxW), x0, ty); ty += 40; }
+  }
+
+  const footY = H - 62;
+  ctx.fillStyle = fg; ctx.font = `40px ${FONT}`;
+  ctx.fillText('oifeel.', x0, footY);
+  const author = authorLabel(post);
+  if (author) {
+    ctx.font = `30px ${FONT}`; ctx.fillStyle = soft; ctx.textAlign = 'right';
+    ctx.fillText(fitEllipsis(ctx, author, 300), W - 80, footY);
+    ctx.textAlign = 'left';
+  }
+}
+
 async function renderCardPng(post) {
   const canvas = canvasLib.createCanvas(CARD_W, CARD_H);
-  drawCard(canvas.getContext('2d'), CARD_W, CARD_H, post);
+  if (post.playlist && post.playlist.name) {
+    drawPlaylistCard(canvas.getContext('2d'), CARD_W, CARD_H, post, await loadCovers(post.playlist.covers));
+  } else {
+    drawCard(canvas.getContext('2d'), CARD_W, CARD_H, post);
+  }
   return canvas.encode('png');
 }
 
@@ -293,9 +383,15 @@ function register(app, { getPosts, siteUrl }) {
 
     const author = authorLabel(post);
     const emoji = String(post.emoji || '').slice(0, 8);
-    const title = `${emoji ? emoji + ' ' : ''}${author || 'Quelqu\'un'} partage son ressenti`;
+    const pl = post.playlist && post.playlist.name ? post.playlist : null;
+    const title = pl
+      ? `${emoji || '🎧'} ${author || 'Quelqu\'un'} partage une playlist`
+      : `${emoji ? emoji + ' ' : ''}${author || 'Quelqu\'un'} partage son ressenti`;
     let description = truncate(plain(post.text), 200);
-    if (post.track && post.track.title) {
+    if (pl) {
+      const mins = Math.max(1, Math.round((pl.durationSec || 0) / 60));
+      description = `${truncate(plain(pl.name), 60)} · ${pl.count || 0} titres · ${mins} min` + (description && description !== `🎧 ${plain(pl.name)}` ? ` — ${truncate(description, 120)}` : '');
+    } else if (post.track && post.track.title) {
       description += ` — ${truncate([post.track.title, post.track.artist].filter(Boolean).join(' · '), 80)}`;
     }
     const colors = parseColors(post.color);
@@ -320,7 +416,7 @@ function register(app, { getPosts, siteUrl }) {
     if (!canvasLib || !post || isExpired(post)) return res.redirect(302, DEFAULT_IMG);
 
     try {
-      const key = `${id}:${post.editedAt || ''}:${post.color}:${post.text}`;
+      const key = `${id}:${post.editedAt || ''}:${post.color}:${post.text}:${post.playlist ? post.playlist.shareId : ''}`;
       let buf = cacheGet(key);
       if (!buf) { buf = await renderCardPng(post); cacheSet(key, buf); }
       res.set({
@@ -337,4 +433,4 @@ function register(app, { getPosts, siteUrl }) {
   });
 }
 
-module.exports = { register, drawCard, renderCardPng: (post) => renderCardPng(post), _internals: { parseColors, esc, plain } };
+module.exports = { register, drawCard, drawPlaylistCard, renderCardPng: (post) => renderCardPng(post), _internals: { parseColors, esc, plain } };
